@@ -1,0 +1,9 @@
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.gif.pcap 'GIF8(7a|9a)?' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.jpg.pcap -xX '0xFFD8FF' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.pdf.pcap -xX '0x25504446' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.exe.pcap -xX '0x4D5A' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.pe.pcap -xX '0x50450000' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.ne.pcap -xX '0x4D5A50' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.elf.pcap -xX '0x7F454C46' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.3gp.pcap -xX '0x6674797033677034' udp
+ngrep -I ${PCAP_FILE} -O ${OUTPUT_DIR}/${PCAP_BASE}.torrent.pcap -xX '0x64383A616E6E6f756E6365' udp

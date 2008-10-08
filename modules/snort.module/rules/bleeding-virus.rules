@@ -1,0 +1,1138 @@
+#
+# $Id: bleeding-virus.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+# Emerging Threats Virus rules. 
+#
+# SID's are 2000000+ to avoid conflicts
+#
+# Only basic testing has been done. At this point all we guarantee is that they won't crash a recent snort release. 
+#
+# More information available at www.emergingthreats.net
+#
+# Please submit any custom rules or ideas to emerging@emergingthreats.net or the emerging-sigs mailing list
+#
+#*************************************************************
+#
+#  Copyright (c) 2003-2008, Emerging Threats
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+#  following conditions are met:
+#  
+#  * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+#    disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+#    following disclaimer in the documentation and/or other materials provided with the distribution.
+#  * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+#
+#
+#From Chris Norton. 
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Generic Downloader Outbound HTTP connection - Downloading Code"; flow:established,to_server; content:"User-Agent|3A| PE-"; classtype: trojan-activity; sid:2002695; rev:5;)
+
+# BugBear
+#Submitted by Brad Doctor, 3/8/2005, for BugBear@MM
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET VIRUS Bugbear@MM virus via SMTP"; flow: established; content:"uv+LRCQID7dIDFEECggDSLm9df8C/zSNKDBBAAoGA0AEUQ+FEN23f7doqAT/dCQk/xWcEQmDxCTD"; reference:url,www.symantec.com/avcenter/venc/data/w32.bugbear@mm.html; classtype: misc-activity; sid: 2001764; rev:5;)
+alert tcp $HOME_NET any -> any 139 (msg:"ET VIRUS BugBear@MM virus in Network share"; flow: established; content:"|24 48 fb bb ff e6 63 02 3a 20 41 70 61 63 68 65|"; reference:url,www.symantec.com/avcenter/venc/data/w32.bugbear@mm.html; classtype: misc-activity; sid: 2001765; rev:5;)
+alert tcp $HOME_NET any -> any 139 (msg:"ET VIRUS BugBear@MM Worm Copied to Startup Folder"; flow: established; content:"|77 00 69 00 6B 00 2E 00 65 00 78 00 65 00 00 00|"; reference:url,www.symantec.com/avcenter/venc/data/w32.bugbear@mm.html; classtype: misc-activity; sid: 2001766; rev:5;)
+
+# Submitted 2006-05-01 by Mark Tombaugh
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25 (msg:"ET VIRUS Mytob.X [clam] SMTP Inbound"; flow:to_server,established; content:"UEsDBAoA"; content:"ojRrPyGt"; distance:8; within:16; reference:url,www3.ca.com/securityadvisor/virusinfo/virus.aspx?ID=42326; classtype:trojan-activity; sid:2002892; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET VIRUS Mytob.X [clam] SMTP Outbound"; flow:to_server,established; content:"UEsDBAoA"; content:"ojRrPyGt"; distance:8; within:16; reference:url,www3.ca.com/securityadvisor/virusinfo/virus.aspx?ID=42326; classtype:trojan-activity; sid:2002893; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25 (msg:"ET VIRUS W32.Nugache SMTP Inbound"; flow:to_server,established; content:"RE9TIG1v"; content:"GUuDQ0KJ"; distance:1; within:9; classtype:trojan-activity; reference:url,www.symantec.com/avcenter/venc/data/w32.nugache.a@mm.html; sid:2002894; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET VIRUS W32.Nugache SMTP Outbound"; flow:to_server,established; content:"RE9TIG1v"; content:"GUuDQ0KJ"; distance:1; within:9; reference:url,www.symantec.com/avcenter/venc/data/w32.nugache.a@mm.html; classtype:trojan-activity; sid:2002895; rev:3;)
+
+#by Jonathan Gross. Experimental
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET VIRUS WinUpack Modified PE Header Inbound"; flow:established; content:"|4d 5a 4b 45 52 4e 45 4c 33 32 2e 44 4c 4c 00 00|"; classtype:bad-unknown; reference:url,doc.emergingthreats.net/bin/view/Main/WinPEHeaders; sid:2003614; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET VIRUS WinUpack Modified PE Header Outbound"; flow:established; content:"|4d 5a 4b 45 52 4e 45 4c 33 32 2e 44 4c 4c 00 00|"; classtype:bad-unknown; reference:url,doc.emergingthreats.net/bin/view/Main/WinPEHeaders; sid:2003615; rev:3;)
+
+#These are by Vlad Tsyrklevich during  presentation at Toorcon 06. These are experimental and will likely be high load. 
+#more information at http://toorcon.org/2006/conference.html?id=29
+
+#These are disabled by default until we learn more about them. 
+
+#alert ip $EXTERNAL_NET any -> $HOME_NET any (msg:"ET VIRUS SHELLCODE CLET polymorphic payload"; classtype:shellcode-detect; dsize: >40; content: "|74 07 eb|"; content: "|e8|"; distance: 1; within: 1;  pcre: "/\xeb.[\x58-\x5b]\x31[\xc0\xc9\xd2\xdb][\xb0-\xb3].\x8b.[\x05\x2d\x35\x81\xc1]/sm"; pcre: "/[\x40-\x43\xfd\xff][\x40-\x43\xff][\x40-\x43\x80\xff][\x40-\x43\xe9-\xeb\xff\x80\x2c][\x40-\x43\x48-\x4b\xe9-\xeb\x01\x2c\x80][\x48-\x4c\xe9-\xeb\x02\x2c][\x03\x48-\x4b][\x48-\x4b]\x74\x07\xeb.\xe8.\xff\xff\xff/smR"; reference:url,toorcon.org/2006/conference.html?id=29; sid:2003117; rev:2;)
+
+#alert ip $EXTERNAL_NET any -> $HOME_NET any (msg:"ET VIRUS SHELLCODE Shikata Ga Nai polymorphic payload"; classtype:shellcode-detect; dsize: >26; content: "|d9 74 24 f4|"; pcre: "/[\x29\x2b\x31\x33]\xc9/sm"; pcre: "/[\xd9-\xdb\xdd].{1,11}\xd9\x74\x24\xf4.{0,10}[\x58\x5a\x5b\x5d-\x5f]/sm";  pcre: "/([\x29\x2b\x31\x33\xb8\xba\xbb\xbe\xbf\xd9-\xdb\xdd][^\x00\xff][^\x00\xff][^\x00][^\x00\xff][^\x00][^\x00\xff][^\x00\xff][^\x00][^\x00][^\x00][^\x00\xff][^\x00\xff][^\x00\xff][^\x00][^\x00][\x31\x83][\x42\x43\x46\x47\x50\x53\x56-\x58\x5a\x5e\x5f\x70\x72\x73\x77\x78\x7a\x7b\x7e\xc0\xc2\xc3\xc6\xc7\xe8\xea\xeb\xee\xef][\x04\x0e\x10\x12\x13\x15\x17\xfc][\x03\x31\x83][\x42\x43\x46\x47\x50\x53\x56-\x58\x5a\x5e\x5f\x70\x72\x73\x77\x78\x7a\x7b\x7e\xc0\xc2\xc3\xc6\xc7\xe8\xea\xeb\xee\xef][\x04\x0a\x0c\x0e-\x13\x15\x17\xfc][\x03\x83]..[^\x1d\xe2][^\x0a\xf5])|([\x29\x2b\x31\x33\xb8\xba\xbb\xbd-\xbf\xd9-\xdb\xdd][^\x00][^\x00][^\x00][^\x00][^\x00][^\x00][^\x00][^\x00][\x24\xb1\xd9-\xdb\xdd][^\x00][\x58\x5a\x5b\x5d-\x5f\xb8\xba\xbb\xbd-\xbf\xd9][^\x00][^\x00][^\x00][^\x00][\x31\x83][\x42\x43\x45-\x47\x50\x53\x55-\x58\x5a\x5d-\x5f\x68\x6a\x6b\x6e-\x70\x72\x73\x75\x77\x78\x7a\x7b\x7d\x7e\xc0\xc2\xc3\xc5-\xc7\xe8\xea\xeb\xed-\xef][\x04\x0e\x12\x17\xfc][\x03\x31\x83][\x42\x43\x45-\x47\x50\x53\x55-\x58\x5a\x5d-\x5f\x68\x6a\x6b\x6e-\x70\x72\x73\x75\x77\x78\x7a\x7b\x7d\x7e\xc0\xc2\xc3\xc5-\xc7\xe8\xea\xeb\xed-\xef][\x04\x0a\x0e\x12\x13\x17\xfc][\x03\x83]..[^\xe2][^\xf5])/sm"; reference:url,toorcon.org/2006/conference.html?id=29; sid:2003118; rev:2;)
+
+#alert ip $EXTERNAL_NET any -> $HOME_NET any (msg:"ET VIRUS SHELLCODE ADMutate polymorphic payload"; classtype:shellcode-detect; dsize: >45; content: "|e8|"; content: "|ff ff ff|"; distance: 1; within: 3; pcre: "/\xeb[\x26-\x7a].{0,20}(\x5e|\x58\x96|\x58\x89\xc6|\x8b\x34\x24\x83\xec\x04).{0,20}(((\xbb....|\x68....\x5b).{0,20}(\x31\xc9|\x31\xc0\x91))|((\x31\xc9|\x31\xc0\x91).{0,20}(\xbb....|\x68....\x5b))).{0,20}(\xb1.|\x6a.\x58\x89\xc1|\x6a.\x66\x59).{0,20}(\x31\x1e|\x93\x31\x06\x93|\x8b\x06\x09\xd8\x21\x1e\xf7\x16\x21\x06).{0,20}(\x46|\x83\xc6\x01|\x96\x40\x96).{0,20}(\x46|\x83\xc6\x01|\x96\x40\x96).{0,20}(\x46|\x83\xc6\x01|\x96\x40\x96).{0,20}(\x46|\x83\xc6\x01|\x96\x40\x96).{0,20}\xe2[\xa0-\xf9].{0,20}\xeb[\x06-\x20].{0,20}\xe8[\x7f-\xff]\xff\xff\xff/sm"; reference:url,toorcon.org/2006/conference.html?id=29; sid:2003119; rev:2;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Sality Trojan User-Agent (KUKU v3.09 exp)"; flow:to_server,established; content:"User-Agent\: KUKU "; nocase; pcre:"/User-Agent\:[^\n]+KUKU\sv/i"; classtype:trojan-activity; reference:url,www.sophos.com/security/analyses/w32salityu.html; sid:2003088; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Sality Trojan Web Update"; flow:to_server,established; uricontent:"/new_array2.php?speed="; nocase; classtype:trojan-activity; reference:url,www.sophos.com/security/analyses/w32salityu.html; sid:2003424; rev:2;)
+
+#from castlecops research, http://www.castlecops.com, sig by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Sality Virus User Agent Detected (KUKU v3.09)"; flow:established,to_server; content:"User-Agent\: KUKU"; nocase; classtype:trojan-activity; sid:2003636; rev:3;)
+
+#from the bleeding sandnet
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Sality Virus User Agent Detected (SPM_ID=)"; flow:established,to_server; content:"User-Agent\: SPM_ID="; nocase; classtype:trojan-activity; sid:2003651; rev:3;)
+
+# Sober
+
+#Joe Stewart
+alert tcp $HOME_NET any -> any 25 (msg:"ET VIRUS Sober-style Ehlo - noalert"; flowbits:noalert; flow: established,to_server; dsize: <50; content:"Ehlo"; depth: 4; flowbits:set,SoberEhlo; classtype: string-detect; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.sober@mm.html; sid: 2001879; rev:7;)
+alert tcp $HOME_NET any -> any 25 (msg:"ET VIRUS Sober-style Ehlo followed by SMTP AUTH - noalert"; flowbits:isset,SoberEhlo; flowbits:noalert; flow: established,to_server; content:"AUTH LOGIN"; depth: 10; flowbits:set,SoberAuth; classtype: string-detect; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.sober@mm.html; sid: 2001880; rev:9;)
+
+# Sobig
+
+#Unknown submitter - Sobig E-F downloading goodies
+alert udp $HOME_NET any -> $EXTERNAL_NET 8998 (msg:"ET VIRUS Sobig.E-F Trojan Site Download Request"; dsize: 8; content:"|5c bf 01 29 ca 62 eb f1|"; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.sobig.e@mm.html; sid: 2001547; rev:6;)
+
+# Spy.Win32.Bancos Trojan
+
+#Submitted by Matt Jonkman for Spy.Win32.Bancos Trojan
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET VIRUS Trojan-Spy.Win32.Bancos Download"; flow: established,from_server; content:"[AspackDie!]"; content:"|0f 6d 07 9e 6c 62 6c 68 00 d2 2f 63 6d 64 9d 11 af af 45 c7 72 ac 5f 3138 d0|"; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/pwsteal.bancos.b.html; sid: 2001726; rev:7;)
+
+#from sandnet data
+#Disabling by default, hits on the VB api, not unique to this virus.
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Bancos User-Agent Detected"; flow:established,to_server; content:"User-Agent\: vb wininet"; nocase; classtype:trojan-activity; sid:2004114; rev:2;)
+
+#from castlecops research, http://www.castlecops.com, sig by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS AV-Killer.Win32 User Agent Detected (p4r4z1t3v3.one14.J)"; flow:established,to_server; content:"User-Agent\: p4r4z1t3v3"; nocase; classtype:trojan-activity; sid:2003638; rev:2;)
+
+#by mr Magic Pants
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET VIRUS Win32.SMTP-Mailer SMTP Outbound"; flow:to_server,established; content:"Subject\: \: ZOMBIE"; nocase; content:"X-Library\: Indy 9.00.10"; nocase; distance:0; classtype:trojan-activity; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Win32.SMTP-Mailer&threatid=48095; reference:url,www.hauri.net/virus/virusinfo_read.php?code=TRW3000774&start=1; sid:2003041; rev:4;)
+
+#Matt Jonkman, analysis from captured binary
+# Don't know a lot about this one. But the control session is apparently opened by a 00 00 00 00
+#  Then the bot replies with a packet that begins with the date in form such as 20060622, and 
+#  among other things contains the host OS info.
+#  Since this is a windos bot, we can assume the word windows will be in there. 
+#  Hopefully we can update these as more is learned. This is sorta crude, but should 
+#  be reliable to not false pos at least....
+alert tcp $HOME_NET any -> $EXTERNAL_NET 8000 (msg:"ET TROJAN Backdoor.Hupigon Possible Control Connection Being Established"; flow:established,to_server; dsize:4; content:"|00 00 00 00|"; flowbits:set,BSHupigonControlStart; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/fulldetails/id_vir/1051/bds_hupigon.bo.html; sid:2002974; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 8000 (msg:"ET TROJAN Backdoor.Hupigon INFECTION - Reporting Host Type"; flow:established,to_server; flowbits:isset,BSHupigonControlStart; content:"Windows "; flowbits:isset,BSHupigonControlStart; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/fulldetails/id_vir/1051/bds_hupigon.bo.html; sid:2002975; rev:2;)
+
+#by Scott Melnick
+alert tcp $HOME_NET !$HTTP_PORTS -> $EXTERNAL_NET 1337 (msg:"ET TROJAN Win32.SkSocket C&C Connection"; flow:established,to_server; flags:PA,12; dsize:1; content:"|04|"; classtype:trojan-activity; sid:2007585; rev:3;)
+
+#by Matt Jonkman
+#Bandook 1.2
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.2 Initial Connection and Report"; flowbits:isnotset,BE.Bandook1.2; flow:established,to_server; content:"&first& # "; pcre:"/# \d+d \d+dh \d+m # /iR"; classtype:trojan-activity; flowbits:set,BE.Bandook1.2; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003549; rev:3;)
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.2 Get Processes"; flowbits:isset,BE.Bandook1.2; flow:established,to_server; dsize:8; content:"|99 9b 86 8a 85 80 9a 9d|"; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003550; rev:3;)
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.2 Kill Process Command"; flowbits:isset,BE.Bandook1.2; flow:established,to_server; dsize:>8; content:"kill3d"; offset:0; depth:6; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003551; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.2 Reporting Socks Proxy Active"; flowbits:isset,BE.Bandook1.2; flow:established,from_server; dsize:7; content:"sockson"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003552; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.2 Reporting Socks Proxy Off"; flowbits:isset,BE.Bandook1.2; flow:established,from_server; dsize:8; content:"socksoff"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003553; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.2 Client Ping Reply"; flowbits:isset,BE.Bandook1.2; flow:established,from_server; dsize:10; content:"&SEXREPLY&"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003554; rev:3;)
+
+#Bandook 1.35
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.35 Initial Connection and Report"; flowbits:isnotset,BE.Bandook1.35; flow:established,to_server; content:"|cf 8f|"; offset:0; depth:2; content:"|20 26 26 26|"; distance:50; classtype:trojan-activity; flowbits:set,BE.Bandook1.35; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003555; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.35 Keepalive Send"; flowbits:isset,BE.Bandook1.35; flow:established,from_server; dsize:6; content:"|cf ab a8 a7 ae cf|"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003556; rev:3;)
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.35 Keepalive Reply"; flowbits:isset,BE.Bandook1.35; flow:established,to_server; dsize:9; content:"|cf ab a8 a4 ae cf 26 26 26|"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003557; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.35 Create Registry Key Command Send"; flowbits:isset,BE.Bandook1.35; flow:established,from_server; dsize:>10; content:"|cf 9b 8c 8e 8a 9b cf|"; offset:0; depth:7; content:"|95|"; distance:5; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003558; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.35 Create Directory Command Send"; flowbits:isset,BE.Bandook1.35; flow:established,from_server; dsize:>7; content:"|cf 84 82 8d 80 9b cf 95|"; offset:0; depth:8; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003559; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.35 Window List Command Send"; flowbits:isset,BE.Bandook1.35; flow:established,from_server; dsize:10; content:"|cf 8e 80 84 84 8c 9e 80 87 cf|"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003560; rev:3;)
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.35 Window List Reply"; flowbits:isset,BE.Bandook1.35; flow:established,to_server; dsize:>10; content:"|cf 9e 80 87 85 80 9a 9d cf|"; offset:0; depth:9; content:"|26 26 26|"; distance:10; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003561; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.35 Get Processes Command Send"; flowbits:isset,BE.Bandook1.35; flow:established,from_server; dsize:8; content:"|99 9b 86 8a 85 80 9a 9d|"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003562; rev:3;)
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.35 Get Processes Command Reply"; flowbits:isset,BE.Bandook1.35; flow:established,to_server; dsize:>10; content:"|cf 9d 82 99 9b 86 8a cf|"; offset:0; depth:8; content:"|26 26 26|"; distance:10; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003565; rev:3;)
+alert tcp any 1024:65535 -> $HOME_NET any (msg:"ET TROJAN Bandook v1.35 Start Socks5 Proxy Command Send"; flowbits:isset,BE.Bandook1.35; flow:established,from_server; dsize:>6; content:"|a7 a0 a7 ae 95|"; offset:0; depth:5; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003563; rev:3;)
+alert tcp $HOME_NET any -> any 1024:65535 (msg:"ET TROJAN Bandook v1.35 Socks5 Proxy Start Command Reply"; flowbits:isset,BE.Bandook1.35; flow:established,to_server; dsize:10; content:"|9a 86 8a 82 9a 86 87 26 26 26|"; offset:0; classtype:trojan-activity; reference:url,www.nuclearwintercrew.com; reference:url,research.sunbelt-software.com/threatdisplay.aspx?name=Bandook&threatid=40408; reference:url,doc.emergingthreats.net/bin/view/Main/TrojanBandook; sid:2003564; rev:3;)
+
+
+#by Joe Stewart
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET TROJAN Bandok phoning home (xor by 0xe9 to decode)"; flow:established,to_server; content:"|CF 8F 80 9B 9A 9D CF 95|"; depth:8; dsize:<80; reference:url,www.dshield.org/diary.html?date=2007-03-28; reference:url,www.secureworks.com/research/threats/bbbphish/?threat=bbbphish; classtype:trojan-activity; sid:2003936; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Bandook iwebho/BBB-phish trojan leaking user data"; flow:established,to_server; content:"POST|20|/"; depth:6; content:"|20|HTTP/1.1|0d0a|Content-Type|3a20|application/x-www-form-urlencoded|0d0a|Host|3a20|"; within:150; content:"Content-Length|3a20|"; within:100; content:"|0d0a0d0a|"; within:12; content:"VISITED_URL"; within:100; classtype:trojan-activity; reference:url,www.secureworks.com/research/threats/bbbphish; priority:20; sid:2003937; rev:2;)
+
+#Matt Jonkman
+# This thing send out an email to it's owner with stats and such. This ought to catch it..
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN Banker.Delf Infection - Sending Initial Email to Owner"; flow:established,to_server; content:"X-Library\: Indy 9"; nocase; content:"Maquina.."; nocase; content:"Vers|e3|o do Windows"; nocase; content:"Microsoft Windows"; nocase; content:"Mac Address.."; nocase; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2002976; rev:6;)
+#another variant
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN Banker.Delf Infection variant 2 - Sending Initial Email to Owner"; flow:established,to_server; content:"X-Library\: Indy 9"; nocase; content:"Nome Computador\: "; nocase; content:"Data\: "; nocase; content:"Windows\: Microsoft Windows "; nocase; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2002978; rev:3;)
+#Yet another
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN Banker.Delf Infection variant 3 - Sending Initial Email to Owner"; flow:established,to_server; content:"X-Library\: Indy 9"; nocase; content:"Subject\: INFECT - "; nocase; content:"Data\: "; nocase; content:"Windows\: Microsoft Windows "; nocase; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2002980; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN Banker.Delf Infection variant 4 - Sending Initial Email to Owner"; flow:established,to_server; content:"X-Library\: Indy 9"; nocase; content:"Maquina"; nocase; content:"IP"; nocase; content:"Hora"; nocase; content:"Data"; nocase; content:"Microsoft Windows "; nocase; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2002981; rev:2;)
+
+#from sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.Delf User-Agent (Varlok_11000)"; flow:established,to_server; content:"User-Agent\: Varlok_"; nocase; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2003931; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.Delf User-Agent (Ms)"; flow:established,to_server; content:"User-Agent\: Ms|0d 0a|"; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2003933; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.Delf User-Agent (hhh)"; flow:established,to_server; content:"User-Agent\: hhh"; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2004442; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.Delf User-Agent (MzApp)"; flow:established,to_server; content:"User-Agent\: MzApp"; classtype:trojan-activity; reference:url,www.avira.com/en/threats/section/details/id_vir/1836/tr_banker.delf.df735649.html; sid:2007594; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.Delf User-Agent (WINDOWS_LOADS)"; flow:established,to_server; content:"User-Agent\: WINDOWS_LOADS"; classtype:trojan-activity; sid:2007699; rev:2;)
+
+#yet another c&c method, by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Delf HTTP Checkin (1)"; flow:established,to_server; uricontent:"/mydown.asp?"; nocase; uricontent:"reg="; nocase; uricontent:"&ver="; nocase; uricontent:"&tgid="; nocase; uricontent:"&address="; nocase; uricontent:"&mydo="; nocase; uricontent:"&flag="; nocase; classtype:trojan-activity; sid:2007838; rev:1;)
+
+#delf keylog upload, kinda flimsy but works
+alert tcp $HOME_NET any -> $EXTERNAL_NET 21 (msg:"ET TROJAN Delf Keylog FTP Upload"; flow:established,to_server; content:"STOR "; depth:5; content:" Keylogger ["; nocase; distance:5; within:50; content:"].txt|0d 0a|"; nocase; distance:5; within:40; classtype:trojan-activity; sid:2007858; rev:1;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Delf HTTP Post Checkin (1)"; flow:established,to_server; content:"POST "; depth:5; uricontent:".php"; nocase; content:"|0d 0a|Content-type\: image/gif|0d 0a 0d 0a|x|da|"; content:!"|0d 0a|User-Agent\: "; classtype:trojan-activity; sid:2007867; rev:1;)
+
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.OT Checkin"; flow:established,to_server; content:"POST "; depth:5; content:"User-Agent\: Mozilla/3.0 (compatible|3b| Indy Library)|0d 0a 0d 0a|praquem="; content:"&titulo="; content:"&texto="; classtype:trojan-activity; sid:2007823; rev:1;)
+
+#A different one, by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banker.anv Generally Suspicious User-Agent (CustomExchangeBrowser)"; flow:established,to_server; content:"|0d 0a|User-Agent\: "; content:"CustomExchangeBrowser"; pcre:"/User-Agent\:[^\n]+CustomExchangeBrowser/"; classtype:trojan-activity; sid:2007824; rev:1;)
+
+#Banker.OPX, by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET TROJAN Banker.OPX HTTP Checkin"; flow:established,to_server; content:"POST "; depth:5; content:"|0d 0a 0d 0a|TIPO=CLIENTE&NOME="; nocase; classtype:trojan-activity; sid:2007901; rev:1;)
+
+#Matt Jonkman
+# Regular downloader, usually grabs a fw swf exploiting files from brazilian servers. Sends an email on installl
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN Banload Downloader Infection - Sending initial email to owner"; flow:established,to_server; content:"X-Library\: Indy 9"; nocase; content:"Dispositivo instalado."; nocase; content:"Maquina pronta para uso."; nocase; content:"Data\: "; nocase; content:"Hora\: "; nocase; content:"Development by "; nocase; classtype:trojan-activity; reference:url,www.viruslist.com/en/viruses/encyclopedia?virusid=95586; sid:2002977; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banload User-Agent Detected (ExampleDL)"; flow:established,to_server; content:"User-Agent\: ExampleDL"; classtype:trojan-activity; sid:2004440; rev:2;)
+
+#matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banload HTTP Checkin"; flow:established,to_server; content:"POST "; depth:5; content:"|0d 0a|User-Agent\: Mozilla/3.0 (compatible|3b| Indy Library)|0d 0a 0d 0a|tipo=cli&cli="; classtype:trojan-activity; sid:2007863; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Banload HTTP Checkin Detected"; flow:established,to_server; uricontent:"php?mac="; nocase; uricontent:"&hdd="; nocase; uricontent:"++++++++"; nocase; uricontent:"&ver="; nocase; uricontent:"&ie="; nocase; classtype:trojan-activity; sid:2007864; rev:1;)
+
+#by matt Jonkman, from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Basine Trojan Checkin"; flow:established,to_server; dsize:>1000; content:"|0d 0a 0d 0a|a="; content:"&b=reported"; distance:0; within:40; content:"&d=report"; distance:0; within:40; classtype:trojan-activity; sid:2007692; rev:2;)
+
+#analysis by Jose Nazario at arbor networks. Sig by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Blackenergy Bot Checkin to C&C"; flow:established,to_server; content:"POST "; depth:5; dsize:<400; content:"|0d 0a|Cache-Control\: no-cache|0d 0a 0d 0a|id="; content:"&build_id="; distance:5; pcre:"/id=x.+_[0-9A-F]{8}&build_id=.+/"; classtype:trojan-activity; reference:url,asert.arbornetworks.com/2007/10/blackenergy-ddos-bot-analysis-available; sid:2007668; rev:3;)
+
+#fake search site, distributed backdoor.agent.aqr and others
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Blink.com related Backdoor Checkin"; flow:established,to_server; uricontent:"/?vn="; nocase; uricontent:"&partner="; nocase; uricontent:"&ptag="; nocase; uricontent:"&b="; nocase; uricontent:"&se="; nocase; uricontent:"&au="; nocase; flowbits:set,ET.blink.get; classtype:trojan-activity; sid:2007805; rev:1;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Blink.com related Upgrade Command Given";flowbits:isset,ET.blink.get; flow:established,from_server; content:"|0d 0a|X-Messaging\: This is an important download|0d 0a|Location\: http\://"; classtype:trojan-activity; sid:2007806; rev:1;)
+
+# Bofra Worm
+#submitted by Matt Jonkman, additions by David Maciejak - Bofra Worm
+alert tcp $HOME_NET !$HTTP_PORTS -> $EXTERNAL_NET 1639 (msg:"ET WORM Bofra Victim Accessing Reactor Page"; flow: from_client,established; content:"GET "; nocase; content:"reactor"; nocase; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.bofra.e@mm.html; reference:url,us.mcafee.com/virusInfo/default.asp?id=description&virus_k=129631; classtype: trojan-activity; sid: 2001430; rev:9;)
+
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Brontok User-Agent Detected (Brontok.A3 Browser)"; flow:established,to_server; content:"User-Agent\: Brontok"; nocase; classtype:trojan-activity; sid:2006999; rev:2;)
+
+#by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Cashpoint.com Related checkin User-Agent (inetinst)"; flow:established,to_server; content:"|0d 0a|User-Agent\: inetinst|0d 0a|"; classtype:trojan-activity; sid:2007808; rev:1;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Cashpoint.com Related checkin User-Agent (okcpmgr)"; flow:established,to_server; content:"|0d 0a|User-Agent\: okcpmgr|0d 0a|"; classtype:trojan-activity; sid:2007810; rev:1;)
+
+#by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Densmail.com Related Trojan Checkin"; flow:established,to_server; uricontent:"/cc.php"; nocase; uricontent:"v="; nocase; uricontent:"&rnd="; nocase; pcre:"/v=\d+&rnd=\d+/Ui"; classtype:trojan-activity; sid:2007822; rev:1;)
+
+#By Scott Melnick
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Dialer"; flow: established,to_server; uricontent:"/getnumtemp.asp?nip=0"; nocase; reference:url,isc.sans.org/diary.php?storyid=1388; classtype:trojan-activity; sid:2003083; rev:2;)
+
+#Matt Jonkman from snadnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Dialer-715 Install Checkin"; flow: established,to_server; uricontent:"/perl/invoc_oneway.pl"; nocase; uricontent:"?id_service="; nocase; uricontent:"&nom_exe="; nocase; uricontent:"&skin="; nocase; uricontent:"&id_produit="; nocase; classtype:trojan-activity; sid:2003650; rev:2;)
+
+#by Scott Melnick from sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Dialer-967 User-Agent"; flow:to_server,established; content:"User-Agent\: del|0d 0a|"; nocase; classtype:trojan-activity; sid:2006364; rev:2;)
+
+#matt jonkman from sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Dialer.qn HTTP Request - Checkin"; flow:established,to_server; uricontent:".php?"; uricontent:"c="; uricontent:"&v="; uricontent:"&b="; uricontent:"&id="; uricontent:"&cnt="; uricontent:"&q="; classtype:trojan-activity; sid:2007743; rev:2;)
+
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Diazom Trojan User-Agent in Use (cv_v2.0.1)"; flow:established,to_server; content:"User-agent\: cv_v"; classtype:trojan-activity; reference:url,ww.symantec.com/enterprise/security_response/writeup.jsp?docid=2007-032316-0426-99&tabid=2; sid:2003598; rev:2;)
+
+#Matt Jonkman, thanks to the Clam guys for the information and sample
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader-1355 Checking In"; flow:established,to_server; uricontent:"/adload.php?a1="; nocase; uricontent:"a3="; nocase; uricontent:"&a4="; nocase; uricontent:"&a5="; nocase; content:!"User-Agent\:"; content:"Host\:"; classtype:trojan-activity; sid:2003408; rev:2;)
+
+#Sigs by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN W32.Downloader Tibs.jy Reporting to C&C"; flow:established,to_server; uricontent:"/post.php"; nocase; content:"User-Agent\: Mozilla/3.0b5a (Win95\; I)"; nocase; content:"data="; nocase; classtype:trojan-activity; sid:2003238; rev:5;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN W32.Downloader Tibs.jy Reporting to C&C (2)"; flow:established,to_server; uricontent:"/rule.php?"; nocase; uricontent:"name="; nocase; uricontent:"b="; nocase; uricontent:"w="; nocase; classtype:trojan-activity; sid:2003239; rev:3;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN W32.Downloader Tibs.ek Reporting to C&C"; flow:established,to_server; uricontent:".php"; nocase; uricontent:"?win=Win"; nocase; uricontent:"&id="; nocase; uricontent:"&lip="; nocase; uricontent:"&s5="; nocase; uricontent:"&h="; nocase; uricontent:"&hs="; nocase; uricontent:"&b="; nocase; classtype:trojan-activity; sid:2007841; rev:1;)
+# by axn jxn
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader-5265/Torpig/Anserin/Sinowal Unique UA (MSID [...)"; flow:established,to_server; content:"User-Agent\: MSID ["; nocase; depth:320; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2003590; sid:2003590; rev:4;)
+
+#by Matt Jonkman
+#from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.Dluca HTTP Checkin"; flow:established,to_server; uricontent:"?id={"; nocase; uricontent:"&srv=ms"; nocase; uricontent:"&ver="; nocase; uricontent:"&docid="; nocase; uricontent:"&time="; nocase; uricontent:"&cstate="; nocase; uricontent:"&state="; nocase; uricontent:"&flash="; nocase; uricontent:"&pin="; nocase; uricontent:"&OSInfo2="; nocase; uricontent:"&cinfo="; nocase; uricontent:"&smd="; nocase; uricontent:"&rts="; nocase; uricontent:"&retryattempt="; nocase; classtype:trojan-activity; sid:2007595; rev:2;)
+
+#Sigs for general downloader trojans and worms. Not all get unique names
+
+#by Matt Jonkman. Saw a downloader appending ver7 to the end of a regular UA. No spaces. very unique
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious User-Agent - Possible Trojan Downloader (ver18/ver19, etc)"; flow:established,to_server; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+\)ver\d/i"; classtype: trojan-activity; sid:2003380; rev:3;)
+
+#from castlecops research, http://www.castlecops.com, sig by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.Small User Agent Detected (NetScafe)"; flow:established,to_server; content:"User-Agent\: NetScafe "; nocase; classtype:trojan-activity; sid:2003641; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.Affill User Agent Detected (lol)"; flow:established,to_server; content:"User-Agent\: lol"; nocase; classtype:trojan-activity; sid:2003642; rev:2;)
+
+#Reports of falsing here, the UA is legit within MS VB stuff. Scheduled to be deleted in a week or so. Do not recommend using this
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.VB.TX User Agent Detected (Microsoft URL Control)"; flow:established,to_server; content:"User-Agent\: Microsoft URL Control -"; nocase; classtype:trojan-activity; sid:2003646; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Backdoor.Irc.MFV User Agent Detected (IRC-U)"; flow:established,to_server; content:"User-Agent\: IRC-U v"; nocase; classtype:trojan-activity; sid:2003647; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Clicker.BC User Agent Detected (linkrunner)"; flow:established,to_server; content:"User-Agent\: linkrunner"; nocase; classtype:trojan-activity; sid:2003648; rev:2;)
+
+#generic downloader and bot checkin url, found in  Backdoor.Win32.Small.or
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Bot Backdoor Checkin/registration Request"; flow:established,to_server; uricontent:"/remote.php?"; nocase; uricontent:"os="; nocase; uricontent:"&user="; nocase; uricontent:"&status="; nocase; uricontent:"&version="; nocase; uricontent:"&build="; nocase; uricontent:"&uptime="; nocase; classtype:trojan-activity; sid:2006366; rev:2;)
+
+
+#by Scott Melnick and Andre
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.Win32.Agent.bwr"; flow:established,to_server; uricontent:"?m="; nocase; uricontent:"&a="; nocase; uricontent:"&hdd="; nocase; uricontent:"&os="; nocase; classtype:trojan-activity; sid:2006377; rev:2;)
+
+
+#from sandnet analysis, by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Matcash or related downloader User-Agent Detected"; flow:established,to_server; content:"User-Agent\: x"; pcre:"/x\w\wx\w\w\!x\w\wx\w\wx\w\w/"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2006382; sid:2006382; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader User-Agent Detected (Windows Updates Manager|3.12|...)"; flow:established,to_server; content:"User-Agent\: Windows Updates Manager|7c|"; classtype:trojan-activity; sid:2006387; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader User-Agent Detected (ld)"; flow:established,to_server; content:"User-Agent\: ld|0d 0a|"; classtype:trojan-activity; sid:2006394; rev:2;)
+
+#sandnet analysis, by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.26001 Url Pattern Detected"; flow:established,to_server; uricontent:"install.php?"; nocase; uricontent:"wall_id="; nocase; uricontent:"&maddr=0"; nocase; uricontent:"&action="; nocase; classtype:trojan-activity; sid:2006400; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.26001 Url Pattern Detected (lunch_id)"; flow:established,to_server; uricontent:".php?"; nocase; uricontent:"aff_id="; nocase; uricontent:"lunch_id="; nocase; uricontent:"&maddr=0"; nocase; classtype:trojan-activity; sid:2006401; rev:2;)
+
+#from sandnet data, by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.Win32.Agent.cav Url Pattern Detected (ping)"; flow:established,to_server; uricontent:"/ping/"; nocase; pcre:"/\/ping\/[0-9a-fA-F]{64}\/[0-9a-fA-F]+\/[0-9a-fA-F]+/Ui"; classtype:trojan-activity; sid:2007284; rev:2;)
+
+#matt jonkman, from sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN General Downloader Checkin URL (GUID+)"; flow:established,to_server; uricontent:"&version="; nocase; uricontent:"&configversion="; nocase; uricontent:"GUID="; nocase; uricontent:"&cmd="; nocase; uricontent:"&p="; nocase; uricontent:"&i="; nocase; uricontent:"&x="; nocase; classtype:trojan-activity; sid:2007577; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN General Downloader or Virut C&C Ack"; flow:established,to_server; uricontent:"uid="; nocase; uricontent:"&version="; nocase; uricontent:"&actionname="; nocase; uricontent:"&action="; nocase; uricontent:"&success="; nocase; uricontent:"&debug="; nocase; uricontent:"&nocache="; nocase; classtype:trojan-activity; sid:2007587; rev:2;)
+
+#Matt Jonkman, from the sandnet
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious User-Agent - Matcash related Trojan Downloader (Ismazo Advanced Loader)"; flow:established,to_server; content:"User-Agent\: Ismazo"; nocase; classtype: trojan-activity; sid:2007633; rev:3;)
+
+#Matt Jonkman, Trojan-Downloader.Win32.Small.hkp
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Trojan-Downloader.Win32.Small.hkp Checkin via HTTP"; flow:established,to_server; dsize:96; content:"GET /"; depth:5; pcre:"/\/[0-9a-f]{78}\sHTTP/Ui"; classtype:trojan-activity; sid:2007755; rev:2;)
+
+
+# By Jeremy Conway - Possible root kit user agent
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN User-agent DownloadNetFile Win32.small.hsh downloader"; flow:established,to_server; content:"GET "; depth:4; nocase; content:"User-Agent|3A|DownloadNetFile|0D 0A|"; nocase; within:200; classtype:trojan-activity; sid:2007778; rev:3;)
+
+# By Jeremy Conway
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Browser HiJacker/Infostealer Stat file"; flow:established,to_server; content:"|5B00|u|00|p|00|d|00|a|00|t|00|e|005D|"; nocase; content:"v|00|e|00|r|00|="; nocase; classtype:trojan-activity; sid:2007777; rev:2;)
+
+#matt jonkman, general downloader ua
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious User-Agent - Possible Trojan Downloader (ie)"; flow:established,to_server; content:"|0d 0a|User-Agent\: ie|0d 0a|"; classtype: trojan-activity; sid:2007827; rev:1;)
+
+#matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader General Bot Checking In via HTTP Post (bot_id push)"; flow:established,to_server; content:"POST "; depth:5; content:"|0d 0a 0d 0a|bot_id="; content:"&build_id="; distance:0; content:"&sport="; distance:0; content:"&hport="; distance:0; content:"&ping="; distance:0; content:"&speed="; distance:0; classtype: trojan-activity; sid:2007831; rev:1;)
+
+#matt jonkman, sample marked Trojan-Downloader.Win32.Small.htz by fsecure
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader General Bot Checking In - Possible Win32.Small.htz related"; flow:established,to_server; content:"POST "; depth:5; uricontent:"?id="; nocase; content:!"|0d 0a|User-Agent\: "; content:"|0d 0a 0d 0a|proc=[System Process]|0d 0a|"; content:"|0d 0a|&size="; distance:0; classtype: trojan-activity; sid:2007836; rev:1;)
+
+#Matt Jonkman, Kaspersky  Trojan-Proxy.Win32.Agent.ty
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious User-Agent - Possible Trojan Downloader (WinInet)"; flow:established,to_server; content:"|0d 0a|User-Agent\: WinInet|0d 0a|"; classtype: trojan-activity; sid:2007837; rev:1;)
+
+#Matt Jonkman, Kaspersky  Trojan-Proxy.Win32.Agent.blm
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious User-Agent - Possible Trojan Downloader (Shell)"; flow:established,to_server; content:"|0d 0a|User-Agent\: Shell|0d 0a|"; nocase; classtype: trojan-activity; sid:2007840; rev:1;)
+
+#matt jonkman, downloader Agent.isd
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader Agent.isd Checkin"; flow:established,to_server; uricontent:"win=Win"; nocase; uricontent:"&id="; nocase; uricontent:"&lip="; nocase; uricontent:"&s5="; nocase; uricontent:"&h="; nocase; classtype:trojan-activity; sid:2007844; rev:1;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious User-Agent - Possible Trojan Downloader (-)"; flow:established,to_server; content:"|0d 0a|User-Agent\: -|0d 0a|"; nocase; classtype: trojan-activity; sid:2007880; rev:1;)
+
+#Matt Jonkman, found in the sandnet
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Tear Application User-Agent Detected"; flow:established,to_server; content:"|0d 0a|User-Agent\: Tear Application|0d 0a|"; classtype:trojan-activity; sid:2007770; rev:2;)
+
+#from the sandnet
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Agent.cah Checkin Request"; flow:established,to_server; uricontent:"?v="; nocase; uricontent:"&mid="; nocase; uricontent:"&r1="; nocase; uricontent:"&tm=200"; nocase; uricontent:"&av="; nocase; uricontent:"&os=Windows"; nocase; uricontent:"&uid="; nocase; uricontent:"cht="; classtype:trojan-activity; sid:2007644; rev:2;)
+
+# Submitted by Tom Fischer, 2006-01-08, updated 4/22/06
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Dumador Reporting User Activity"; flow:established,to_server; uricontent:".php?p="; nocase; uricontent:"?machineid="; nocase; uricontent:"&connection="; nocase; uricontent:"&iplan="; nocase; classtype:trojan-activity; reference:url,www.norman.com/Virus/Virus_descriptions/24279/; sid:2002763; rev:3;)
+
+# Submitted 4-6-07 Mark Warren
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Trojan.Duntek establishing remote connection"; flow:established,to_server; uricontent:"rfe.php?"; nocase; uricontent:"cmp=dun_tekfirst"; nocase; uricontent:"guid="; nocase; classtype:trojan-activity; reference:url,www.symantec.com/security_response/writeup.jsp?docid=2006-102514-0554-99; sid:2003537; rev:2;)
+
+#By Don Jackson of SecureWorks
+# Crafted for the lowest common denominator; should work in most 1.x and later engines, PCRE used for C&C traffic.
+# Mostly for spotting it's use on your network.  Only one DDoS rule. Be careful of the number/rate of alerts; these do not use thresholding.
+# DNS left in hex to avoid advertising the domains to the bad guys via google
+
+#these first few are for specific domains, to be removed in the not too distant future
+alert tcp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity TCP (1)"; flow:established,to_server; content:"|08616c2d6a696e616e036e65740000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007673; rev:4;)
+alert tcp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity TCP (2)"; flow:established,to_server; content:"|0861312d6a696e616e036e65740000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007674; rev:4;)
+alert tcp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity TCP (3)"; flow:established,to_server; content:"|0661726464726104686f737402736b0000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007675; rev:4;)
+alert tcp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity TCP (4)"; flow:established,to_server; content:"|03777777056a6f2d7566036e65740000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007676; rev:4;)
+alert tcp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity TCP (5)"; flow:established,to_server; content:"|037777770c6a6f66706d7579747276636603636f6d0000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007677; rev:4;)
+alert udp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity UDP (1)"; content:"|08616c2d6a696e616e036e65740000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007678; rev:4;)
+alert udp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity UDP (2)"; content:"|0861312d6a696e616e036e65740000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007679; rev:4;)
+alert udp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity UDP (3)"; content:"|0661726464726104686f737402736b0000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007680; rev:4;)
+alert udp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity UDP (4)"; content:"|03777777056a6f2d7566036e65740000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007681; rev:4;)
+alert udp $HOME_NET :1024 -> any 53 (msg:"ET TROJAN E-Jihad 3.0 DNS Activity UDP (5)"; content:"|037777770c6a6f66706d7579747276636603636f6d0000010001|"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007682; rev:4;)
+
+#these are more permanent, C&C related
+alert tcp $HOME_NET 1024: -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN E-Jihad 3.0 HTTP Activity 1"; flow:established,to_server; content:"GET "; depth:4; uricontent:"/tlog.php?logn="; pcre:"/GET /tlog\.php?logn=[^\s]+&pss=[^\s]+\sHTTP/1\.[0|1]\x0D\x0A/"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007683; rev:4;)
+alert tcp $HOME_NET 1024: -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN E-Jihad 3.0 HTTP Activity 2"; flow:established,to_server; content:"GET "; depth:4; uricontent:"/ntarg.php?"; pcre:"/GET /ntarg\.php?[^\s]*(notdoing=|howme=|uname=)[^\s]*\sHTTP/1\.[0|1]\x0D\x0A/"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007684; rev:4;)
+alert tcp $HOME_NET 1024: -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN E-Jihad 3.0 HTTP Activity 3"; flow:established,to_server; content:"GET "; depth:4; uricontent:"/tnewu.php?nlogin="; pcre:"/GET /tnewu.php?nlogin=[^\s]+&npss=[^\s]+&invitedby=[^\s]+\sHTTP/1\.[0|1]\x0D\x0A/"; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007685; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN E-Jihad 3.0 DDoS HTTP Activity OUTBOUND"; flow:established,to_server; content:"GET "; offset:0; depth:4; content:"|0d 0a|User-Agent\: Attacker|0d 0a|"; offset:14; classtype:denial-of-service; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007686; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET TROJAN E-Jihad 3.0 DDoS HTTP Activity INBOUND"; flow:established,to_server; content:"GET "; offset:0; depth:4; content:"|0d 0a|User-Agent\: Attacker|0d 0a|"; offset:14; classtype:denial-of-service; reference:url,doc.emergingthreats.net/bin/view/Main/EJihadHackTool; sid:2007687; rev:6;)
+
+#by Matt Jonkman, from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Eldorado.BHO User-Agent Detected (netcfg)"; flow:established,to_server; content:"GET "; depth:4; content:"|0d 0a|User-Agent\: netcfg|0d 0a|"; classtype:trojan-activity; sid:2007758; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Eldorado.BHO User-Agent Detected (MSIE 5.5)"; flow:established,to_server; content:"GET "; depth:4; content:"|0d 0a|User-Agent\: MSIE 5.5|0d 0a|"; classtype:trojan-activity; sid:2007833; rev:1;)
+
+#by Chich Thierry
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25 (msg:"ET TROJAN elitekeylogger v1.0 reporting - Inbound"; flow:established,to_server; content:"MAIL FROM|3a|<logs@logs.com>"; classtype:trojan-activity; sid:2002938; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN elitekeylogger v1.0 reporting - Outbound"; flow:established,to_server; content:"MAIL FROM|3a|<logs@logs.com>"; classtype:trojan-activity; sid:2002941; rev:4;)
+
+#from sandnet, by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN ExplorerHijack Trojan HTTP Checkin"; flow:established,to_server; uricontent:"php?i="; uricontent:"&v="; uricontent:"&win=Windows"; uricontent:"&un="; uricontent:"&uv="; uricontent:"&s="; uricontent:"&onl="; uricontent:"&ip="; uricontent:"&f="; classtype:trojan-activity; sid:2007700; rev:2;)
+
+#this sig is experimental. It appears to use a base64 encoded user-agent
+#  it's very long, no spaces or punctuation, which is what we can key on
+#  please report load or fp problems
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Farfli User Agent Detected"; flow:established,to_server; uricontent:"/rpt"; content:"|0d 0a|User-Agent\: "; content:!"|0d 0a|User-Agent\: Mozilla"; pcre:"/\x0a\x0aUser-Agent\: [a-z0-9]{92}/Ui"; classtype:trojan-activity; sid:2007646; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Farfli User Agent Detected (VYG)"; flow:established,to_server; content:"|0d 0a|User-Agent\: VYG|0d 0a|"; classtype:trojan-activity; sid:2007658; rev:2;)
+
+#by matt jonkman, from sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Feral Checkin via HTTP"; flow:established,to_server; uricontent:"?ucid="; nocase; uricontent:"&wmid="; nocase; classtype:trojan-activity; sid:2007286; rev:2;)
+
+#spyware/trojan/backdoors all reported here. sig by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Gadu-Gadu.pl Related Trojan Reporting via HTTP"; flow:established,to_server; uricontent:"/appsvc/appmsg"; nocase; uricontent:"fmnumber="; nocase; uricontent:"&version="; nocase; uricontent:"&fmt="; nocase; uricontent:"&lastmsg="; nocase; classtype:trojan-activity; sid:2007866; rev:1;)
+
+#Matt Jonkman
+# General signs of trojan infections....
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN GENERAL Possible Trojan Sending Initial Email to Owner - INFECTADO"; flow:established,to_server; content:"Subject\: Microsoft Windows"; nocase; content:"INFECTADO"; nocase; within:20; classtype:trojan-activity; sid:2002982; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN GENERAL Possible Trojan Sending Initial Email to Owner - SUCCESSO"; flow:established,to_server; content:"PC INFECTADO COM SUCCESSO"; nocase; classtype:trojan-activity; sid:2002983; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Suspicious Useragent Used by Several trojans (API-Guide test program)"; flow:established,to_server; content:"|0d 0a|User-Agent\: API-Guide test program|0d 0a|"; nocase; classtype:trojan-activity; sid:2007826; rev:1;)
+
+#Matt Jonkman, found by Jacob Kitchel
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Unnamed Generic.Malware http get"; flow:established,to_server; uricontent:"/ww20/script.php?id="; nocase; content:"&config="; nocase; content:!"User-Agent\:"; classtype:trojan-activity; sid:2003431; rev:2;)
+
+#from castlecops research
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Generic.Malware.SFL User-Agent (Rescue/9.11)"; flow:established,to_server; content:"User-Agent\: Rescue/9.11"; classtype:trojan-activity; sid:2003645; rev:2;)
+
+#by Tom Fisher
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Goldun Reporting User Activity"; flow:established,to_server; uricontent:"/data.php?param="; nocase; uricontent:"&socks="; pcre:"/User-Agent\:[^\n]Windows Updater/i"; nocase; classtype:trojan-activity; reference:url,www.avira.com/en/threats/TR_Spy_Goldun_de_1_details.html; sid:2002775; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Goldun Reporting User Activity 2"; flow:established,to_server; uricontent:"/c.php?phid="; nocase; uricontent:"&ver="; nocase; uricontent:"&nn="; nocase; pcre:"/User-Agent\:[^\n]+z/i"; classtype:trojan-activity; reference:url,www.avira.com/en/threats/TR_Spy_Goldun_de_1_details.html; sid:2002780; rev:2;)
+
+# Submitted 2006-09-22 by Frank Knobbe
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Possible Goldun Dropsite 1"; flow:to_server,established; uricontent:"/sd.php"; nocase; classtype:trojan-activity; sid:2003107; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Possible Goldun Dropsite 2"; flow:to_server,established; uricontent:"/fix.php"; nocase; classtype:trojan-activity; sid:2003108; rev:2;)
+
+#by Secureworks
+# Paper here: www.secureworks.com/research/threats/gozi/?threat=gozi
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Gozi Certificate Information Leakage"; flow:to_server,established; content:"POST /cgi-bin/certs.cgi?"; depth:24; pcre:"/POST\x20\x2Fcgi\x2Dbin\x2Fcerts\x2Ecgi\x20HTTP\x2F1\x2E1[\x0D\x0A]+Content\x2DType\x3A\x20multipart\x2Fform\x2Ddata\x3B\x20boundary\x3D.*[\x0D\x0A]+User\x2DAgent\x3A\x20Mozilla\x2F4\x2D0\x20\x28compatible\x3B\x20MSIE\x206\x2D0\x3B\x20Windows\x20NT\x205\x2D1\x29[\x0D\x0A]+Host\x3A\x20/i"; classtype:trojan-activity; reference:url,www.secureworks.com/research/threats/gozi; sid:2003509; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Gozi Registration"; flow:to_server,established; content:"GET /cgi-bin/options.cgi?"; depth:25; pcre:"/GET\x20\x2Fcgi\x2Dbin\x2Foptions\x2Ecgi\x3Fuser_id\x3D([0-9])+\x26socks\x3D([0-9])+\x26version_id\x3D([0-9])+\x26passphrase\x3D\x20HTTP\x2F1\x2E1[\x0D\x0A]+User\x2DAgent\x3A\x20Mozilla\x2F4\x2D0\x20\x28compatible\x3B\x20MSIE\x206\x2D0\x3B\x20Windows\x20NT\x205\x2D1\x29[\x0D\x0A]+Host\x3A\x20/i"; classtype:trojan-activity; reference:url,www.secureworks.com/research/threats/gozi; sid:2003510; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Gozi Form Data Information Leakage"; flow:to_server,established; content:"POST /cgi-bin/forms.cgi?"; depth:24; pcre:"/POST\x20\x2Fcgi\x2Dbin\x2Fforms\x2Ecgi\x20HTTP\x2F1\x2E1[\x0D\x0A]+Content\x2DType\x3A\x20multipart\x2Fform\x2Ddata\x3B\x20boundary\x3D.*[\x0D\x0A]+User\x2DAgent\x3A\x20Mozilla\x2F4\x2D0\x20\x28compatible\x3B\x20MSIE\x206\x2D0\x3B\x20Windows\x20NT\x205\x2D1\x29[\x0D\x0A]+Host\x3A\x20/i"; classtype:trojan-activity; reference:url,www.secureworks.com/research/threats/gozi; sid:2003511; rev:2;) 
+
+#by Cees Elzinga
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Possible Gozi Trojan Checkin"; flow:established,to_server; uricontent:"cgi"; uricontent:"user_id="; uricontent:"version_id="; uricontent:"crc="; uricontent:"passphrase"; classtype:trojan-activity; reference:url,www.secureworks.com/research/threats/gozi; sid:2007632; rev:2;) 
+
+#from private list
+alert tcp any any -> any $HTTP_PORTS (msg:"ET BOTNET HTTP Botnet reg"; flow: established; uricontent:"/reg?u="; nocase; content:"&v="; nocase; within: 15; content:"&s="; nocase; within: 15; content:"&su="; nocase; within: 15; content:"&p="; nocase; within: 15; classtype: trojan-activity; reference:url,www.honeynet.org/papers/bots; sid: 2001899; rev:8;)
+
+#5/2/05 aim distributed in some cases, Matt Jonkman
+alert tcp any any -> any $HTTP_PORTS (msg:"ET BOTNET BwB Botnet Checkin"; flow: established; uricontent:"/update.php?port="; nocase; content:"&checktime="; nocase; within: 20; content:"&uptime="; nocase; within: 20; content:"&result="; nocase; within: 20; content:"&localip="; nocase; within: 15; content:"&id="; nocase; within: 20; content:"$hash="; nocase; within: 20; classtype: trojan-activity; reference:url,www.honeynet.org/papers/bots; sid: 2001900; rev:7;)
+
+#Joe Stewart from Lurhq
+alert tcp any any -> any $HTTP_PORTS (msg:"ET TROJAN Possible Bobax trojan infection"; flow: established,to_server; content:"GET /reg|3f|u="; depth: 11; content:"|26|v="; within: 3; distance: 8; reference:url,www.lurhq.com/bobax.html; classtype: trojan-activity; sid: 2001901; rev:4;)
+
+# Hacker Defender Root Kit
+
+#By Chris Norton 2/22/05
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN HackerDefender Root Kit Remote Connection Attempt Detected"; flow: established,to_server; content:"|01 9a 8c 66 af c0 4a 11 9e 3f 40 88 12 2c 3a 4a 84 65 38 b0 b4 08 0b af db ce 02 94 34 5f 22|"; rawbytes;tag: session, 20, packets; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/backdoor.hackdefender.html; sid: 2001743; rev:7;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET TROJAN HackerDefender.HE Root Kit Control Connection"; flow: established,to_server; content:"|d0 84 ec 77 cf ec 60 e9|"; depth:8; classtype:trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/backdoor.hackdefender.html; sid: 2003244; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN HackerDefender.HE Root Kit Control Connection Reply"; flow: established,from_server; content:"|d0 84 ec 77 cf ec 60 e9|"; depth:8; classtype:trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/backdoor.hackdefender.html; sid: 2003245; rev:2;)
+
+#    Trojan HaxDoor
+#Submitted by Tom Fischer, 2006-01-24, modified 2/2/06 on info from chris
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Haxdoor Reporting User Activity"; flow:established,to_server; uricontent:"/bsrv.php?"; nocase; uricontent:"lang="; nocase; uricontent:"&socksport="; nocase; uricontent:"&httpport="; nocase; uricontent:"&uptimem="; nocase; uricontent:"&uptimeh="; nocase; uricontent:"&uid="; nocase; uricontent:"&ver="; nocase; pcre:"/User-Agent\:[^\n]MSIE 6.0/i"; nocase; classtype:trojan-activity; reference:url,www.trendmicro.com/vinfo/virusencyclo/default5.asp?VName=BKDR_HAXDOOR.DI; sid: 2002790; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Haxdoor Reporting User Activity 2"; flow:established,to_server; uricontent:".php?param="; nocase; uricontent:"&socksport="; nocase; uricontent:"&httpport="; nocase; uricontent:"&uptime"; nocase; uricontent:"&uid="; nocase; uricontent:"&ver="; nocase; classtype:trojan-activity; sid:2002929; rev:2;)
+
+#Matt Jonkman
+alert tcp $EXTERNAL_NET !$HTTP_PORTS -> $HOME_NET any (msg: "ET VIRUS Hotword Trojan in Transit"; flow: established,from_server; content:"|63 6f 6d 66 69 64 65 6e 74 69 61 6c 20 64 6f 63 75 6d 65 6e 74 20 28 57 6f 72 64 29 20 66 72 6f 6d 20 44 69 67 69 44 6f 63 00 43 4d 20 25 73 20|"; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001959; rev:6;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg: "ET VIRUS Hotword Trojan inbound via http"; flow: established,from_server; content:"|63 6f 6d 66 69 64 65 6e 74 69 61 6c 20 64 6f 63 75 6d 65 6e 74 20 28 57 6f 72 64 29 20 66 72 6f 6d 20 44 69 67 69 44 6f 63 00 43 4d 20 25 73 20|"; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001960; rev:5;)
+alert tcp any any -> $EXTERNAL_NET 21 (msg: "ET VIRUS Hotword Trojan - Possible File Upload CHJO"; flow: to_server,established; content:"STOR __"; content:"-CHJO.DRV"; nocase; within: 100; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001961; rev:7;)
+alert tcp any any -> $EXTERNAL_NET 21 (msg: "ET VIRUS Hotword Trojan - Possible File Upload CFXP"; flow: to_server,established; content:"STOR __"; content:"-CFXP.DRV"; nocase; within: 100; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001962; rev:7;)
+alert tcp any any -> $EXTERNAL_NET 21 (msg: "ET VIRUS Hotword Trojan - Possible FTP File Request pspv.exe"; flow: to_server,established; content:"SIZE pspv.exe"; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001963; rev:7;)
+alert tcp any any -> $EXTERNAL_NET 21 (msg: "ET VIRUS Hotword Trojan - Possible FTP File Request .tea"; flow: to_server,established; content:"LIST "; content:".tea"; nocase; within: 50; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001964; rev:7;)
+alert tcp any any -> $EXTERNAL_NET 21 (msg: "ET VIRUS Hotword Trojan - Possible FTP File Status Upload ___"; flow: to_server,established; content:"|53 54 4f 52 20 5f 5f 5f 0d 0a|"; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001965; rev:7;)
+alert tcp any any -> $EXTERNAL_NET 21 (msg: "ET VIRUS Hotword Trojan - Possible FTP File Status Check ___"; flow: to_server,established; content:"|53 49 5a 45 20 5f 5f 5f 0d 0a|"; reference:url,securityresponse.symantec.com/avcenter/venc/data/trojan.hotword.html; classtype: trojan-activity; sid: 2001966; rev:7;)
+
+#from castlecops research, http://www.castlecops.com, sig by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Hupinon User Agent Detected (SykO)"; flow:established,to_server; content:"User-Agent\: SykO"; nocase; classtype:trojan-activity; sid:2003649; rev:4;)
+
+#from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Hupinon User Agent Detected (IE_7.0)"; flow:established,to_server; content:"User-Agent\: IE_7.0"; nocase; classtype:trojan-activity; sid:2003932; rev:4;)
+
+#from sandnet
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Hupigon URL Infection Checkin Detected"; flow:established,to_server; uricontent:"?mac="; nocase; uricontent:"&ver="; nocase; uricontent:"&user="; nocase; uricontent:"&md5="; nocase; uricontent:"&pc="; nocase; pcre:"/mac=[a-f0-9]{2}-[a-f0-9]{2}-[a-f0-9]{2}-[a-f0-9]{2}-[a-f0-9]{2}-[a-f0-9]{2}/Ui"; classtype:trojan-activity; sid:2007592; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Hupigon User Agent Detected (RAV1.23)"; flow:established,to_server; content:"User-Agent\: RAV"; nocase; pcre:"/User-Agent\: RAV\d\.\d\d/"; classtype:trojan-activity; sid:2007661; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Hupigon User Agent Detected (??)"; flow:established,to_server; content:"User-Agent\: |3f 3f 0d 0a|"; nocase; classtype:trojan-activity; sid:2007689; rev:2;)
+
+# By Joe Stewart,  Based on valuable work by Tom Fisher
+alert icmp any any -> any any (msg:"ET TROJAN ICMP Banking Trojan sending encrypted stolen data"; dsize:>64; itype:8; icode:0; content:"|08|"; depth:1; byte_test:4,>,64,1,little; byte_test:4,<,1500,1,little; content:"|0000|"; distance:4; within:1495; classtype:trojan-activity; reference:url,www.websensesecuritylabs.com/alerts/alert.php?AlertID=570; sid:2003073; rev:3;)
+
+# IRC Trojan Reporting
+#
+# By Erik Fichtner
+#
+# Bleeding-Remix :: irc / ircbot detection state machine
+# compiled from various sources.
+# thanks to: Joe Stewart of LURHO, Joel Esler, Tomfi.
+
+### Client login process. flowbits needs an OR.
+### Client needs to tell the server who they are, join
+### join a group, and someone needs to say something to
+### someone else.
+
+alert tcp any any -> any any (msg:"ET TROJAN IRC USER command"; flow: to_server,established; content:"USER|20|"; nocase; offset: 0; content:"|203a|"; within: 40; content:"|0a|"; within: 40; flowbits:noalert; flowbits: set,irc.start; classtype: misc-activity; sid: 2002023; rev:10;)
+alert tcp any any -> any any (msg:"ET TROJAN IRC NICK command"; flow: to_server,established; content:"NICK|20|"; nocase; depth:50; content:"|0a|"; within: 40; flowbits:noalert; flowbits: set,irc.start; classtype: misc-activity; sid: 2002024; rev:11;)
+alert tcp any any -> any any (msg:"ET TROJAN IRC JOIN command"; flowbits:isset,irc.start; flow:to_server,established; content:"JOIN|2023|"; nocase; depth:50; content:"|0a|"; within: 40; flowbits: set,irc.start; flowbits:set,is_proto_irc; flowbits:noalert; classtype: misc-activity; sid: 2002025; rev:11;)
+
+#Another start, psyBNC servers don't always use a join, info from Reg Quinton
+alert tcp any any -> $HOME_NET any (msg:"ET TROJAN psyBNC IRC Server Connection"; flow:from_server,established; content:"\:"; offset:0; depth:1; content:"psyBNC@lam3rz"; within:32; nocase; flowbits:set,irc.start; flowbits:set,is_proto_irc; classtype: misc-activity; reference:url,en.wikipedia.org/wiki/PsyBNC; sid:2003302; rev:5;)
+
+#Updated by Reg Quinton
+alert tcp any any -> any any (msg:"ET TROJAN IRC PRIVMSG command"; flowbits:isset,irc.start; flow:established; content:"PRIVMSG|20|"; content:"|3a|"; within:30; flowbits:set,is_proto_irc; flowbits:noalert;classtype: misc-activity; sid: 2002026; rev:12;)
+
+
+### Alternate path to is_proto_irc, Catch PING/PONG.
+alert tcp any any -> any any (msg:"ET TROJAN IRC PING command"; flowbits:isnotset,is_proto_irc; flow: from_server,established; content:"PING|20|"; nocase; offset: 0; flowbits: set,irc.ping; flowbits:noalert; classtype: misc-activity; sid: 2002027; rev:5;)
+alert tcp any any -> any any (msg:"ET TROJAN IRC PONG response"; flowbits:isnotset,is_proto_irc; flowbits:isset,irc.ping; flowbits:noalert; flow: from_client,established; content:"PONG|20|"; nocase; offset: 0; flowbits: set,is_proto_irc; classtype: misc-activity; sid: 2002028; rev:5;)
+
+# Bot potty
+alert tcp any any -> any any (msg:"ET TROJAN BOT - channel topic scan/exploit command"; flowbits:isset,is_proto_irc; flow: to_client,established; content:"|3a|"; offset: 0; content:"|20|332|20|"; within: 50; content:"|2023|"; within: 20; content:"|203a|"; nocase; within: 40; tag: host,300,seconds,dst; pcre:"/(ntscan [0-9]{1,4} [0-9]{1,4}|dcom\.self|scan\.(start|stop)|scan ([0-9]{1,3}\.[0-9]{1,3})|(advscan|asc|xscan|xploit|adv\.start) (webdav|netbios|ntpass|dcom(2|135|445|1025)|mssql|lsass|optix|upnp|dcass|beagle[12]|mydoom|netdevil|DameWare|kuang2|sub7|iis5ssl|wkssvc|wks1|mysql|wkssvcOth|wkssvcENG|arkeia|arcserve|wins|veritas|netbackup|asn1))/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002029; rev:6;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential scan/exploit command"; flowbits:isset,is_proto_irc; flow: established; content:"PRIVMSG|20|"; nocase; content:"|3a|"; within:30; tag: host,300,seconds,dst; pcre:"/(ntscan [0-9]{1,4} [0-9]{1,4}|dcom\.self|scan\.(start|stop)|scan ([0-9]{1,3}\.[0-9]{1,3})|(advscan|asc|xscan|xploit|adv\.start) (webdav|netbios|ntpass|dcom(2|135|445|1025)|mssql|lsass|optix|upnp|dcass|beagle[12]|mydoom|netdevil|DameWare|kuang2|sub7|iis5ssl|wkssvc|wks1|mysql|wkssvcOth|wkssvcENG|arkeia|arcserve|wins|veritas|netbackup|asn1))/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002030; rev:8;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential update/download"; flowbits:isset,is_proto_irc; flow: established; tag: host,300,seconds,dst; pcre:"/\.(upda|getfile|dl\dx|dl|download|execute)\w*\s+(http|ftp)\x3a\x2f\x2f/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002031; rev:12;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential DDoS command (1)"; flowbits:isset,is_proto_irc; flow: established; tag: host,300,seconds,dst; content:"."; distance:1; content:"."; distance:1; within:3; content:"."; distance:1; within:3; pcre:"/floodnet ([0-9]{1,3}\.){3}[0-9]{1,3}|(syn|udp) ([0-9]{1,3}\.){3}[0-9]{1,3}|(tcp|syn|udp|ack|ping|icmp)(flood)? ([0-9]{1,3}\.){3}[0-9]{1,3}/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002032; rev:6;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential response"; flowbits:isset,is_proto_irc; flow: established; content:"PRIVMSG|20|"; nocase; content:"|3a|"; within:30; tag: host,300,seconds,src; pcre:"/((T?FTP)\x3a File transfer|(random|sequential) Port Scan|Random (Spreading|Scanner)|Exploiting IP|Exploiting\.\.|flooding\x3a|flood stopped|sending packets)|Random Method started|FINDFILE|Scan stopped|No scan thread found|thread\(s\) stopped|\x3aExec /i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002033; rev:11;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential misc bot commands"; flowbits:isset,is_proto_irc; flow: established; content:"PRIVMSG|20|"; nocase; content:"|3a|"; within:30; tag: host,300,seconds,src; pcre:"/((\.aim\w*|ascanall|\x3agetshit200)\s+\w+)|((@kill|@get_os_version|@get_computer_name|@get_bot_version|@update|@restart|@reboot|@shutdown)\s)/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002384; rev:9;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - channel topic misc bot commands"; flowbits:isset,is_proto_irc; flow: established; content:"|3a|"; offset: 0; content:"|20|332|20|"; within: 50; content:"|2023|"; within: 20; content:"|203a|"; tag: host,300,seconds,src; pcre:"/(\.aim\w*|ascanall)\s+\w+/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2002386; rev:7;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential DDoS command (2)"; flowbits:isset,is_proto_irc; flow: established; tag: host,300,seconds,dst; content:"ddos"; nocase; pcre:"/ddos\.(phat(icmp|syn|wonk)|stop|(syn|udp|http)flood|targa3|(syn|ack|random) ([0-9]{1,3}\.){3}[0-9]{1,3})/i"; flowbits: set,trojan; classtype: trojan-activity; sid: 2003132; rev:2;)
+
+# Added commands of another nasty bot
+alert tcp any any -> any any (msg:"ET TROJAN BOT - potential reptile commands"; flowbits:isset,is_proto_irc; flow:established; content:"PRIVMSG ";nocase; content:"|3a|"; within:30; pcre:"/\.((testdlls|threads|nsp|speed|uptime|installed|secure|sec|unsecure|unsec|process|ps|rand|exploitftpd|eftpd|flusharp|farp|flushdns|fdns|resolve|dns|pstore|pst|sysinfo|si|netinfo|ni|driveinfo|di|currentip)\s*[\r\n]|(iestart|ies|login|l|mirccmd|system|file\s+(cat|exists|e|del|rm|rmdir|move|copy|attrib)|down|dl\dx|update|reg\s+(query|delete|write))\s+\w+|(banner|ban|advscan|asc|scanall|sa|ntscan|nts)\s*[\n\r])/i"; flowbits: set,trojan; classtype: trojan-activity; sid:2002363; rev:9;)
+alert tcp any any -> any any (msg:"ET TROJAN BOT - channel topic reptile commands"; flowbits:isset,is_proto_irc; flow:established; content:"|3a|"; offset: 0; content:"|20|332|20|"; within: 50; content:"|2023|"; within: 20; content:"|203a|"; pcre:"/\.((testdlls|threads|netstatp|nsp|speed|uptime|installed|secure|sec|unsecure|unsec|process|ps|rand|exploitftpd|eftpd|flusharp|farp|flushdns|fdns|resolve|dns|pstore|pst|sysinfo|si|netinfo|ni|driveinfo|di|stats|currentip)\s*[\r\n]|(iestart|ies|login|l|mirccmd|system|file\s+(cat|exists|e|del|rm|rmdir|move|copy|attrib)|down|dl\x|update|reg\s+(query|delete|write))\s+\w+|(banner|ban|advscan|asc|scanall|sa|ntscan|nts)\s*[\n\r])/i"; flowbits: set,trojan; classtype: trojan-activity; sid:2002385; rev:8;)
+
+#agobot, sdbot stuff, from JB
+alert tcp any any -> any any (msg:"ET TROJAN Agobot-SDBot Commands"; flowbits:isset,is_proto_irc; flow:established; pcre:"/((cvar\.set)|(http\.(execute|update))|((aol)spam\.(setlist|settemplate|start|stop|setuser|setpass))|sniffer\.(addstring|delstring)|pingstop|udpstop|scan(all|stats|del|stop)|clone(stop|start)|c_(raw|mode|nick|join|part|privmsg|action))/i"; flowbits: set,trojan; classtype: trojan-activity; sid:2003157; rev:2;)
+
+#pBot commands, Matt Jonkman, updated by Reg Quinton
+alert tcp any any -> any any (msg:"ET TROJAN pBot (PHP bot) Commands"; flowbits:isset,is_proto_irc; flow:established; pcre:"/PRIVMSG\s+\S+\s+\x3a\s*(\.user |\.logout|\.die|\.restart|\.mail |\.dns |\.download |\.exec |\.find |\.cmd |\.php |\.tcpflood |\.udpflood |\.raw |\.rndnick|\.pscan |\.ud\.server )/i"; flowbits: set,trojan; classtype: trojan-activity; sid:2003208; rev:5;)
+
+
+#These are by Reg Quinton for perl bots. Uses the above irc state machines:
+# $Id: bleeding-virus.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+#
+# I am building these from perlbots I've captured over the last few months
+# as I chase PHP injection attacks. In each case what you have is a "PRIVMSG"
+# response with content that looks like ":\002...text\002"
+#
+# I rely on flowbits isproto_irc to catch the leading "PRIVMSG .*:"
+#
+# [11:29am dominic] cat ~/php-injection/* | sed -n 's/.*:\\002/:\\002/p' |\
+#	 sed 's/002[ :].*/002/' | sort | uniq -c | grep 002\\[
+#      2 :\002[Atk33]\002
+#      2 :\002[Exploiting]\002
+#      2 :\002[Finished]\002
+#      8 :\002[GOOGLE]\002
+#      1 :\002[GOOGLER]\002
+#     11 :\002[HTTP]\002
+#      4 :\002[HTTP-DDOS]\002
+#      1 :\002[HTTP DDoSing]\002
+#      1 :\002[PKS-SCAN| @@ ERROR @@ ]\002
+#      1 :\002[PKS-SCAN|EXPLOTANDO CON CURL]\002
+#      1 :\002[PKS-SCAN|EXPLOTANDO CON FETCH]\002
+#      1 :\002[PKS-SCAN|EXPLOTANDO CON GET]\002
+#      1 :\002[PKS-SCAN|EXPLOTANDO CON LYNX]\002
+#      1 :\002[PKS-SCAN|EXPLOTANDO CON WGET]\002
+#      1 :\002[PKS-SCAN| SPREANDING ]\002
+#      2 :\002[Results]\002
+#      2 :\002[RSH]\002
+#     19 :\002[SCAN]\002
+#     10 :\002[TCP]\002
+#      4 :\002[TCP-DDOS]\002
+#      2 :\002[TCP DDoSing]\002
+#     13 :\002[UDP]\002
+#      4 :\002[UDP-DDOS]\002
+#      1 :\002[UDP DDoSing]\002
+#      2 :\002[v6]\002
+#      1 :\002[v6|Exploiting]\002
+#      1 :\002[v6|VULN]\002
+#      6 :\002[VERSION]\002
+
+# Ones that look like ':\002[sometext]\002'
+
+alert tcp any any -> any any (msg:"ET TROJAN perlb0t/w0rmb0t Response (Case 1)"; flowbits:isset,is_proto_irc; content:"|3A 02 5B|"; content:"|5B 02|"; within: 32; pcre:"/\x3A\x02\x5B(Atk33|Exploiting|Finished|GOOGLE.*|HTTP.{0,8}|PKS-SCAN.{0,20}|Results|RSH|SCAN|TCP.{0,8}|UDP.{0,8}|v6.{0,12}|VERSION)\x5D\x02/i"; flowbits:set,BE.trojan; classtype:trojan-activity; sid:2006910; rev:2;)
+
+# [11:31am dominic] cat ~/php-injection/* | sed -n 's/.*:\\002/:\\002/p' \
+#	| sed 's/002[ :].*/002/' | sort | uniq -c | grep 002.003
+#      2 :\002\0034<------------------------------------------------>\003\002"); 
+#      2 :\002\0034<------------------------------------------------>\003\002");
+#      1 :\002\0034[BackConnect]\003\002
+#      2 :\002\0034[help]\003\002
+#      1 :\002\0034[HTTP]\003\002
+#      1 :\002\0034[HTTP DDoSing]\003\002
+#      1 :\002\0034PerlBot :By SPEED (Security Net Information) LoaDED bY @adms"); 
+#      3 :\002\0034[SCAN]\003\002
+#      2 :\002\0034[TCP DDoSing]\003\002
+#      1 :\002\0034[UDP]\003\002
+#      1 :\002\0034[UDP DDoSing]\003\002
+#      1 :\002\0034[VERSION]\003\002
+#
+# Ones that look like \002\0034[sometext]\003\002
+
+alert tcp any any -> any any (msg:"ET TROJAN perlb0t/w0rmb0t Response (Case 2)"; flowbits:isset,is_proto_irc; content:"|3A 02 03|4|5B|"; content:"|03 02|"; within: 32; pcre:"/\x3A\x02\x034\x5B(BackConnect|help|HTTP.*|SCAN|TCP.*|UDP.*|VERSION)\x5D\x03\x02/i"; flowbits:set,BE.trojan; classtype:trojan-activity; sid:2006911; rev:2;)
+
+# [11:34am dominic] cat ~/php-injection/* | sed -n 's/.*:\\002/:\\002/p' \
+#	| sed 's/002[ :].*/002/' | sort | uniq -c | grep -v '002\\003' | grep -v '002\['
+#      1 :\002
+#      2 :\002Alvo dos Pacotes\002
+#      1 :\002Conectando-se em\002
+#      1 :\002Média de envio\002
+#      1 :\002Tempo\002
+#      2 :\002Tempo de Pacotes\002
+#      1 :\002Total bytes\002
+#      2 :\002Total de Pacotes\002
+#      1 :\002Total pacotes\002
+#
+# Ones that look like \002sometext\002
+
+alert tcp any any -> any any (msg:"ET TROJAN perlb0t/w0rmb0t Response (Case 3)"; flowbits:isset,is_proto_irc; content:"|3A 02|"; content:"|02|"; within: 32; pcre:"/\x3A\x02(Alvo dos Pacotes|Conectando-se em|Média de envio|Tempo.*|Total .*)\x02/i"; flowbits:set,BE.trojan; classtype: trojan-activity; sid:2006912; rev:3;)
+
+
+# $Id: bleeding-virus.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+#
+# [8:03am dominic] telnet 59.124.158.12 65500
+# Trying 59.124.158.12...
+# Connected to 59-124-158-12.HINET-IP.hinet.net (59.124.158.12).
+# Escape character is '^]'.
+# :irc.Indonesia.B0tN3t.org NOTICE AUTH :*** Looking up your hostname...
+# :irc.Indonesia.B0tN3t.org NOTICE AUTH :*** Found your hostname
+#
+# Reg Quinton <reggers@ist.uwaterloo.ca>; 9-Nov-2007
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN B0tN3t IRCbotnet"; flow:from_server,established; content:"\:"; offset:0; depth:1; content:"B0tN3t"; within:32; nocase; flowbits:set,irc.start; flowbits:set,is_proto_irc; classtype:misc-activity; reference:url,en.wikipedia.org/wiki/Botnet; sid:2007672; rev:3;)
+
+# by Reg Quinton 
+#
+# Kaiten is a compiled code DDOS IRCbotnet for Unix/Linux systems. You will
+# find the string "Kaiten wagoraku" in the code ..(or in the strings if you
+# have a compiled version). It's been around since at least 2006, source can
+# be found at many sites.
+#
+# See also
+#
+# http://isc.sans.org/diary.html?storyid=1127
+# http://handlers.dshield.org/pbueno/Steve_malware6.pdf
+# http://www.stacksegment.net/wiki/index.php/Linux_Malware_Analysis
+# http://ktp.e-isa.com/Viruses/Linux.DDos-Kaiten.htm
+#
+# Reg Quinton; 2007/08/30
+#
+# Botnet begins by contacting an IRC server (there's some randomization to
+# pick one) and saying (with short nick,ident,user strings..):
+#
+#  Send(sock,"NICK %s\nUSER %s localhost localhost :%s\n",nick,ident,user);
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET TROJAN Kaiten IRCbotnet login";  flow:to_server,established; content:"NICK|20|"; offset:0; depth:5; content:"USER|20|"; within:32; content:"localhost|20|localhost|20 3A|"; within:32; pcre:"/NICK\x20\S+\x0AUSER\x20\S+localhost\x20localhost\x20\x3A/"; flowbits:set,irc.start; flowbits:set,irc.trojan; classtype:trojan-activity; reference:url,en.wikipedia.org/wiki/IRC_bot; sid:2007621; rev:2;)
+
+# various distinctive responses to commmands implemented by Kaiten client
+
+alert tcp $HOME_NET any -> any any (msg:"ET TROJAN Kaiten IRCbotnet Response"; flowbits:isset,irc.start; content:"NOTICE|20|"; content:"|20 3A|"; within:32; pcre:"/\x20\x3A(Receiving\x20file.\x0A|Saved\x20as\x20|Spoofs\x3A\x20|Kaiten\x20wa\x20goraku|Current\x20status\x20is\x3a\x20|Removed\x20all\x20spoofs|Packeting\x20|Panning\x20|Tsunami\x20heading\x20for\x20|Unknowing\x20|Killing\x20pid\x20)/"; flowbits:set,irc.trojan; classtype:trojan-activity; reference:url,en.wikipedia.org/wiki/IRC_bot; sid:2007622; rev:2;)
+
+# various commmands implemented by Kaiten client, they don't use a : delimiter
+# as others do, it's "[:<server> ]PRIVMSG !<clients> <command> <args>". I'm
+# skipping the server part. I wish there were flowbits that noted that we have
+# an IRC channel going. I don't want to watch everything.
+
+alert tcp any any -> $HOME_NET any (msg:"ET TROJAN Kaiten IRCbotnet Commands"; flow:from_server,established; content:"PRIVMSG|20 21|"; pcre:"/PRIVMSG\x20\x21\S+\x20(TSUNAMI\x20|PAN\x20|UDP\x20|UNKNOWN\x20|GETSPOOFS|SPOOFS\x20)/i"; flowbits:set,irc.trojan; classtype:trojan-activity; reference:url,en.wikipedia.org/wiki/IRC_bot; sid:2007623; rev:2;)
+
+# $Id: bleeding-virus.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+# Pitbull is an IRCbot implemented in Perl since 2007/09/13, code seems to have
+# authors who speak spanish or portugese. Small sample here
+#
+#   http://www.directadmin.com/forum/showthread.php?p=113720
+#
+# Google had a cached version, you might browse around to find others.
+#
+# Versions I captured are a little different from one another (s/space/etx/).
+#
+# Code *says* it supports these commands (but versions differ):
+#!bot @portscan <ip>
+#!bot @nmap <ip> <beginport> <endport>
+#!bot @back <ip><port>
+#!bot @udpflood <ip> <packet size> <time>
+#!bot @tcpflood <ip> <port> <packet size> <time>
+#!bot @httpflood <site> <time>
+#!bot @linuxhelp
+#!bot @rfi <vuln> <dork>
+#!bot @system
+#!bot @milw0rm
+#!bot @logcleaner
+#!bot @sendmail <subject> <sender> <recipient> <message>
+#!bot @join <#channel>
+#!bot @part <#channel>
+#!bot @help
+#!bot cd tmp for example
+#!bot !eval <code= for example :@nickname>
+#
+# Reg Quinton; 26-Sept-2007
+#
+# seems to be a common prefix in responses with the few I've seen.
+
+alert tcp $HOME_NET any -> any any (msg:"ET TROJAN Pitbull IRCbotnet Response"; flowbits:isset,irc.start; content:"PRIVMSG|20|"; content:"|3A|"; within:32; content:"4"; within:5;content:"12"; within:5; content:"|3a|"; within:5; pcre:"/\x3a.4\x7c.12.\x3a.4/"; classtype:trojan-activity; reference:url,en.wikipedia.org/wiki/IRC_bot; sid:2007624; rev:2;)
+
+# various commmands implemented by Pitbull client as provided above
+
+alert tcp any any -> $HOME_NET any (msg:"ET TROJAN Pitbull IRCbotnet Commands"; flow:from_server,established; content:"PRIVMSG|20|"; content:"@"; within:32; pcre:"/@(portscan|nmap|back|udpflood|tcpflood|httpflood|linuxhelp|rfi|system|milw0rm|logcleaner|sendmail|join|part|help)/i"; flowbits:set,irc.trojan; classtype:trojan-activity; reference:url,en.wikipedia.org/wiki/IRC_bot; sid:2007625; rev:2;)
+
+# distinctive string in page fetch to google, yahoo, lycos, milw0rm, etc.
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Pitbull IRCbotnet Fetch"; flow:to_server,established; content:"Accept|3a20|*/*|0d0a|User-Agent|3a20|Mozilla/5.0|0d0a0d0a|"; depth:300; classtype:trojan-activity; reference:url,en.wikipedia.org/wiki/IRC_bot; sid:2007626; rev:2;)
+
+# IE Ilookup Trojan
+#Submitted by Joseph Gama, for IE Ilookup Trojan
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN IE Ilookup Trojan"; flow: from_server,established; content:"#@~^/gAAAA==@#@&@#@&7lMP\:HVK^P{P[W1Ehn"; content:"#@~^GAIAAA==@#@&\\CMPsX/DD,xPvEU+kmC2"; reference:url,62.131.86.111/analysis.htm; classtype: misc-activity; sid: 2001066; rev:6;)
+
+#from castlecops research, http://www.castlecops.com, sig by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Inject.BV Trojan User Agent Detected (faserx)"; flow:established,to_server; content:"User-Agent\: faser"; nocase; classtype:trojan-activity; sid:2003637; rev:2;)
+
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Klom.A Connecting to Controller"; flow:established,to_server; uricontent:"/s_13_0?m="; nocase; uricontent:"r="; nocase; uricontent:"&a="; nocase; uricontent:"&os="; nocase; classtype:trojan-activity; reference:url,www.bitdefender.com/VIRUS-1000126-en--Trojan.Klom.A.html; sid:2003538; rev:2;)
+
+#trojan using this domain and UA
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Kpang.com Related Trojan User-Agent (kpangupdate)"; flow:established,to_server; content:"|0d 0a|User-Agent\: kpangupdate|0d 0a|"; classtype:trojan-activity; sid:2007779; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Kpang.com Related Trojan User-Agent (alertup)"; flow:established,to_server; content:"|0d 0a|User-Agent\: alertup|0d 0a|"; classtype:trojan-activity; sid:2007849; rev:1;)
+
+#by matt jonkman, from sandnet hits
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Krunchy/BZub HTTP Checkin/Update"; flow:established,to_server; uricontent:".php?action="; uricontent:"&guid=%"; content:"GET "; depth:4; content:!"|0d 0a|User-Agent\: "; classtype:trojan-activity; sid:2007775; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Krunchy/BZub HTTP POST Update"; flow:established,to_server; content:"|0d 0a 0d 0a|action="; content:"|25 35 46|script"; distance:0; content:"POST "; depth:5; content:!"|0d 0a|User-Agent\: "; classtype:trojan-activity; sid:2007776; rev:2;)
+
+#By matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Lager Trojan Initial Checkin"; flow:established,to_server; uricontent:"/cp/rule.php?"; nocase; uricontent:"fstt="; nocase; uricontent:"&b="; nocase; uricontent:"name="; reference:url,www.viruslist.com/en/viruses/encyclopedia?virusid=87732; classtype:trojan-activity; sid:2003187; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Lager Trojan Reporting"; flow:established,to_server; uricontent:"/cp/rule.php?"; nocase; uricontent:"v="; nocase; uricontent:"&b="; nocase; uricontent:"name="; reference:url,www.viruslist.com/en/viruses/encyclopedia?virusid=87732; classtype:trojan-activity; sid:2003188; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Lager Trojan Reporting (gcu)"; flow:established,to_server; uricontent:"/cp/rule.php?"; nocase; pcre:"/\/cp\/rule\.php\?gcu=\d+/Ui"; reference:url,www.viruslist.com/en/viruses/encyclopedia?virusid=87732; classtype:trojan-activity; sid:2003189; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Lager Trojan Reporting Spam"; flow:established,to_server; uricontent:"/sp/post.php"; nocase; content:"POST"; nocase; content:"data="; depth:400; reference:url,www.viruslist.com/en/viruses/encyclopedia?virusid=87732; classtype:trojan-activity; sid:2003190; rev:3;)
+
+#from anonymous
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET 1025:5000 ( msg:"ET TROJAN Possible Web-based DDoS-command being issued"; flow: established,from_server; content: "Server\: nginx/0."; offset: 17; depth: 19; content: "Content-Type\: text/html"; content:"\:80\;255.255.255.255"; classtype:trojan-activity; sid:2003296; rev:2;)
+
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Lop.gfr/Swizzor HTTP Update/Checkin"; flow:established,to_server; content:"POST "; depth:5; uricontent:"/tba/"; nocase; content:"|0d 0a|guid="; content:"&version="; content:"&clientid="; content:"&time="; content:"&idle="; content:"&ticksBoot="; classtype:trojan-activity; sid:2007774; rev:4;)
+
+#by Matt Jonkman, MBR Virus related
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN MBR Trojan (Sinowal/Mebroot/) Phoning Home"; flow:established,to_server; content:"POST "; depth:5; uricontent:"/ld/mat"; nocase; uricontent:".php"; nocase; content:"|0d 0a|id="; distance:30; content:"&hit="; distance:5; classtype:trojan-activity; sid:2007747; rev:2;)
+
+#info from Bojan at ISC and Russell Fulton
+# sig by Russell and Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Mac Trojan HTTP Checkin (accept-language violation)"; flow:established,to_server; content:"GET "; depth:4; content:" HTTP/1.1|0d 0a|Accept-Language\: "; pcre:"/Accept-Language\: [a-zA-Z0-9]{20}/"; classtype:trojan-activity; sid:2007650; rev:2;)
+
+#by David Bianco
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Metajuan trojan checkin"; uricontent:"trafc-2/rfe"; nocase; classtype: trojan-activity; reference:url,www.symantec.com/security_response/writeup.jsp?docid=2007-030112-0714-99; sid:2007811; rev:1;) 
+
+#by Scott Melnick
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Downloader.MisleadApp Fake Security Product Install"; flow:established,to_server; content:"GET "; depth:4; nocase; uricontent:"hash?http"; nocase; pcre:"/\/(ucleaner|udefender|ufixer)\.com\/demo\.php\?/Ui";  classtype:trojan-activity; sid:2007566; rev:2;) 
+
+# Added 2005-10-04 in response to ISC diary
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Mitglieder Proxy Bot Checking In"; flow:established,to_server; uricontent:"/scr5.php"; nocase; pcre:"/\/scr5\.php\?p=\d+&id=\d+/Ui"; reference:url,isc.sans.org/diary.php?storyid=722; classtype:trojan-activity; sid:2002387; rev:5;)
+
+#from Matt Richard with Verisign Security Services / iDefense
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 ( msg:"ET TROJAN NPRC Malicious POST Request Possible DOJ or DOT Malware"; flow:to_server; content:"POST"; nocase; offset:0; depth:4; content:"ACCEPT|3A|"; nocase; within:300; content:"POST|2C|"; nocase; within:100; classtype:trojan-activity; reference:url,www.websense.com/securitylabs/alerts/alert.php?AlertID=835; sid:2007748; rev:2;)
+
+#by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Neonaby.com Related Trojan User-Agent (neonabyupdate)"; flow:established,to_server; content:"|0d 0a|User-Agent\: neonabyupdate|0d 0a|"; nocase; classtype:trojan-activity; sid:2007825; rev:1;)
+
+#by Matt Jonkman
+# Advisory by Websense, www.websense.com/securitylabs/alerts/alert.php?AlertID=743
+#
+#This one is from what appears to be a typo in the get string right after the initial infection
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Nukebot related infection - Unique HTTP get request"; flow:established,to_server; content:".dll|0d 0a|e|20|HTTP/1.1"; rawbytes; content:!"User-Agent\:"; nocase; reference:url,www.websense.com/securitylabs/alerts/alert.php?AlertID=743; classtype:trojan-activity; sid:2003432; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Nukebot Checkin"; flow:established,to_server; content:"POST "; rawbytes; depth:5; uricontent:"/script.php?"; content:!"User-Agent\:"; nocase; pcre:"/\/script\.php?\d{8}/Ui"; content:"Kernel\:"; reference:url,www.websense.com/securitylabs/alerts/alert.php?AlertID=743; classtype:trojan-activity; sid:2003433; rev:2;)
+
+#by Matt Jonkman, from sandnet
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Nulprot Checkin Response"; flow:established,from_server; content:"HTTP/1.0 200 OK|0d 0a|Encryption\: on|0d 0a|Content-Length\: "; offset:0; depth:49; reference:url,doc.emergingthreats.net/2007669; classtype:trojan-activity; sid:2007669; rev:4;)
+
+# Submitted 2006-03-05 by Tom Fisher
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Orderjack Reporting User Activity"; flow:established,to_server; uricontent:"options.cgi?user_id="; nocase; uricontent:"&version_id="; nocase; uricontent:"&passphrase="; nocase; reference:url,www.avira.com/en/threats/section/fulldetails/id_vir/1724/tr_dldr.orderjack.a.html; classtype:trojan-activity; sid:2002854; rev:2;)
+
+#by Russ McRee of expedia.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN - Trojan.Proxy.PPAgent.t (updatea)"; flow:to_server,established; uricontent:"/updatea.php?p="; nocase; pcre:"/updatea.php?p=\d+/Ui"; reference:url,original.avira.com/en/threats/vdf_history.html?id_vdf=2738; classtype:trojan-activity; flowbits:set,BT.ppagent.updatea; flowbits:noalert; sid:2003115; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN - Trojan.Proxy.PPAgent.t (updateb)"; flowbits:isset,BT.ppagent.updatea; flow:to_server,established; uricontent:"/updateb.php?p="; nocase; pcre:"/updateb.php?p=\d+/Ui"; reference:url,original.avira.com/en/threats/vdf_history.html?id_vdf=2738; classtype:trojan-activity; flowbits:unset,BT.ppagent.updatea; sid:2003116; rev:2;)
+
+#by Lance James and Michael Ligh, referenced in paper at http://ip.securescience.net/advisories/pubMalwareCaseStudy.pdf
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 (msg:"ET TROJAN Prg Trojan v0.1-v0.3 Data Upload"; flow:to_server,established; content:"POST"; uricontent:"php?"; content:"Content-Type|3a20|binary"; within:512; content:"LLAH"; within:512; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2003182; rev:3;)
+alert tcp $EXTERNAL_NET 80 -> $HOME_NET any (msg:"ET TROJAN Prg Trojan Server Reply"; flow:to_client,established; content:"HTTP"; depth:4; content:"|0d0a|Hall|3a|"; within:512; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2003183; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN Prg Trojan v0.1 Binary In Transit"; flow:to_client,established; content:"MZ"; content:"|1D B9 F2 75 62 85 5A 4F 15 48 52 1D 50 90 41 89 37 9F FF 94 CE A6 3E 63 35 AB 29 6B 30 43 2F 45 46 B0 E1 C2 11 7F 0C 55 0F C7|"; within:128; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2003184; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN Prg Trojan v0.2 Binary In Transit"; flow:to_client,established; content:"MZ"; content:"|13 B9 F2 75 62 85 5A 4F 15 48 19 1D 10 4F 0D 5B 04 5B 04 60 CE 5F 00 67 F5 AE 25 6B 20 41 23 B3|"; within:128; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2003185; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN Prg Trojan v0.3 Binary In Transit"; flow:to_client,established; content:"MZ"; content:"| 5E 7D 66 7D 28 40 19 88 5F 8C 13 50 15 59 08 58 3C 97 00 9B 33 A5 F9 AF 39 68 F0 9F 27 AF E9 A8 25 B7 18 B6 15 7F 0E B6 1A|"; within:128; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2003186; rev:2;)
+
+#by Jeremy Conway
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Prg Trojan HTTP POST v1"; flow:established,to_server; content:"POST "; depth:5; uricontent:".php?2="; uricontent:"&n="; uricontent:"&v="; uricontent:"&i="; uricontent:"&sp="; uricontent:"&lcp="; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2007688; rev:4;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Prg Trojan HTTP POST version 2"; flow:established,to_server; content:"POST "; depth:5; uricontent:".php?1="; uricontent:"&i="; pcre:"/\.php\?1=[a-z0-9]+_[a-z0-9_]+&i=/Ui"; reference:url,ip.securescience.net/advisories/pubMalwareCaseStudy.pdf; classtype:trojan-activity; sid:2007724; rev:5;)
+
+#by Tom Fischer
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN PWS-LDPinch Reporting User Activity"; flow:established,to_server; uricontent:".php?ut="; nocase; uricontent:"&idr="; nocase; uricontent:"&lang="; nocase; uricontent:"&ver="; nocase; uricontent:"&winver="; nocase; classtype:trojan-activity; sid:2002812; rev:2;)
+
+
+#New by Matt Jonkman, re 0a7b2d160c90af079dbe560b38c89d3f in sandnet
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN PWS-LDPinch posting data"; flow:established,to_server; dsize:>400; content:"POST "; depth:5; content:"|0d 0a 0d 0a|a="; nocase; content:"&b="; nocase; within:10; content:"&d="; nocase; within:20; content:".bin&"; nocase; within:30; content:"u="; nocase; within:10; content:"&c="; nocase; within:20; classtype:trojan-activity; sid:2006385; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN PWS-LDPinch posting data (2)"; flow:established,to_server; dsize:>400; content:"POST / HTTP/1.1"; depth:15; content:"|0d 0a 0d 0a|a="; nocase; content:"&b="; nocase; distance:0; content:"&c="; nocase; distance:0; classtype:trojan-activity; sid:2007756; rev:2;)
+
+#matt jonkman, new variant
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN PWS-LDPinch Checkin"; flow:established,to_server; content:"POST "; depth:5; uricontent:"?act=online&"; nocase; uricontent:"s4="; nocase; uricontent:"&s5="; nocase; uricontent:"&nickname="; content:"|0d 0a 0d 0a|msg_out="; nocase; classtype:trojan-activity; sid:2007829; rev:1;)
+
+#more pinch
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN LDPinch Checkin (2)"; flow:established,to_server; content:"POST "; depth:5; uricontent:"/gate.php"; nocase; content:"|0d 0a 0d 0a|a="; content:"@mail.ru&b=pinch"; nocase; distance:0; content:"_report&d="; nocase; distance:0; classtype:trojan-activity; sid:2007828; rev:1;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN LDPinch Checkin (3)"; dsize:>500; flow:established,to_server; content:"POST "; depth:5; uricontent:"/gate.php"; nocase; content:"|0d 0a 0d 0a|a=&b=&d=&c="; nocase; classtype:trojan-activity; sid:2007862; rev:2;)
+
+#By Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET 26 (msg:"ET VIRUS PWS Banker Trojan Sending Report of Infection"; flow: established,to_server; content:"From\: \"PC ID\:"; nocase; content:"Subject\: INFECTED"; nocase; content:"esta infectado"; nocase; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/pwsteal.banker.b.html; sid: 2001933; rev:5;)
+
+#from castlecops research, http://www.castlecops.com, sig by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Generic Password Stealer User Agent Detected"; flow:established,to_server; content:"User-Agent\: RookIE"; nocase; classtype:trojan-activity; sid:2003635; rev:2;)
+
+#from sandnet research, by Matt JOnkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Generic Password Stealer Checkin URL Detected"; flow:established,to_server; uricontent:"method=get"; nocase; uricontent:"&port="; nocase; uricontent:"&id="; nocase; uricontent:"&type="; nocase; uricontent:"&winver="; nocase; uricontent:"&ver="; nocase; classtype:trojan-activity; sid:2006384; rev:2;)
+
+#by Matt Jonkman, Pakes.bwp update check
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Pakes User-Agent Detected"; flow:established,to_server; content:"|0d 0a|User-Agent\: Mozilla/4.7 [en] (WinNT"; classtype:trojan-activity; sid:2007767; rev:2;)
+
+#pakes.bwa
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Pakes Update Detected"; flow:established,to_server; uricontent:".php?wm="; nocase; uricontent:"&ucid="; nocase; uricontent:"&e="; classtype:trojan-activity; sid:2007768; rev:2;)
+
+#seeing this pattern from several named trojans, from the sandnet
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Pakes/Cutwall/Kobcka Update URL Detected"; flow:established,to_server; uricontent:"40e800"; nocase; uricontent:"202020"; uricontent:"c00000"; nocase; classtype:trojan-activity; sid:2007771; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Pakes/Cutwall/Kobcka Update URL Detected"; flow:established,to_server; uricontent:"40e800"; nocase; uricontent:"30303"; uricontent:"c00000"; nocase; classtype:trojan-activity; sid:2007773; rev:4;)
+
+#based on clamav info, by matt Jonkman
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET TROJAN Parite.B HTTP Download Detected"; flow:established,from_server; content:"|47 65 74 50 72 6f 63 41 64 64 72 65 73 73 00|"; classtype:trojan-activity; sid:2007745; rev:2;)
+
+# Submitted 2006-03-20 by Tom Fischer
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN PassSickle Reporting User Activity"; flow:established,to_server; uricontent:".php?id="; nocase; uricontent:"&data="; nocase; pcre:"/User-Agent\:[^\n]+PassSickle/i"; classtype:trojan-activity; sid:2002859; rev:2;)
+
+#Sandnet analysis
+#by Matt JOnkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Poebot Related User Agent (SPM_ID=)"; flow:established,to_server; content:"User-Agent\: SPM_ID="; nocase; classtype: trojan-activity; sid: 2006391; rev:2;)
+
+# Submitted by Brad Doctor
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25 (msg:"ET VIRUS Greeting card gif.exe email incoming SMTP"; flow: established,to_server; content:"postcard.gif.exe"; nocase; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/vbs.postcard@mm.html; sid: 2001919; rev:4;)
+alert tcp $EXTERNAL_NET 110:220 -> $HOME_NET any (msg:"ET VIRUS Greeting card gif.exe email incoming POP3/IMAP"; flow: established,from_server; content:"postcard.gif.exe"; nocase; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/vbs.postcard@mm.html; sid: 2001920; rev:4;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET VIRUS Greeting card gif.exe email incoming HTTP"; flow: established,from_server; content:"postcard.gif.exe"; nocase; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/vbs.postcard@mm.html; sid: 2001921; rev:4;)
+
+# Created by Jeremy Conway  with contributions from Steven Adair
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN TROJ_PROX.AFV POST"; flow:to_server,established; content:"POST "; nocase; depth:5; uricontent:".php"; nocase; content:"=|22|sid|22|"; nocase; content:"=|22|up|22|"; nocase; content:"=|22|wbfl|22|"; nocase; content:"=|22|v|22|"; nocase; content:"=|22|ping|22|"; nocase; content:"=|22|guid|22|"; nocase; content:"=|22|wv|22|"; nocase; reference:url,trendmicro.com/vinfo/virusencyclo/default5.asp?VName=TROJ%5FPROXY%2EAFV&VSect=T; classtype:trojan-activity; sid:2007728; rev:2;)
+
+#by Scott Melnick, re 9376323d9f8a59f253c3800fcb355575
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Proxy.Win32.Agent.mx"; flow:established,to_server; uricontent:"q.php"; nocase; uricontent:"&m="; nocase; uricontent:"&a="; nocase; uricontent:"&x="; nocase; uricontent:"&i="; nocase; classtype:trojan-activity; sid:2006405; rev:1;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Proxy.Win32.Agent.mx (2)"; flow:established,to_server; uricontent:"q.php"; nocase; uricontent:"&p="; nocase; uricontent:"&x="; nocase; uricontent:"&i="; nocase; uricontent:"&t="; nocase; uricontent:"&o="; nocase; uricontent:"&v="; nocase; classtype:trojan-activity; sid:2006406; rev:2;)
+
+#Matt Jonkman
+#from sandnet analysis, looking for User Agents like  bL0j3jKdUwy3kUCZnsqaHlFTNEU4Ik8IhfG5kpu1Up9qFuqAtSnmqDYUHgAWPsjf1soqBMqxqts1OkiavJn05uGl38NIw4lPZHKHvO36WFcSNu81CJx
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN QQHelper Related User-Agent -- Infection Checkin"; flow:established,to_server; content:"|35 70|User-Agent\: "; nocase; pcre:"/\x35\x70User-Agent\: [a-zA-Z0-9]{115}/"; classtype:trojan-activity; sid:2006415; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN QQPass Related User-Agent -- Infection Checkin (App4)"; flow:established,to_server; content:"User-Agent\: App"; nocase; pcre:"/User-Agent\: App\d+/"; classtype:trojan-activity; sid:2007569; rev:2;)
+
+#by Myron Davis
+alert udp $HOME_NET any -> $EXTERNAL_NET 20192 (msg:"ET TROJAN Ransky or variant backdoor communication ping"; dsize:<6; reference:url,www.sophos.com/virusinfo/analyses/trojranckcx.html; classtype:trojan-activity; sid:2002728; rev:2;)
+
+#matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Rcash.co.kr Bootup Checkin via HTTP"; flow:established,to_server; uricontent:"/install/Boot.asp?macaddr="; nocase; uricontent:"&partner="; nocase; classtype:trojan-activity; sid:2007807; rev:1;)
+
+#matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Renos/ssd.com HTTP Checkin"; flow:established,to_server; uricontent:"/dlp.php?"; nocase; uricontent:"&m="; nocase; uricontent:"&ydf="; nocase; uricontent:"&e="; nocase; uricontent:"&w=___"; nocase; uricontent:"&t="; nocase; uricontent:"&apzx="; nocase; uricontent:"&apz="; nocase; classtype:trojan-activity; sid:2007834; rev:1;)
+
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET 8080 (msg:"ET TROJAN Saturn Proxy Initial Outbound Checkin (404.txt)"; flow:established,to_server; dsize:<50; content:"GET /404.txt HTTP/1.0"; depth:21; classtype:trojan-activity; flowbits:set,ET.saturn.checkin; sid:2007751; rev:2;)
+alert tcp $EXTERNAL_NET 8080 -> $HOME_NET any (msg:"ET TROJAN Saturn Proxy Checkin Response"; flow:established,from_server; flowbits:isset,ET.saturn.checkin; content:"HTTP/1.0 200 OK|0d 0a|Encryption\: on|0d 0a|"; offset:0; depth:33; classtype:trojan-activity; sid:2007752; rev:2;)
+
+#this is a C&C, may or may not be unique to each variant, need to learn more about it...
+#by Matt Jonkman
+alert tcp $EXTERNAL_NET 443 -> $HOME_NET any (msg:"ET TROJAN Saturn Proxy C&C Activity"; flow:established,from_server; dsize:12; content:"|2d 00 00 00|"; offset:0; depth:4; content:"|00 00 55 00 00 00|"; distance:2; classtype:trojan-activity; sid:2007753; rev:2;)
+
+#by Tom Fisher
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN SickleBot Reporting User Activity"; flow:established,to_server; uricontent:"/stat.php?id="; nocase; uricontent:"&ver="; nocase; pcre:"/User-Agent\:[^\n]+SickleBot/i"; classtype:trojan-activity; sid:2002776; rev:2;)
+
+#UA used by trojan small.mi, sent in from castlecops research
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Small.mi User-Agent Detected (MyAgent)"; flow:established,to_server; content:"User-Agent\: MyAgent"; classtype:trojan-activity; sid:2003643; rev:2;)
+
+#y Tom Fischer
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Snatch Reporting User Activity"; flow:established,to_server; uricontent:"/snatch/module";content:"User-Agent|3a20|Snatch-System"; within:512; classtype:trojan-activity; sid:2003515; rev:2;)
+
+#This is a new type of proxying via port 80. Tha agent opens up a conn to the controller, then repeats whatever the controller tells it to do
+# the initial 2 packets seem to be a checkin, then a command of the host and port to connect to.
+#
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Socks666 Connection Initial Packet"; flow:established,to_server; dsize:24; content:"|9a 02 06 00|"; offset:0; depth:4; flowbits:set,BS.BPcheckin; flowbits:noalert; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2006396; sid:2006395; rev:4;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Socks666 Connect Command Packet"; flowbits:isset,BS.BPcheckin; flow:established,from_server; dsize:10; content:"|9a 02 07 00|"; offset:0; depth:4; flowbits:set,BS.BPset; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2006396; sid:2006396; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Socks666 Successful Connect Packet Packet"; flowbits:isset,BS.BPset; flow:established,to_server; dsize:16; content:"|9a 02 08 00|"; offset:0; depth:4; flowbits:set,BS.BPcheckin; tag:session; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2006396; sid:2006397; rev:4;)
+
+#Caught a checkin, this should find it
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Socks666 Checkin Packet"; flow:established,to_server; dsize:30; content:"|9a 02 01 00|"; offset:0; depth:4; flowbits:set,BS.BPcheckin1; flowbits:noalert; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2006396; sid:2006398; rev:5;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Socks666 Checkin Success Packet"; flowbits:isset,BS.BPcheckin1; flow:established,from_server; dsize:4; content:"|9a 02 05 00|"; offset:0; depth:4; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2006396; sid:2006399; rev:4;)
+
+#by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Sohanad Checkin via HTTP"; flow:established,to_server; content:"GET "; depth:4; uricontent:"/cs/bux/check.php"; content:!"|0d 0a|User-Agent\: "; classtype:trojan-activity; sid:2007898; rev:1;)
+
+#by Joe Stewart of Lurhq/Secureworks
+alert tcp any any -> any any (msg:"ET TROJAN SpamThru trojan peer exchange"; flow:established,to_server; content:"|01|hs5p|0000|"; depth:7; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003138; rev:2;)
+alert tcp any 25 -> any any (msg:"ET TROJAN SpamThru trojan SMTP test successful"; flow:established,to_client; dsize:6; content:"XSMTPX"; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003139; rev:2;)
+alert tcp any any -> any any (msg:"ET TROJAN SpamThru trojan update request"; flow:established,to_server; content:"|01|hs5p|0001|"; depth:7; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003140; rev:2;)
+alert tcp any any -> any any (msg:"ET TROJAN SpamThru trojan AV DLL request"; flow:established,to_server; content:"|01|hs5p|0007|"; depth:7; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003141; rev:2;)
+alert tcp any any -> any any (msg:"ET TROJAN SpamThru trojan spam template request"; flow:established,to_server; content:"|01|hs5p|0004|"; depth:7; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003142; rev:2;)
+alert tcp any any -> any any (msg:"ET TROJAN SpamThru trojan spam run report"; flow:established,to_server; content:"|01|hs5p|0005|"; depth:7; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003143; rev:2;)
+alert tcp any any -> any any (msg:"ET TROJAN SpamThru trojan AV scan report"; flow:established,to_server; content:"|01|hs5p|0008|"; depth:7; classtype:trojan-activity; reference:url,www.secureworks.com/analysis/spamthru/; sid:2003144; rev:2;)
+
+#from Secureworks research
+alert udp any 1024: -> any 4099 (msg:"ET TROJAN Srizbi registering with controller"; dsize:20;  content:"|2d|"; offset:6; content:"|2d|"; distance:6;  within:1; classtype:trojan-activity;  reference:url,www.secureworks.com/research/threats/ronpaul/; sid:2007711; rev:2;)
+alert tcp any any -> any 4099 (msg:"ET TROJAN Srizbi requesting template"; content:"GET|20|/"; depth:5; content:"|0d0a|X-Flags|3a20|";  within:200; content:"|0d0a|X-TM|3a20|"; within:20;  content:"|0d0a|X-BI|3a20|"; within:20; reference:url,www.secureworks.com/research/threats/ronpaul/; sid:2007712; rev:2;)
+
+#Matt Jonkman, info from Sunbelt Software
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Srv.SSA-KeyLogger Checkin Traffic"; flow:to_server,established; uricontent:"Srv.SSA-KeyLogger"; classtype:trojan-activity; sid:2002175; rev:2;)
+
+#this may have once been a legit tool, no longer appears to be so
+# Sends an email after boot to announce it's location and password
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN Ssppyy.com Surveillance Agent Reporting via Email"; flow:established,to_server; content:"|0d 0a|Subject\: SSPPYY notification|0d 0a|X=Mailer\: Mail|0d 0a|"; content:"The computer you are monitoring has connected online - The module name of"; distance:5; classtype:trojan-activity; sid:2007780; rev:1;)
+
+
+#idea submitted anonymously, sig should catch the malware download url the storm work uses
+#disabling, current variants don't seem to be using this scheme, high load rule
+#alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET TROJAN Storm Worm HTTP Request"; flow:established,to_server; content:"GET "; depth:4; offset:0; uricontent:"/?"; pcre:"/GET \/\?[0-9a-f]{16}/Ui"; pcre:"/Host\: [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/i"; classtype:trojan-activity; sid:2006411; rev:5;)
+
+
+#by Matt jonkman, info from many sources
+alert icmp any any -> any any (msg:"ET TROJAN Storm Worm ICMP DDOS Traffic"; itype:8; icode:0; dsize:32; content:"abcdefghijklmnopqr|00 00|"; depth:22; threshold:type both, track by_src, count 1, seconds 60; classtype:trojan-activity; sid:2007618; rev:5;)
+
+
+#new storm stuff, experimental. They're encrypting packets, size and frequency matching should still work
+#disabling by default. 2007701 and 2007702 are more reliable. These tend to hit on skype and game traffic
+#alert udp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Storm Worm Encrypted Traffic Outbound - Likely Search by md5"; dsize:25; threshold: type threshold, count 40, seconds 60, track by_src; classtype:trojan-activity; sid:2007634; rev:2;)
+#alert udp $EXTERNAL_NET 1024:65535 -> $HOME_NET 1024:65535 (msg:"ET TROJAN Storm Worm Encrypted Traffic Inbound - Likely Connect Ack"; dsize:2; threshold: type threshold, count 10, seconds 60, track by_dst; classtype:trojan-activity; sid:2007635; rev:2;)
+
+#Significant reports of falses on skype traffic. Disabling for now
+#alert udp $EXTERNAL_NET 1024:65535 -> $HOME_NET 1024:65535 (msg:"ET TROJAN Storm Worm Encrypted Traffic Inbound - Likely Search by md5"; dsize:25; threshold: type threshold, count 40, seconds 60, track by_dst; classtype:trojan-activity; sid:2007636; rev:2;)
+#alert udp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Storm Worm Encrypted Traffic Outbound - Likely Connect Ack"; dsize:2; threshold: type threshold, count 10, seconds 60, track by_src; classtype:trojan-activity; sid:2007637; rev:2;)
+
+#more storm, uses a tcp connection now for some specialized commands. reversed by Joe Stewart
+#temporarily disabling for falses
+#alert tcp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Storm Making initial outbound connection"; flowbits:isnotset,BE.stormtcp.init; flow:established,to_server; dsize:4; classtype:trojan-activity; flowbits:noalert; flowbits:set,BE.stormtcp.init; reference:url,doc.emergingthreats.net/bin/view/Main/StormWorm; sid:2007640; rev:3;)
+#alert tcp $EXTERNAL_NET 1024:65535 -> $HOME_NET 1024:65535 (msg:"ET TROJAN Storm Controller Response to Drone via tcp"; flowbits:isset,BE.stormtcp.init; flow:established,from_server; dsize:4; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/StormWorm; sid:2007641; rev:3;)
+
+#adding these for a specific storm variant that is encrypting traffic. 
+# Temporary, there has so far been only one key used, no others have been detected here. This has remained for 
+#  at last a month, so may stay a while. These sigs are for THIS VARIANT'S KEY ONLY
+alert udp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Storm Worm Encrypted Variant 1 Traffic (1)"; dsize:25; content:"|10 a6 d4 c3|"; depth:4; threshold: type both, count 1, seconds 60, track by_src; classtype:trojan-activity; sid:2007701; rev:2;)
+alert udp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Storm Worm Encrypted Variant 1 Traffic (2)"; dsize:25; content:"|10 a0 d4 c3|"; depth:4; threshold: type both, count 1, seconds 60, track by_src; classtype:trojan-activity; sid:2007702; rev:2;)
+
+#storm c&c with a typo'd UA
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Storm C&C with typo'd User-Agent (Windoss)"; flow:established,to_server; content:"User-Agent\: Mozilla/4.0 (compatible\; MSIE 6.0\; Windoss NT"; depth:200; sid:2007742; rev:2;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Stormy Variant HTTP Request"; flow:established,to_server; uricontent:"/zzu/zc.php?l="; nocase; uricontent:"&d="; nocase; uricontent:"&v="; nocase; uricontent:"&k="; nocase; classtype:trojan-activity; sid:2003435; rev:2;)
+
+#matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Theoreon.com Related Trojan Checkin"; flow:established,to_server; uricontent:"/firststart.php?pid="; nocase; uricontent:"&dt="; nocase; uricontent:"&v="; nocase; classtype:trojan-activity; sid:2007832; rev:1;)
+
+# Submitted by Tom Fischer, 2006-01-07
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Torpig Reporting User Activity (x25)"; flow:established,to_server; uricontent:"/x25.php"; nocase; uricontent:"?id="; nocase; uricontent:"&sv="; nocase; uricontent:"&ip="; nocase; uricontent:"&sport="; nocase; uricontent:"&hport="; nocase; uricontent:"&os="; nocase; classtype:trojan-activity; reference:url,www.sophos.com/virusinfo/analyses/trojtorpigr.html; sid:2002762; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Torpig Reporting User Activity (wur8)"; flow:established,to_server; uricontent:"/wur8.php"; nocase; uricontent:"?id="; nocase; uricontent:"&sv="; nocase; uricontent:"&ip="; nocase; uricontent:"&sport="; nocase; uricontent:"&hport="; nocase; uricontent:"&os="; nocase; classtype:trojan-activity; reference:url,www.sophos.com/virusinfo/analyses/trojtorpigr.html; sid:2003066; rev:2;)
+
+#by Michael Hale Ligh
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN VMM Detecting Torpig/Anserin/Sinowal Trojan"; flow:to_client,established; content:"|51 51 0F 01 4C 24 00 8B 44 24 02 59 59 C3 E8 ED FF FF FF 25 00 00 00 FF 33 C9 3D 00 00 00 80 0F 95 C1 8B C1 C3|"; classtype:trojan-activity; sid:2003094; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN (UPX) VMM Detecting Torpig/Anserin/Sinowal Trojan"; flow:to_client,established; content:"|51 51 0F 01 27 00 C1 FB B5 D5 35 02 E2 C3 D1 66 25 32 BD 83 7F B7 4E 3D 06 80 0F 95 C1 8B C1 C3|"; classtype:trojan-activity; sid:2003095; rev:2;)
+
+#by Matt Jonkman, from sandnet analysis
+# some kind of c&c, needs more research, but these sigs are reliable
+alert tcp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Trojan.Win32.Qhost C&C Traffic Outbound (case1)"; flow:established; dsize:>1000; content:"|00 00 00 28 0a 00 00 02 0f|Service Pack 1|00|"; classtype:trojan-activity; reference:url,/www.viruslist.com/en/viruses/encyclopedia?virusid=142254; sid:2007578; rev:2;)
+alert tcp $HOME_NET 1024:65535 -> $EXTERNAL_NET 1024:65535 (msg:"ET TROJAN Trojan.Win32.Qhost C&C Traffic Outbound (case2)"; flow:established; dsize:>1000; content:"|00 00 00 28 0a 00 00 02 0f|Service Pack 2|00|"; classtype:trojan-activity; reference:url,/www.viruslist.com/en/viruses/encyclopedia?virusid=142254; sid:2007579; rev:2;)
+alert tcp $EXTERNAL_NET 1024:65535 -> $HOME_NET 1024:65535 (msg:"ET TROJAN Trojan.Win32.Qhost C&C Traffic Inbound (case1)"; flow:established; dsize:>1000; content:"|00 00 00 28 0a 00 00 02 0f|Service Pack 1|00|"; classtype:trojan-activity; reference:url,/www.viruslist.com/en/viruses/encyclopedia?virusid=142254; sid:2007580; rev:2;)
+alert tcp $EXTERNAL_NET 1024:65535 -> $HOME_NET 1024:65535 (msg:"ET TROJAN Trojan.Win32.Qhost C&C Traffic Inbound (case2)"; flow:established; dsize:>1000; content:"|00 00 00 28 0a 00 00 02 0f|Service Pack 2|00|"; classtype:trojan-activity; reference:url,/www.viruslist.com/en/viruses/encyclopedia?virusid=142254; sid:2007581; rev:2;)
+
+#from sandnet analysis, by matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Vanquish Trojan HTTP Checkin"; flow:established,to_server; uricontent:"ip="; uricontent:"&v=1&s="; uricontent:"&h="; uricontent:"&kb="; uricontent:"&o="; uricontent:"&c="; uricontent:"&un="; uricontent:"&m="; uricontent:"&w="; uricontent:"&ss="; classtype:trojan-activity; sid:2007698; rev:2;)
+
+#by Matt Jonkman, from Sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Virtumonde Variant Reporting to Controller via HTTP"; flow:established,to_server; uricontent:"?sid="; pcre:"/\?sid=[0-9A-F]{180}/U"; classtype:trojan-activity; sid:2007142; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Virtumonde Variant Reporting to Controller via HTTP (2)"; flow:established,to_server; uricontent:"php?"; nocase; uricontent:"cmp="; nocase; uricontent:"&guid="; nocase; uricontent:"&affid="; nocase; uricontent:"&run="; nocase; uricontent:"&dn_uid="; nocase; uricontent:"&dn_affid="; nocase; uricontent:"&vm_guid="; nocase; uricontent:"&ip="; nocase; uricontent:"&altid="; nocase; classtype:trojan-activity; sid:2007285; rev:2;)
+
+#by Daniel D.L.
+alert tcp $HOME_NET any -> $EXTERNAL_NET 65520 (msg:"ET TROJAN W32.Virut.A joining an IRC Channel"; flow:established,to_server; content:"JOIN &virtu"; classtype:trojan-activity; reference:url,www.bitcrank.net; sid:2003603; rev:2;)
+
+#by Matt Jonkman
+#from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Vundo.dam http Checkin after infection"; flow:established,to_server; uricontent:"install.php?"; nocase; uricontent:"afid="; nocase; uricontent:"&user_id="; nocase; uricontent:"&version="; nocase; classtype:trojan-activity; sid:2007572; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Vundo.dam http Update"; flow:established,to_server; uricontent:"/cgi-bin/heartbeat.php"; nocase; uricontent:"uid="; nocase; uricontent:"&affiliate_id="; nocase; uricontent:"&db=1"; nocase; uricontent:"&version="; nocase; classtype:trojan-activity; sid:2007573; rev:2;)
+
+#by Tom Fischer 
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.VB.aie Reporting User Activity"; flow:established,to_server; uricontent:"php?iso="; nocase; uricontent:"&country="; nocase; uricontent:"&proxy="; nocase; uricontent:"&tel="; nocase; uricontent:"&ftp="; nocase; uricontent:"&socks="; nocase; uricontent:"&remote="; nocase; uricontent:"&smtp="; nocase; classtype:trojan-activity; sid:2002857; rev:2;)
+
+#by Mark Tombaugh, analysis at Nepenthesis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN w32agent.dsi Domain Update"; flow:established,to_server; uricontent:"/getgewinnspiel.php?uid="; classtype:trojan-activity; reference:url,nepenthes.sourceforge.net/analysis\:w32agent.dsi; sid:2002782; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN w32agent.dsi Posting Info"; flow:established,to_server; uricontent:"/postgewinnspiel.php"; uricontent:"uid="; classtype:trojan-activity; reference:url,nepenthes.sourceforge.net/analysis\:w32agent.dsi; sid:2002781; rev:3;)
+
+#By Tom Fischer
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Agent Reporting User Activity"; flow:established,to_server; uricontent:".php?phid="; nocase; uricontent:"&ver="; nocase; uricontent:"&lg="; nocase;  pcre:"/User-Agent\:[^\n]+z/i"; classtype:trojan-activity; sid:2002792; rev:3;)
+
+#Matt Jonkman
+#Experimental, may only apply to a few variants, but worth testing
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET TROJAN Warezov/Stration Challenge"; flow:established,to_server; dsize:1; content:"|38|"; flowbits:noalert; flowbits:set,BEposs.warezov.challenge; classtype:not-suspicious; reference:url,www.sophos.com/security/analyses/w32strationbo.html; sid:2003175; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET TROJAN Warezov/Stration Challenge Response"; flowbits:isset,BEposs.warezov.challenge; flow:established,from_server; dsize:4; content:"|00 00 00 00|"; classtype:trojan-activity; reference:url,www.sophos.com/security/analyses/w32strationbo.html; sid:2003176; rev:4;) 
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Possible Warezov/Stration Data Post to Controller"; flow:established,to_server; dsize:<400; uricontent:"/cgi-bin/pr.cgi"; content:"POST "; nocase; reference:url,www.sophos.com/security/analyses/w32strationbo.html; classtype:trojan-activity; sid:2003180; rev:7;) 
+
+#Matt Jonkman, strangely enough from spyware listening post hits
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Warezov/Stration Communicating with Controller"; flow:established,to_server; uricontent:"/chr/"; nocase; uricontent:"/e/b?lid="; nocase; uricontent:"&pt="; nocase; pcre:"/\/chr\/\d+\/e\/b\?lid=/Ui"; reference:url,www.sophos.com/security/analyses/w32strationbo.html; reference:url,www.avira.com/en/threats/section/fulldetails/id_vir/3242/tr_dldr.warezov.df.html; classtype:trojan-activity; sid:2003392; rev:4;) 
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Warezov/Stration Communicating with Controller 2"; flow:established,to_server; uricontent:"/chr/"; nocase; uricontent:"/e/"; uricontent:"?lid="; nocase; pcre:"/\/chr\/\d+\/e\/t\d+\?lid=/Ui"; reference:url,www.sophos.com/security/analyses/w32strationbo.html; reference:url,www.avira.com/en/threats/section/fulldetails/id_vir/3242/tr_dldr.warezov.df.html; classtype:trojan-activity; sid:2003436; rev:3;) 
+
+#from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Possible Warezov/Stration Data Post to Controller (pr2.cgi)"; flow:established,to_server; uricontent:"/cgi-bin/pr2.cgi"; pcre:"/\/cgi-bin\/pr2\.cgi\?[a-zA-Z0-9]{172}/Ui"; reference:url,doc.emergingthreats.net/2006414; classtype:trojan-activity; sid:2006414; rev:3;) 
+
+#by Matt Jonkman
+#uses an encrypted/obfuscated c&c over port 80. Headers are static
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32 Agent.ALT C&C Initial Infection Checkin"; flow:established,to_server; dsize:18; content:"|00 02|"; offset:0; depth:5; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/Win32AgentALT; sid:2007588; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32 Agent.ALT C&C Checkin packet 1"; flow:established,to_server; dsize:26; content:"|00 03|"; offset:0; depth:2; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/Win32AgentALT; sid:2007589; rev:4;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Win32 Agent.ALT C&C Checkin packet 2"; flow:established,from_server; dsize:34; content:"|00 04|"; offset:0; depth:2; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/Win32AgentALT; sid:2007590; rev:4;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Win32 Agent.ALT C&C Checkin Connection in Progress"; flow:established,from_server; dsize:10; content:"|00 01 e4 8a 1a|"; offset:0; depth:5; classtype:trojan-activity; reference:url,doc.emergingthreats.net/bin/view/Main/Win32AgentALT; sid:2007591; rev:5;)
+
+#from sandnet
+#by Matt Jonkman
+# Duplicate of sid:2007644, without nocase qualifiers.
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Agent.GRW Checkin via HTTP"; flow:established,to_server; uricontent:"?v="; uricontent:"&mid="; uricontent:"&r1="; uricontent:"&tm=200"; uricontent:"&av="; uricontent:"&os=Windows"; uricontent:"&uid="; uricontent:"&cht="; classtype:trojan-activity; sid:2007665; rev:2;)
+
+#by Matt Jonkman, from sandnet snalysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Agent.ajx Trojan Reporting to Server"; flow:established,to_server; uricontent:"/count.php?fid="; nocase; uricontent:"&cid="; nocase; uricontent:"&ver="; nocase; uricontent:"&tid="; nocase; uricontent:"&sn="; nocase; uricontent:"&wc="; nocase; classtype:trojan-activity; sid:2006448; rev:2;)
+
+#by Scott Melnick
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5190 (msg:"ET TROJAN Win32.Agent.bea C&C connection"; flow:to_server,established; dsize:24; content:"|9a 02 06 00|"; depth:4; classtype:trojan-activity; sid:2007608; rev:2;)
+
+#from sandnet analysis
+#by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Agent.pt User-Agent Detected"; flow:established,to_server; content:"|0d 0a|User-Agent\: Machaon|0d 0a|"; classtype:trojan-activity; sid:2007663; rev:2;)
+
+#kind of a general inject win32 kinda thing, but seeing it frequently
+# such as 7438b695c0f32cb5c3a0a89485a362c1, by matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Inject.ql Checkin Post"; flow:established,to_server; content:"POST "; depth:5; content:"|0d 0a 0d 0a|MAC="; nocase; content:"&IP="; nocase; distance:17; content:"&NAME="; nocase; distance:7; content:"&OS="; nocase; distance:0; classtype:trojan-activity; sid:2007803; rev:1;)
+
+#by Matt JOnkman, from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Small.qh/xSock User-Agent Detected"; flow:established,to_server; content:"User-Agent\: xSock Config"; nocase; classtype:trojan-activity; sid:2007609; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Win32.Small.qh/xSock Checkin URL Detected"; flow:established,to_server; uricontent:"port="; nocase; uricontent:"&id="; nocase; uricontent:"&v="; nocase; uricontent:"&sm="; nocase; pcre:"/port=\d+/Ui"; pcre:"/id=[a-f0-9-]+&/Ui"; classtype:trojan-activity; sid:2007610; rev:2;)
+
+#by shirkdog, from sandnet analysis
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Proxy.Win32.Wopla.ag Check-In"; flow:established,to_server; dsize:12; content:"|0a 00 00 00 00 00 00 00 00 00 00 00|"; classtype:trojan-activity; sid:2007603; rev:3;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET TROJAN Proxy.Win32.Wopla.ag Server Reply"; dsize:12; flow:established,from_server; content:"|0d 00 00 00|"; depth:4; content:"|00 00 00 00 00 00|"; distance:2; within:6; classtype:trojan-activity; sid:2007604; rev:4;)
+
+#by Chich Thierry
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25 (msg:"ET TROJAN XP keylogger v2.1 mail report - Inbound"; flow:established,to_server; content:"X-Mailer|3a| JMail 4.3.0 Free Version by Dimac"; content:"<H2=3EAbout the use of the PC</H2=3E"; classtype:trojan-activity; sid:2002940; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET TROJAN XP keylogger v2.1 mail report - Outbound"; flow:established,to_server; content:"X-Mailer|3a| JMail 4.3.0 Free Version by Dimac"; content:"<H2=3EAbout the use of the PC</H2=3E"; classtype:trojan-activity; sid:2002942; rev:3;)
+
+#by matt Jonkman
+# this bot s using the same user agent as the legitimate majestic-12 distributed 
+#  search spider. With minor variation. This sig is for the bot, not the legit one
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Zapchast Bot User-Agent"; flow:established,to_server; content:"|0d 0a|User-Agent\: MJ12bot/v1.0.8|0d 0a|"; reference:url,www.majestic12.co.uk/bot.php; sid:2007781; rev:2;)
+
+#by matt jonkman, Zhelatin.pe
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Zhelatin Update Detected"; flow:established,to_server; uricontent:".php?l="; nocase; uricontent:"&v="; nocase; uricontent:"&rvz1="; nocase; classtype:trojan-activity; sid:2007769; rev:2;)
+
+#zhelatin.gen
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Zhelatin npopup Update Detected"; flow:established,to_server; content:"POST "; depth:5; uricontent:"/server/npopup/"; nocase; content:"|0d 0a 0d 0a|data="; nocase; content:"&key="; distance:100; within:200; nocase; classtype:trojan-activity; sid:2007787; rev:1;)
+
+#by axn jxn
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Zlob User Agent - updating (internetsecurity)"; flow:established,to_server; content:"User-Agent\: internetsecurity"; classtype:trojan-activity; reference:url,secubox.aldria.com/topic-post1618.html#post1618; sid:2003632; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Zlob User Agent - updating (Winlogon)"; flow:established,to_server; content:"User-Agent\: Winlogon"; classtype:trojan-activity; sid:2006441; rev:2;)
+
+#from sandnet data
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Zlob User Agent - updating (unknown)"; flow:established,to_server; content:"User-Agent\: unknown"; content:!".real.com|0d 0a|"; classtype:trojan-activity; sid:2007567; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Zlob Updating via HTTP"; flow:established,to_server; uricontent:".php?code="; nocase; uricontent:"&hash="; nocase; pcre:"/code=[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}/Ui"; classtype:trojan-activity; sid:2007568; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET TROJAN Zlob Updating via HTTP (v2)"; flow:established,to_server; uricontent:".php?Code="; nocase; uricontent:"&V="; nocase; uricontent:"&ID="; nocase; pcre:"/Code=\d+/Ui"; pcre:"/ID=.{40}&.{6}/Ui"; classtype:trojan-activity; sid:2007620; rev:2;)
+
+#Matt Jonkman, info from Bob Grabowsky
+alert tcp $HOME_NET any -> $EXTERNAL_NET 1345 (msg:"ET WORM AIM Bot Outbound Control Channel Open and Login"; flow: to_server,established; content:"PASS"; nocase; pcre:"/PASS\s.*?\x0d\x0aNICK\s.*?\x0d\x0aUSER\s.*?\s\d\s\d\s\:\S/im"; classtype: trojan-activity; sid: 2001910; rev:4;)
+
+# Atak Worm
+
+#Submitted by Michael Sconzo for Atak worm
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET WORM Possible Atak.mm Worm Outbound"; flow: to_server,established; content:"Authorized Researcher Only"; content:"filename="; content:".zip"; pcre:"m/(Read the Result\!|Important Data\!)/"; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.atak@mm.html; classtype: trojan-activity; sid: 2000494; rev:7;)
+
+#by Matt Jonkman
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET WORM Allaple ICMP Sweep Ping Outbound"; icode:0; itype:8; content:"Babcdefghijklmnopqrstuvwabcdefghi"; threshold: type both, count 1, seconds 60, track by_src; classtype:trojan-activity; reference:url,www.sophos.com/virusinfo/analyses/w32allapleb.html; reference:url,isc.sans.org/diary.html?storyid=2451; sid:2003292; rev:6;)
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM Allaple ICMP Sweep Reply Inbound"; icode:0; itype:0; content:"Babcdefghijklmnopqrstuvwabcdefghi"; threshold: type both, count 1, seconds 60, track by_dst; classtype:trojan-activity; reference:url,www.sophos.com/virusinfo/analyses/w32allapleb.html; reference:url,isc.sans.org/diary.html?storyid=2451; sid:2003293; rev:6;)
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM Allaple ICMP Sweep Ping Inbound"; icode:0; itype:8; content:"Babcdefghijklmnopqrstuvwabcdefghi"; threshold: type both, count 1, seconds 60, track by_src; classtype:trojan-activity; reference:url,www.sophos.com/virusinfo/analyses/w32allapleb.html; reference:url,isc.sans.org/diary.html?storyid=2451; sid:2003294; rev:5;)
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET WORM Allaple ICMP Sweep Reply Outbound"; icode:0; itype:0; content:"Babcdefghijklmnopqrstuvwabcdefghi"; threshold: type both, count 1, seconds 60, track by_dst; classtype:trojan-activity; reference:url,www.sophos.com/virusinfo/analyses/w32allapleb.html; reference:url,isc.sans.org/diary.html?storyid=2451; sid:2003295; rev:5;)
+
+#Matt Jonkman
+alert tcp any any -> any $HTTP_PORTS (msg:"ET WORM Allaple Unique HTTP Request - Possibly part of DDOS"; flow:established,to_server; content:"GET /  HTTP/1.1|0d 0a|"; rawbytes; depth:20; threshold:type both, count 1, seconds 60, track by_src; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2003483; reference:url,isc.sans.org/diary.html?storyid=2451; sid:2003484; rev:5;)
+
+# Bagle variants
+
+#Taken from the Netsquid Rules for Bagle.I and other variants
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET WORM Beagle User Agent Detected"; flow: to_server,established; dsize: < 150; content:"User-Agent\: beagle_beagle"; nocase; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.beagle.i@mm.html; sid: 2001269; rev:12;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET WORM Bagle Worm User-Agent (DEBUT.TMP)"; flow:to_server,established; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+DEBUT\.TMP/i"; classtype:trojan-activity; sid:2003427; rev:2;)
+
+# Bropia Worm
+#From Evgeny P
+alert tcp $HOME_NET any -> $EXTERNAL_NET 6891:6900 (msg:"ET WORM Bropia.F Worm Propagation"; flow: established,to_server; content:"|E1 37 A2 BA 6E 5C 63 8B D6 D1 F7 3C BA 13 16 FD 77 21 5A 5C 17 1B 29 4A 4F 15 A9 29 CF FA 48 3A|"; reference:url,www.trendmicro.com/vinfo/virusencyclo/default5.asp?VName=WORM%5FBROPIA%2EF; classtype: misc-attack; sid: 2001715; rev:7;)
+
+# CIA
+#Submitted by Chris Norton
+alert ip $HOME_NET any -> $EXTERNAL_NET any (msg:"ET WORM Possible CIA Trojan download/upload attempt"; content:"|6C 75 66 6A 65 6F 6F|"; classtype: trojan-activity; sid: 2001233; rev:7;)
+
+# Evaman Worm
+
+#Submitted by msconzo@tamu.edu
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET WORM Possible Evaman Worm Outbound"; flow: to_server,established; content:"filename="; pcre:"m/(body|message|email|returned|text|document)\.(scr|txt\.scr|html\.scr|outlook\.scr|txt\.exe)/"; reference:url,secunia.com/virus_information/10429/evaman; classtype: trojan-activity; sid: 2000343; rev:10;)
+
+# Korgo Worm
+
+#Submitted by Nick Hatch
+alert tcp $HOME_NET any -> any 445 (msg:"ET WORM Korgo.P offering executable"; flow: to_server,established; content:"|FF|SMB"; depth: 10; content:"|58|http"; content:".exe"; nocase; within: 36; reference:url,www.f-secure.com/v-descs/korgo_p.shtml; classtype: trojan-activity; sid: 2001337; rev:6;)
+alert tcp $HOME_NET any -> any any (msg:"ET WORM Korgo.P binary upload"; flow: to_server,established; content:"|aa4f7ea86c90457d686868f0de687a68689768686868|"; reference:url,www.f-secure.com/v-descs/korgo_p.shtml; classtype: trojan-activity; sid: 2001338; rev:7;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET WORM Korgo.U Reporting"; flow: to_server,established; uricontent:"/index.php?id="; nocase; uricontent:"cnt="; nocase; uricontent:"&scn="; nocase; uricontent:"&inf="; nocase; uricontent:"&ver="; nocase; reference:url,www.f-secure.com/v-descs/korgo_u.shtml; classtype: trojan-activity; sid: 2003070; rev:4;)
+
+#by Scott Melnick
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM Possible MSN Worm Exploit php"; flow: established; content:"X-MMS-IM-"; depth:153; content:"http"; nocase; content:".php"; nocase; classtype:misc-activity; sid:2002322; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM Possible MSN Worm Exploit exe"; flow: established; content:"X-MMS-IM-"; depth:153; content:"http"; nocase; content:".exe"; nocase; classtype:misc-activity; sid:2002323; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM Possible MSN Worm Exploit pif"; flow: established; content:"X-MMS-IM-"; depth:153; content:"http"; nocase; content:".pif"; nocase; classtype:misc-activity; sid:2002324; rev:2;)
+#Specific Kelvir.HI detection on MSN
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM W32.kelvir.HI"; flow: established; content:"X-MMS-IM-"; depth:153; content:"search.php?data="; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.kelvir.hi.html; classtype:misc-activity; sid:2002325; rev:2;)
+
+# MySQL Worm
+
+#Submitted by unknown
+alert tcp $HOME_NET any -> !$SQL_SERVERS 3306 (msg:"ET WORM Potential MySQL bot scanning for SQL server"; flags: S,12; reference:url,isc.sans.org/diary.php?date=2005-01-27; classtype: trojan-activity; sid: 2001689; rev:6;)
+
+# Novarg Worm
+
+#Taken from the Netsquid Rules
+#obsoleting
+#alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET WORM Outbound W32.Novarg.A worm"; flow: established; content:"TVqQAAMAAAAEAAAA"; content:"8AALgAAAAAAAAAQ"; within: 20; distance: 2; content:"UEUA..AEwBAW"; content:"DgAA8BCwEHAABQAAAAE"; within: 40; distance: 16; content:"ABVUFgwAAAAAABgAAAAEAAAAAAAAAAEA"; content:"ACAAADg"; within: 30; distance: 16; classtype: trojan-activity; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.mydoom.a@mm.html; sid: 2001273; rev:12;)
+
+# OpaServ Worm
+
+#Submitted by Brad Doctor, 3/8/2005, for Opaserv
+alert tcp $HOME_NET any -> $HOME_NET 139 (msg:"ET VIRUS - W32.Opaserv Worm Infection"; flow: established; content:"|5c 73 63 72 73 76 72 2e 65 78 65|"; reference:url,www.sarc.com/avcenter/venc/data/w32.opaserv.worm.html; classtype: misc-activity; sid: 2001763; rev:5;)
+
+#by matt Jonkman, sample submitted anonymously
+# I'm putting these sigs in current events because the worm will likely morph quickly making them obsolete. 
+# If it doesn't we'll move these into a permanent ruleset
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Worm.Pyks HTTP C&C Traffic (User-Agent skw00001)"; flow:established,to_server; content:"User-Agent\: skw000"; depth:50; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2003588; sid:2003588; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET VIRUS Worm.Pyks HTTP C&C Post Traffic (User-Agent h9tslbw0)"; flow:established,to_server; content:"User-Agent\: h9tslbw0"; depth:50; classtype:trojan-activity; reference:url,doc.emergingthreats.net/2003589; sid:2003589; rev:4;)
+
+# Rbot trojan
+#by M Shirk
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET VIRUS HTTP RBOT Challenge/Response Authentication"; flow: to_server,established; content:"Host|3A 20|"; nocase; content:"|3A 20|Negotiate|20|YIIQegYGKwYBBQUCoIIQbjCCEGqhghBmI4IQYgOCBAEAQUFBQUFBQUFBQUFBQUFB"; nocase; reference:url,isc.sans.org/diary.php?date=2005-06-03; reference:url,www.phreedom.org/solar/exploits/msasn1-bitstring; classtype: trojan-activity; sid: 2001985; rev:6;)
+
+# Sasser Worm
+
+#Submitted by Lin Zhong for Sasser variants
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM W32/Sasser.worm.a"; flow: established; content:"|BC 3B 74 0B 50 8B 3D E8 46 A7 3D 09 85 B8 F8 CD 76 40 DE 7C 5B 5C D7 2A A8 E8 58 75 62 96 25 24|"; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.sasser.worm.html; classtype: misc-activity; sid: 2001057; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM W32/Sasser.worm.b"; flow: established; content:"|58 BC 0C FF 59 57 32 31 BD EC 34 64 6E D6 E3 8D 65 04 68 58 62 79 DF D8 2C 25 6A B5 28 BA 13 74|"; reference:url,securityresponse.symantec.com/avcenter/venc/data/w32.sasser.worm.html; classtype: misc-activity; sid: 2001056; rev:6;)
+alert tcp any any -> any 5554 (msg:"ET WORM Sasser FTP Traffic"; flow: to_server,established; content:"up.exe"; classtype: misc-activity; reference:url,vil.mcafeesecurity.com/vil/content/Print125009.htm; sid: 2000040; rev:4;)
+alert tcp any any -> any 9996 (msg:"ET WORM Sasser Transfer _up.exe"; flow: established,to_server; content:"|5F75702E657865|"; depth: 250; classtype: misc-activity; reference:url,vil.mcafeesecurity.com/vil/content/Print125009.htm; sid:2000047; rev:4;)
+
+#Submitted by Joe Stewart for Sasser FTP exploit
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5554 (msg:"ET WORM Sasser FTP exploit attempt"; flow: to_server,established; dsize: >150; content:"PORT "; depth: 5; reference:url,www.lurhq.com/dabber.html; classtype: attempted-admin; sid: 2001548; rev:5;)
+
+#from the SecureCiRT Team
+alert tcp $HOME_NET any -> $EXTERNAL_NET 1863 (msg:"ET WORM Singworm MSN message Outbound"; flow:established; content:"Here are the new smiles for MSN, they are incredible!"; classtype:trojan-activity; sid:2007605; rev:2;)
+alert tcp $EXTERNAL_NET 1863 -> $HOME_NET any (msg:"ET WORM Singworm MSN message Inbound"; flow:established; content:"Here are the new smiles for MSN, they are incredible!"; classtype:trojan-activity; sid:2007606; rev:2;)
+
+# Suspicious Extensions
+
+#Snort.org rule 721 scaled back a bit by Matt Jonkman to not hit on xls, vcf, ppt, rtf, dot, or pdf.
+#If you use this rule disable 721 in the snort sets. This rule will hit on the following:
+#
+# ade, adp, asd, asf, asx, bat, bas, chm, cli, cmd, com, crt, cpl, cpp, diz, dll, ebs, emf, eml, exe, fol, folder, hlp, hsq, hta, ini, inf, ins,
+# isp, js, jse, lnk, mda, mdb, mde, mdw, mdz, mht, mhtm, msi, msc, msg, msp, mst, nws, ocx, pcd, pif, pl, pls, plc,plx, pm, pot, rar,
+# reg, scr, sct, shs, swf, sys, url, vb, vbe, vbs, vxd, wmd, wmf, wms, wmz, wpm, wps, wpz, wsc, wsf, wsh, xlt, xlw, zip
+#
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET VIRUS OUTBOUND Suspicious Email Attachment"; flow: to_server,established; content:"Content-Disposition|3A|"; nocase; pcre:"/filename\s*=\s*.*?\.(?=[abcdehijlmnoprsvwx])(a(d[ep]|s[x])|c(rt|[ho]m|li|pl|md|pp)|d(iz|ll)|e(m[fl]|xe|bs)|h(lp|sq|ta)|jse?|m(d[abzew]|s[tcgip]|htm|ht)|p(cd|if|l[xsc]|[lm]|ot)|r(eg|ar)|s(cr|ct|[hy]s|wf)|v(b[es]?|xd)|w(m[dfsz]|p[msz]|s[cfh])|xl[tw]|folder|fol|ba[st]|i(sp|n[sif])|lnk|nws|ocx|zip|url)[\x27\x22\n\r\s]/iR"; classtype: suspicious-filename-detect; sid: 2000562; rev:10;)
+
+#Submitted by Joseph Gama
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM UPX compressed file download - possible worm"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program cannot be run in DOS mode."; distance: 0; isdataat: 10,relative; content:"PE"; distance: 0; content:"|00|UPX0|00|"; content:"|00|UPX1|00|"; content:"|00|UPX!|00|"; classtype: misc-activity; sid: 2001046; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WORM UPX encrypted file download - possible worm"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program cannot be run in DOS mode."; distance: 0; isdataat: 10,relative; content:"PE"; distance: 0; content:"|00|code|00|"; content:"|00 C0|text|00|"; classtype: misc-activity; sid: 2001047; rev:5;)
+
+#from Jack Pepper
+#Disabling, tends to false
+#alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WORM shell bot perl code download"; flow:to_client,established; content:"# ShellBOT"; nocase; classtype:trojan-activity; sid:2002683; rev:4;)
+#alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WORM Shell Bot Code Download"; flow:to_client,established; content:"##################### IRC #######################"; nocase; classtype:trojan-activity; sid:2002684; rev:3;)
+

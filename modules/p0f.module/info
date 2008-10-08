@@ -1,0 +1,8 @@
+The p0f performs passive OS fingerprinting on the pcap data. It will
+hopefully identify the OS sending packets.
+
+http://lcamtuf.coredump.cx/
+
+Available options:
+OPTIONS - Command line options (Default: -U)
+OUTPUT_FILE - Filename to save information in (Default: ${PCAP_BASE}.p0f)

@@ -1,0 +1,12 @@
+This argus3 module will convert pcap packet data format to argus flow data
+format so that it can be parsed by various of argus client tools.
+
+http://www.qosient.com/argus/
+
+Options:
+ARGUS_OPTIONS - options for generating the flow, default: -mAJZRU 512
+ARG3_FLOW_FILE - Argus3 flow data file, default: ${OUTPUT_DIR}/${PCAP_BASE}-flow.arg3
+ARG3_SESS_FILE - Argus3 session data file, default: ${OUTPUT_DIR}/${PCAP_BASE}-sess.arg3
+ARGUS_FILTER - BPF like filter for all argus commands, default:
+RACLUSTER_OPTIONS - racluster command line option, default: -n 
+RACLUSTER_FILTER= BPF like filter for racluster command, default:

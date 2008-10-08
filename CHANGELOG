@@ -1,0 +1,130 @@
+Version 0.7
+DONE - \x33\x55 etc, done - decode hex now supports this automatically
+DONE - Allow encode/decode to work on files instead of just a textstring
+DONE - From Scholar: IP->ASN mapping, a module (ip2asn)
+DONE - From Scholar: IP->ASN mapping, a command (ip2asn)
+DONE - Upgrade revision of pcapparser library (support flags)
+DONE - 'print' command should print TCP flags using newer revision of pcapparser library
+SEMI-DONE - From Scholar: Some way to extract a list of IPs from a pcap (iplist)
+DONE - Change "run" so you can use "run aimsnarf" to run the aimsnarf module without toggling, etc
+DONE - Path error for modules when relative path is used, the full path to a file is now used (Grzegorz)
+DONE - add 'iplist' command to get a list of IP addresses, sorted by numbers
+DONE - Add yahsnarf module (extract yahoo IM conversations)
+DONE - Need pipes into commands and files, this includes but is not limited to: > < >> | (All except for < are done)
+DONE - Pipe redirection requires an extra enter to get a prompt, figure out why and fix it.
+DONE - Tempfile problems with gzip'd pcap files, use a regular file instead
+DONE - Add encoding method of just "hex" instead of hex_LSB and hex_MSB
+DONE - 'decode hex' should work on space delineated strings
+DONE - Default encode/decode for 'binary' is little-endian
+DONE - geek00l committed bro-ids-connection information module
+DONE - Automatic updating over SVN of NSM-Console
+
+Version 0.6
+DONE - rot13 encode/decode
+DONE - Fix error with an alias handling arguments
+DONE - Add 'dump' command, similar to print, dump binary payload of packet(s) to a file
+DONE - Warning when file doesn't exist
+DONE - Harimau attempts to use wget if it can, since it's about 10 times faster than Net::HTTP
+DONE - Argus rdns lookups were killing the speed. Added '-n' so it doesn't do that by default
+DONE - checkip tried to use wget if it's installed, should be much much faster
+DONE - tcptrace doesn't do rdns lookups because it was dying, -n is the default now
+DONE - fixed a typo in urlescape (en|de)coding, thanks John!
+DONE - Add clamscan module
+DONE - Use rawpacket's tcpxtract.conf instead of the regular one. (extract many many more types)
+DONE - Add foremost module
+DONE - let the clamscan module select which extraction dir it wants to look in (foremost? tcpxtract?)
+DONE - Need to add "color on", instead of just off and toggle
+DONE - Auto gunzip pcap files on the fly (only for .gz extensions) (doesn't work for directories)
+DONE - Clean up the autogunzipping
+DONE - Create the temp file in the NSM-Console directory, file is cleaned up on exit
+DONE - Directories support gzip'd files for modules, print and dump
+DONE (N/A)- dump doesn't like temp files, fix this -- doesn't matter any more, since gunzip the file once by default
+DONE - gunzip once, not every time, silly me.
+DONE - Separate the bro alarms and extracting the bro contents
+DONE - Update Snort rules (community and emerging)
+DONE - add "-f" tag to dump command to allow for full dumping of selected packets
+DONE - Add the trace-summary module (http://www.icir.org/robin/trace-summary/)
+DONE - Fixed a serious bug with argument parsing for dump -f
+
+
+Version 0.5
+DONE - Alias command!
+DONE - Change license of pcapparser
+DONE - Add flowtime module
+DONE - Make 'help' more readable
+DONE - Allow 'help' to take argument so you specify help for what you want
+DONE - Redirect error output to STDERR
+DONE - Read ~/.nsmcrc much quieter :)
+DONE - Alias handles concatinating of arguments (bugfix)
+DONE - Add license to header in nsm file
+DONE - Add aliases to tab completion without killing current completion
+DONE - (bugfix) Aliases without arguments casting nil to string
+DONE - Integrate IP checking with Mel's http://watchlist.security.org.my/ inline (instead of scriptable)
+DONE - Add the 'checkip' command (check the Harimau watchlist)
+DONE - Add harimau module
+DONE - Make checkip command use Ruby modules (Net::HTTP) instead of wget
+DONE - Give bro-ids option for user-settable cfg file
+DONE - Make bro-ids do more things (like actually produce alerts :P)
+DONE - Add some modules to better categories
+DONE - Toggle handle space-separated module names
+
+
+Version 0.4
+DONE - uuencode/decode
+DONE - Octal (just decoding so far)
+DONE - Char # encoding
+DONE - 'print #' shows packet # in tcpdump -X format, specify range, etc lots of options
+DONE - print support directories
+DONE - Fix "~" support (file support ~)
+DONE - 'output' command support ~ also
+DONE - Color terminal text whee!
+DONE - Read .nsmcrc on startup
+DONE - Fixed ^C usable for long packet prints works
+DONE - Finally caught ^C at the command line, so it doesn't die like crazy
+DONE - Trap SIGTERM
+DONE - print supports commas: p 1,20-25,101
+DONE - Add tcptrace module
+DONE - 'color' command to toggle color on and off
+DONE - Add tcpick module
+DONE - Screencast: creating a module for nsm-console
+
+
+Version 0.3
+DONE - Strip whitespace from the end of the command
+DONE - Allow "set" to handle whitespace between words/characters
+DONE (NoMethodFound error caught)- Better handling of "Command not found"
+DONE - Ability to specify a different log file
+DONE - Category dies completely if it can't read the file (fix this)
+DONE (I think) - Better error catching
+DONE - Fix 'help' command spacing
+DONE - "exec" command logs
+DONE - "exec" command will do replacement for ${PCAP_FILE}, ${PCAP_BASE}, ${MODULE_DIR} and ${OUTPUT_DIR}
+DONE - Add iploc module
+DONE - fl0p module
+DONE - Add website reference to each module's info file
+DONE - Log regular nsm-console commands
+DONE - Add "history" command
+DONE - Transition into a more OO-based structure to promote future development
+DONE - Log exit status of modules running
+DONE - Do replacement in outputdir (so ${PCAP_FILE} can be used)
+DONE - Add 'argus' module with many ra commands from the flow
+DONE - Snort emerging-threats rules? Should I replace the community rules with these?
+DONE - Default output ${PCAP_BASE}-output
+DONE - Licensing BSD vs GPLv2, BSD
+DONE - Add "e" command as shortcut for exec
+DONE - Add eval command to eval line of ruby
+DONE - Add encode/decode methods to tab completion
+DONE - Add PCAP_* to tab completion
+DONE - Add 'credits' command :)
+DONE - "encode" command
+DONE - "decode" command
+DONE - base64
+DONE - md5
+DONE - sha256
+DONE - url escape
+DONE - hex? LSB and MSB
+DONE - binary? LSB and MSB
+
+
+Version 0.2
+No changelog before this

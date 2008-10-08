@@ -1,0 +1,7 @@
+Aimsnarf is a program to extract aim conversations from a pcap file
+
+http://thnetos.wordpress.com/aimsnarf/
+
+The following options are enabled:
+OUTPUT_FILE (default $PCAP_DATA}.aim)
+This option specifies the output file.

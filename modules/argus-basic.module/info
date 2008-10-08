@@ -1,0 +1,22 @@
+The argus module runs some basic statistic analysis against the packet capture
+
+It will generate:
+An argus flow file
+The top talkers on the network
+The top talkers on the network (matrix)
+Listing of talkers on the network
+Count of packets on the network
+
+http://www.qosient.com/argus/
+
+Options:
+ARGUS_OPTIONS - options for generating the flow, default: -R
+RAMON_OPTIONS - options for ramon, default: -a -n
+RA_OPTIONS - options for ra, default: -a -n
+RACOUNT_OPTIONS - options for racount, default: -a
+ARG_FILE - Argus output file, default: ${OUTPUT_DIR}/${PCAP_BASE}.arg
+TOP_TALKERS_OUTPUT - Output file for top talkers, default: ${OUTPUT_DIR}/${PCAP_BASE}.ramon.toptalkers
+TOP_MATRIX_OUTPUT - Output file for top talker matrix, default: ${OUTPUT_DIR}/${PCAP_BASE}.ramon.topmatrix
+RA_OUTPUT - Output file for ra, default: ${OUTPUT_DIR}/${PCAP_BASE}.ra
+RACOUNT_OUTPUT - Output file for racount, default: ${OUTPUT_DIR}/${PCAP_BASE}.racount
+ARGUS_FILTER - Filter for all argus commands, default: <empty>

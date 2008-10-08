@@ -1,0 +1,2 @@
+OPTS= 
+OUTPUT_FILE=${PCAP_BASE}.trace

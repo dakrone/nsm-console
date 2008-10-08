@@ -1,0 +1,1 @@
+. ${MODULE_DIR}/${MODULE_NAME}.module/bro.cfg; cd ${OUTPUT_DIR} &&  bro -r ${PCAP_FILE} ${POLICIES}

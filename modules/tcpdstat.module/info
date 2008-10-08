@@ -1,0 +1,7 @@
+The tcpdstat module extracts tcp statistics about a pcap file.
+
+http://staff.washington.edu/dittrich/talks/core02/tools/tools.html
+
+Available options:
+OUTPUT_FILE - The filename to output the statistics to
+Default OUTPUT_FILE is ${PCAP_BASE}.tcpdstat

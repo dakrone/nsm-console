@@ -1,0 +1,119 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+Command	lib/command_manager.rb	/^class Command$/;"	c
+CommandManager	lib/command_manager.rb	/^class CommandManager$/;"	c
+Encoder	lib/encodelib.rb	/^class Encoder$/;"	c
+History	lib/history.rb	/^class History$/;"	c
+Kernel	lib/command_manager.rb	/^module Kernel$/;"	m
+Logger	lib/logging.rb	/^class Logger$/;"	c
+NSM_Alias	lib/nsm_alias.rb	/^class NSM_Alias$/;"	c
+NSM_Category	lib/nsm_category.rb	/^class NSM_Category$/;"	c
+NSM_Console	lib/nsm_console.rb	/^class NSM_Console$/;"	c
+NSM_Module	lib/nsm_module.rb	/^class NSM_Module$/;"	c
+Packet	lib/pcapparser.rb	/^class Packet$/;"	c
+PcapParser	lib/pcapparser.rb	/^class PcapParser$/;"	c
+String	nsm	/^class String$/;"	c
+ack_set?	lib/pcapparser.rb	/^  def ack_set?$/;"	f	class:Packet
+add	lib/command_manager.rb	/^  def CommandManager.add(command)$/;"	F	class:CommandManager
+close	lib/pcapparser.rb	/^  def close$/;"	f	class:PcapParser
+command	lib/command_manager.rb	/^  def command (desc, exec, &block)$/;"	f	class:Kernel
+decode_base64	lib/encodelib.rb	/^  def Encoder.decode_base64(str)$/;"	F	class:Encoder
+decode_binary	lib/encodelib.rb	/^  def Encoder.decode_binary(str)$/;"	F	class:Encoder
+decode_binary_LSB	lib/encodelib.rb	/^  def Encoder.decode_binary_LSB(str)$/;"	F	class:Encoder
+decode_binary_MSB	lib/encodelib.rb	/^  def Encoder.decode_binary_MSB(str)$/;"	F	class:Encoder
+decode_char	lib/encodelib.rb	/^  def Encoder.decode_char(str)$/;"	F	class:Encoder
+decode_hex	lib/encodelib.rb	/^  def Encoder.decode_hex(str)$/;"	F	class:Encoder
+decode_octal	lib/encodelib.rb	/^  def Encoder.decode_octal(str)$/;"	F	class:Encoder
+decode_rot13	lib/encodelib.rb	/^  def Encoder.decode_rot13(str)$/;"	F	class:Encoder
+decode_urlescape	lib/encodelib.rb	/^  def Encoder.decode_urlescape(str)$/;"	F	class:Encoder
+decode_uudecode	lib/encodelib.rb	/^  def Encoder.decode_uudecode(str)$/;"	F	class:Encoder
+del_alias	lib/nsm_alias.rb	/^  def NSM_Alias.del_alias(name)$/;"	F	class:NSM_Alias
+dump	lib/nsm_category.rb	/^  def dump$/;"	f	class:NSM_Category
+dump	lib/nsm_module.rb	/^  def dump$/;"	f	class:NSM_Module
+each	lib/pcapparser.rb	/^  def each$/;"	f	class:PcapParser
+enabled?	lib/nsm_category.rb	/^  def enabled?$/;"	f	class:NSM_Category
+enabled?	lib/nsm_module.rb	/^  def enabled?$/;"	f	class:NSM_Module
+encode_base64	lib/encodelib.rb	/^  def Encoder.encode_base64(str)$/;"	F	class:Encoder
+encode_binary	lib/encodelib.rb	/^  def Encoder.encode_binary(str)$/;"	F	class:Encoder
+encode_binary_LSB	lib/encodelib.rb	/^  def Encoder.encode_binary_LSB(str)$/;"	F	class:Encoder
+encode_binary_MSB	lib/encodelib.rb	/^  def Encoder.encode_binary_MSB(str)$/;"	F	class:Encoder
+encode_hex	lib/encodelib.rb	/^  def Encoder.encode_hex(str)$/;"	F	class:Encoder
+encode_hex_LSB	lib/encodelib.rb	/^  def Encoder.encode_hex_LSB(str)$/;"	F	class:Encoder
+encode_hex_MSB	lib/encodelib.rb	/^  def Encoder.encode_hex_MSB(str)$/;"	F	class:Encoder
+encode_md5	lib/encodelib.rb	/^  def Encoder.encode_md5(str)$/;"	F	class:Encoder
+encode_rot13	lib/encodelib.rb	/^  def Encoder.encode_rot13(str)$/;"	F	class:Encoder
+encode_sha256	lib/encodelib.rb	/^  def Encoder.encode_sha256(str)$/;"	F	class:Encoder
+encode_urlescape	lib/encodelib.rb	/^  def Encoder.encode_urlescape(str)$/;"	F	class:Encoder
+encode_uuencode	lib/encodelib.rb	/^  def Encoder.encode_uuencode(str)$/;"	F	class:Encoder
+execute	lib/command_manager.rb	/^  def CommandManager.execute(exec, *args)$/;"	F	class:CommandManager
+execute	lib/command_manager.rb	/^  def execute (*args)$/;"	f	class:Command
+fin_set?	lib/pcapparser.rb	/^  def fin_set?$/;"	f	class:Packet
+flags	lib/pcapparser.rb	/^  def flags$/;"	f	class:Packet
+gen_list_from_pcap	lib/nsm_helper.rb	/^def gen_list_from_pcap$/;"	f
+get_alias	lib/nsm_alias.rb	/^  def NSM_Alias.get_alias(name)$/;"	F	class:NSM_Alias
+get_alias_names	lib/nsm_alias.rb	/^  def NSM_Alias.get_alias_names$/;"	F	class:NSM_Alias
+get_aliases	lib/nsm_alias.rb	/^  def NSM_Alias.get_aliases$/;"	F	class:NSM_Alias
+get_commands	lib/command_manager.rb	/^  def CommandManager.get_commands$/;"	F	class:CommandManager
+get_commands	lib/nsm_helper.rb	/^def get_commands(name)$/;"	f
+get_commands	lib/nsm_module.rb	/^  def get_commands$/;"	f	class:NSM_Module
+get_commands_as_array	lib/command_manager.rb	/^  def CommandManager.get_commands_as_array$/;"	F	class:CommandManager
+get_decode_list	lib/encodelib.rb	/^  def Encoder.get_decode_list$/;"	F	class:Encoder
+get_def_log_file	lib/logging.rb	/^  def Logger.get_def_log_file$/;"	F
+get_defaults	lib/nsm_helper.rb	/^def get_defaults(name)$/;"	f
+get_defaults	lib/nsm_module.rb	/^  def get_defaults$/;"	f	class:NSM_Module
+get_description	lib/nsm_helper.rb	/^def get_description(name)$/;"	f
+get_encode_list	lib/encodelib.rb	/^  def Encoder.get_encode_list$/;"	F	class:Encoder
+get_filelist	lib/nsm_helper.rb	/^def get_filelist(dir,rec)$/;"	f
+get_log_filename	lib/logging.rb	/^  def Logger.get_log_filename$/;"	F
+get_mod_by_name	lib/nsm_helper.rb	/^def get_mod_by_name(mod_name)$/;"	f
+get_module_names_from_category	lib/nsm_helper.rb	/^def get_module_names_from_category(cat_name)$/;"	f
+get_modules	lib/nsm_category.rb	/^  def get_modules$/;"	f	class:NSM_Category
+get_name	lib/nsm_category.rb	/^  def get_name$/;"	f	class:NSM_Category
+get_name	lib/nsm_module.rb	/^  def get_name$/;"	f	class:NSM_Module
+get_uncompressed_filename	lib/nsm_helper.rb	/^def get_uncompressed_filename(file)$/;"	f
+initialize	lib/command_manager.rb	/^  def initialize (desc, exec, block)$/;"	f	class:Command
+initialize	lib/logging.rb	/^  def initialize(name)$/;"	f	class:Logger
+initialize	lib/nsm_category.rb	/^  def initialize(name,mods)$/;"	f	class:NSM_Category
+initialize	lib/nsm_console.rb	/^  def initialize(args)$/;"	f	class:NSM_Console
+initialize	lib/nsm_module.rb	/^  def initialize(name,desc,defs,cmds)$/;"	f	class:NSM_Module
+initialize	lib/pcapparser.rb	/^  def initialize(pcapfh)$/;"	f	class:PcapParser
+initialize	lib/pcapparser.rb	/^  def initialize(time, data, linktype)$/;"	f	class:Packet
+ip?	lib/pcapparser.rb	/^  def ip?$/;"	f	class:Packet
+load_categories	lib/nsm_helper.rb	/^def load_categories(dir)$/;"	f
+load_modules	lib/nsm_helper.rb	/^def load_modules(dir)$/;"	f
+nextpkt	lib/pcapparser.rb	/^  def nextpkt$/;"	f	class:PcapParser
+parse_defaults	lib/nsm_module.rb	/^  def parse_defaults(defs)$/;"	f	class:NSM_Module
+parse_flags	lib/pcapparser.rb	/^  def parse_flags(flags)$/;"	f	class:Packet
+payload	lib/pcapparser.rb	/^  def payload$/;"	f	class:Packet
+print	lib/history.rb	/^  def History.print$/;"	F	class:History
+print_banner	lib/nsm_helper.rb	/^def print_banner$/;"	f
+print_info	lib/nsm_module.rb	/^  def print_info$/;"	f	class:NSM_Module
+print_pkt_payload	lib/pcaplib.rb	/^def print_pkt_payload(p,opts,fullpacket)$/;"	f
+print_pkt_range	lib/pcaplib.rb	/^def print_pkt_range(filename,start_pkt,end_pkt,opts,fullpacket)$/;"	f
+print_welcome_message	lib/nsm_helper.rb	/^def print_welcome_message$/;"	f
+psh_set?	lib/pcapparser.rb	/^  def psh_set?$/;"	f	class:Packet
+rawwrite_pkt_payload	lib/pcaplib.rb	/^def rawwrite_pkt_payload(p,file,num,fulldump)$/;"	f
+rawwrite_pkt_range	lib/pcaplib.rb	/^def rawwrite_pkt_range(file,min,max,outputfile,fulldump)$/;"	f
+read_dotnsmcrc	lib/nsm_helper.rb	/^def read_dotnsmcrc(file)$/;"	f
+readable_flags	lib/pcapparser.rb	/^  def readable_flags$/;"	f	class:Packet
+resolve	lib/nsm_alias.rb	/^  def NSM_Alias.resolve(cmd, args)$/;"	F	class:NSM_Alias
+rot13	nsm	/^  def rot13$/;"	f	class:String
+rst_set?	lib/pcapparser.rb	/^  def rst_set?$/;"	f	class:Packet
+run	lib/nsm_console.rb	/^  def run$/;"	f	class:NSM_Console
+run_commands	lib/nsm_module.rb	/^  def run_commands(filename)$/;"	f	class:NSM_Module
+set_alias	lib/nsm_alias.rb	/^  def NSM_Alias.set_alias(name,val)$/;"	F	class:NSM_Alias
+set_enabled	lib/nsm_module.rb	/^  def set_enabled(en)$/;"	f	class:NSM_Module
+set_enabled_mods	lib/nsm_category.rb	/^  def set_enabled_mods(en)$/;"	f	class:NSM_Category
+start_logging	lib/logging.rb	/^  def Logger.start_logging(logfilename)$/;"	F
+syn_set?	lib/pcapparser.rb	/^  def syn_set?$/;"	f	class:Packet
+tcp?	lib/pcapparser.rb	/^  def tcp?$/;"	f	class:Packet
+toggle_module	lib/nsm_helper.rb	/^def toggle_module(name)$/;"	f
+udp?	lib/pcapparser.rb	/^  def udp?$/;"	f	class:Packet
+update_option	lib/nsm_module.rb	/^  def update_option(name,val)$/;"	f	class:NSM_Module
+urg_set?	lib/pcapparser.rb	/^  def urg_set?$/;"	f	class:Packet
+write	lib/history.rb	/^  def History.write(line)$/;"	F	class:History
+write	lib/logging.rb	/^  def Logger.write(line)$/;"	F	class:Logger

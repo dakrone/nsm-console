@@ -1,0 +1,12 @@
+The flowtime module creates a timeline for network flows, saving the results in
+a png image. Flowtime requires Argus 3, ploticus and EasyTimeline to run.
+
+http://thnetos.wordpress.com
+http://www.qosient.com/argus/index.htm
+http://ploticus.sourceforge.net
+http://infodisiac.com/Wikipedia/EasyTimeline
+
+Variables:
+WIDTH - The width of the image, default: 2000
+HEIGHT - The height of the image, default: 2000
+IP_FILTER - The IP address of the host to graph, default: 'all'

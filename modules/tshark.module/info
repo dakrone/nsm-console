@@ -1,0 +1,8 @@
+The tshark module analyzes the network traffic using the tshark tool
+published by the wireshark team.
+
+http://www.wireshark.org/
+
+Options:
+OPTIONS - The command line options for tshark (default: -qzio,phs -n)
+OUTPUT_FILE - The output file for tshark (default: ${PCAP_BASE}.tshark)

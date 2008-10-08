@@ -1,0 +1,1 @@
+pads -r ${PCAP_FILE} -w ${OUTPUT_DIR}/${OUTPUT_FILENAME}

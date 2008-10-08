@@ -1,0 +1,2 @@
+mkdir -p ${OUTPUT_DIR}/connection
+. ${MODULE_DIR}/${MODULE_NAME}.module/bro.cfg; cd ${OUTPUT_DIR}/connection &&  bro -r ${PCAP_FILE} conn

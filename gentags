@@ -1,0 +1,6 @@
+#!/bin/sh
+
+## This script is intended to be used in conjuction with exuberant-ctags:
+## http://ctags.sourceforge.net/
+
+/usr/local/bin/ctags -L files -f tags --verbose=yes

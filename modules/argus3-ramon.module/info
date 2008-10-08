@@ -1,0 +1,23 @@
+This argus3 module will convert pcap packet data format to argus flow data
+format so that it can be parsed by various of argus client tools.
+
+http://www.qosient.com/argus/
+
+Options:
+ARGUS_OPTIONS - options for generating the flow, default: -mAJZRU
+ARG3_FLOW_FILE - Argus3 flow data file, default: ${OUTPUT_DIR}/${PCAP_BASE}i-flow.arg3
+ARG3_SESS_FILE - Argus3 session data file, default: ${OUTPUT_DIR}/${PCAP_BASE}-sess.arg3
+RACLUSTER_OPTIONS - options for racluster, default: -n
+# TOP_TALKERS_OUTPUT - Output file for top talkers, default:
+# ${OUTPUT_DIR}/${PCAP_BASE}.racluster.toptalkers
+# TOP_MATRIX_OUTPUT - Output file for top talker matrix, default:
+# ${OUTPUT_DIR}/${PCAP_BASE}.racluster.topmatrix
+ARGUS_FILTER - BPF like filter for all argus commands, default: 
+RACLUSTER_OPTIONS=-n
+RACLUSTER_FILTER=
+TOP_N_OUTPUT - output file for ramon style Top N, default: ${OUTPUT_DIR}/${PCAP_BASE}-ramon-TopN
+TOP_MATRIX_OUTPUT - output file for ramon style Top Matrix, default: ${OUTPUT_DIR}/${PCAP_BASE}-ramon-Matrix
+TOP_HOSTPROTO_OUTPUT - output file for ramon style Top Host Proto, default: ${OUTPUT_DIR}/${PCAP_BASE}-ramon-HostProto
+TOP_HOSTSVC_OUTPUT - output file for ramon style Top Host Service, default: ${OUTPUT_DIR}/${PCAP_BASE}-ramon-HostSvc
+TOP_SVC_OUTPUT - output file for ramon stype Top Service, default: ${OUTPUT_DIR}/${PCAP_BASE}-ramon-Svc
+

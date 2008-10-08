@@ -1,0 +1,1 @@
+dnstop ${FLAGS} -b "${FILTER}" -l ${LEVEL} ${PCAP_FILE} > ${OUTPUT_FILE}

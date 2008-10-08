@@ -1,0 +1,6 @@
+The Yahsnarf module extract Yahoo IM conversations from a pcap file.
+
+http://writequit.org/projects/yahsnarf
+
+Variables:
+OUTPUT_FILE - File that output will be saved in, default: ${PCAP_BASE}.yahoo

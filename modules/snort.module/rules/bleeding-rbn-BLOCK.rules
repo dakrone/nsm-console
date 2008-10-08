@@ -1,0 +1,92 @@
+#
+# $Id: bleeding-rbn-BLOCK.rules $
+# Emerging Threats RBN rules.
+#
+# Rules to detect known Russian Business Network (RBN) hosts. These lists are updated daily or better from many sources
+#
+# We do not necessarily declare that these hosts are all bad, or that RBN is inherently an evil organization. Use this
+#  information as you see fit.
+#
+# More information available at doc.emergingthreats.net/bin/view/Main/RussianBusinessNetwork
+#
+# Please submit any feedback or ideas to emerging@emergingthreats.net or the emerging-sigs mailing list
+#
+#*************************************************************
+#
+#  Copyright (c) 2003-2008, Emerging Threats
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+#  following conditions are met:
+#  
+#  * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+#    disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+#    following disclaimer in the documentation and/or other materials provided with the distribution.
+#  * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+#
+#
+
+#general hosts
+alert ip [58.65.233.0/24,58.65.239.66/31,65.99.192.0/20,65.254.48.0/20,66.232.96.0/19,66.252.0.0/19,69.50.160.0/19,81.94.16.0/20,81.95.128.0/19,85.249.23.0/24,85.255.112.0/24,85.255.116.0/24,85.255.121.0/24,88.201.208.0/20,194.146.204.0/22,194.226.64.0/20,194.226.96.0/24,195.114.16.0/23,195.64.140.0/23,195.64.162.0/23,208.72.160.0/20] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Traffic - Hosting Nets - BLOCKING"; reference:url,doc.emergingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold:type limit, track by_src, seconds 60, count 1; sid:2407000; rev:8; fwsam:src, 24 hours;)
+
+#individual general hosts
+alert ip [62.140.208.131,62.140.208.197,62.154.15.154,65.254.54.178,66.252.1.255,67.18.179.15,67.19.24.168,67.19.24.169,67.19.24.170,67.19.24.171,67.19.24.172,67.19.24.173,67.19.24.174,67.19.24.175,67.19.72.205,67.19.72.206,67.137.217.219,72.10.164.69,72.20.14.3,72.20.25.134,74.54.31.196,80.70.239.253,84.45.24.53,84.45.47.130,84.45.90.141,85.133.4.138,89.149.186.77,89.149.186.81,89.149.186.89,193.93.232.6,193.93.232.6,195.66.226.151,213.200.78.66,213.200.79.194,213.200.80.46,216.180.244.179,217.118.119.26] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Traffic - Individual Hosts - BLOCKING"; reference:url,doc.emergingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold:type limit, track by_src, seconds 60, count 1; sid:2407001; rev:8; fwsam:src, 24 hours;)
+
+#chinese
+alert ip [91.196.232.0/22,91.194.140.0/23,91.198.71.0/24,91.193.40.0/22,91.193.56.0/22,193.33.128.0/23,194.110.69.0/24,91.195.116.0/23] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Traffic - Chinese Nets - BLOCKING"; reference:url,doc.emergingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold:type limit, track by_src, seconds 60, count 1; sid:2407002; rev:8; fwsam:src, 24 hours;)
+
+#Panamanian/Central America
+alert ip [200.115.160/20] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Traffic - Central American Nets"; reference:url,doc.emergingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold:type limit, track by_src, seconds 60, count 1; sid:2407004; rev:2; fwsam:src, 24 hours;)
+
+#Anserin/Torpig/Sinowal hosts
+alert ip [72.232.197.83] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Traffic - Known Trojan C&Cs - BLOCKING"; reference:url,doc.emergingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold:type limit, track by_src, seconds 60, count 1; sid:2407003; rev:8; fwsam:src, 24 hours;)
+
+
+
+
+#  VERSION 36
+
+#  Updated 2008-02-21 10:21:51
+
+alert ip [190.15.72.0/21,190.15.73.221,190.15.73.222,190.15.73.223,190.15.73.251,190.15.73.252,193.33.128.0/23,193.39.113.199,193.39.113.2,193.93.232.6] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (1)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407005; rev:36; fwsam: src, 24 hours;)
+alert ip [193.93.235.5,194.110.69.0/24,194.126.174.124,194.146.204.0/22,194.226.64.0/20,194.226.96.0/24,194.67.0.0/18,194.67.27.115,194.67.27.125,194.67.28.250] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (2)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407006; rev:36; fwsam: src, 24 hours;)
+alert ip [194.67.28.62,194.67.35.133,194.67.35.250,195.114.16.0/23,195.225.176.68,195.225.177.54,195.225.177.7,195.3.144.30,195.3.144.77,195.64.140.0/23] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (3)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407007; rev:36; fwsam: src, 24 hours;)
+alert ip [195.64.162.0/23,195.66.226.151,200.115.160.0/20,203.117.0.0/16,203.121.0.0/17,204.251.15.190,206.161.200.34,206.161.200.36,207.226.173.114,207.226.173.67] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (4)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407008; rev:36; fwsam: src, 24 hours;)
+alert ip [207.44.185.10,208.48.15.11,208.48.15.13,208.48.15.62,208.72.160.0/20,208.72.168.0/21,208.72.170.189,209.8.30.2,209.85.84.199,212.24.53.0/24] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (5)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407009; rev:36; fwsam: src, 24 hours;)
+alert ip [213.132.196.200,213.132.196.211,213.200.78.66,213.200.79.194,213.200.80.46,213.99.178.180,216.118.117.68,216.180.244.179,216.195.44.0/24,216.195.49.100] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (6)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407010; rev:36; fwsam: src, 24 hours;)
+alert ip [216.195.49.159,216.195.49.88,216.195.50.159,216.195.50.162,216.195.50.238,216.195.50.51,216.195.50.56,216.195.50.81,216.255.176.0/20,216.255.185.237] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (7)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407011; rev:36; fwsam: src, 24 hours;)
+alert ip [216.255.190.74,216.7.89.12,216.8.177.26,217.118.119.26,58.65.232.0/21,58.65.233.0/24,58.65.234.17,58.65.234.18,58.65.235.177,58.65.235.178] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (8)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407012; rev:36; fwsam: src, 24 hours;)
+alert ip [58.65.235.41,58.65.235.81,58.65.237.121,58.65.237.17,58.65.238.100,58.65.238.101,58.65.238.18,58.65.238.59,58.65.238.66,58.65.238.98] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (9)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407013; rev:36; fwsam: src, 24 hours;)
+alert ip [58.65.239.27,58.65.239.66,62.140.208.131,62.140.208.197,62.154.15.154,63.243.188.2,63.243.188.3,63.243.188.82,64.111.192.0/20,64.111.208.0/24] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (10)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407014; rev:36; fwsam: src, 24 hours;)
+alert ip [64.111.209.0/24,64.111.210.0/24,64.111.211.0/24,64.111.216.0/21,64.28.176.0/20,64.28.177.74,64.28.180.0/24,64.28.181.0/24,64.28.182.106,64.28.182.107] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (11)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407015; rev:36; fwsam: src, 24 hours;)
+alert ip [64.28.182.122,64.28.182.146,64.28.182.151,64.28.182.163,64.28.182.195,64.28.182.196,64.28.182.66,64.28.182.68,64.28.182.8,64.28.183.162] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (12)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407016; rev:36; fwsam: src, 24 hours;)
+alert ip [64.28.183.44,64.28.183.45,64.28.183.99,64.28.184.0/24,64.71.133.0/24,65.254.48.0/20,65.254.54.178,65.99.192.0/20,66.232.96.0/19,66.244.254.0/24] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (13)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407017; rev:36; fwsam: src, 24 hours;)
+alert ip [66.252.0.0/19,66.252.1.255,66.29.15.141,66.45.254.244,66.45.254.245,67.137.217.219,67.18.0.0/15,67.19.24.168,67.19.24.169,67.19.24.170] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (14)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407018; rev:36; fwsam: src, 24 hours;)
+alert ip [67.19.24.171,67.19.24.172,67.19.24.173,67.19.24.174,67.19.24.175,67.19.72.205,67.19.72.206,69.20.117.228,69.20.68.36,69.22.162.0/23] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (15)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407019; rev:36; fwsam: src, 24 hours;)
+alert ip [69.22.168.0/21,69.22.184.0/22,69.31.128.2,69.31.40.0/21,69.31.64.0/20,69.39.224.27,69.42.216.122,69.50.160.0/19,69.50.166.196,69.50.168.102] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (16)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407020; rev:36; fwsam: src, 24 hours;)
+alert ip [69.50.168.98,69.50.168.99,69.50.170.174,69.50.170.82,69.50.176.227,69.50.176.228,69.50.176.229,69.50.188.3,69.50.188.4,72.10.164.69] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (17)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407021; rev:36; fwsam: src, 24 hours;)
+alert ip [72.20.0.0/19,72.20.110.8,72.20.14.3,72.20.25.134,72.232.197.83,74.54.31.196,77.91.224.0/21,77.91.225.14,77.91.225.18,77.91.225.2] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (18)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407022; rev:36; fwsam: src, 24 hours;)
+alert ip [77.91.225.20,77.91.225.3,77.91.225.30,77.91.225.4,77.91.225.5,77.91.225.6,77.91.225.7,77.91.225.8,77.91.225.9,77.91.226.5] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (19)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407023; rev:36; fwsam: src, 24 hours;)
+alert ip [77.91.226.6,77.91.226.7,77.91.227.178,77.91.227.202,77.91.227.203,77.91.227.208,77.91.227.209,77.91.227.211,77.91.227.246,77.91.227.247] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (20)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407024; rev:36; fwsam: src, 24 hours;)
+alert ip [77.91.227.253,77.91.228.106,77.91.228.110,77.91.228.111,77.91.228.121,77.91.228.122,77.91.228.125,77.91.228.126,77.91.228.130,77.91.228.131] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (21)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407025; rev:36; fwsam: src, 24 hours;)
+alert ip [77.91.228.139,77.91.228.140,77.91.228.141,77.91.228.142,77.91.228.155,77.91.228.156,77.91.228.180,77.91.228.44,77.91.228.51,77.91.228.53] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (22)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407026; rev:36; fwsam: src, 24 hours;)
+alert ip [77.91.228.7,77.91.229.103,77.91.229.106,77.91.229.107,8.15.231.110,80.70.224.0/20,80.70.239.253,81.29.241.9,81.29.249.38,81.94.16.0/20] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (23)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407027; rev:36; fwsam: src, 24 hours;)
+alert ip [81.95.128.0/19,81.95.144.0/20,81.95.144.182,81.95.144.3,81.95.145.186,81.95.146.250,81.95.147.182,81.95.147.202/31,81.95.148.130/31,81.95.148.132/31] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (24)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407028; rev:36; fwsam: src, 24 hours;)
+alert ip [81.95.148.18,81.95.149.110/31,81.95.149.171,81.95.149.178,81.95.149.181,81.95.149.27,81.95.153.243,81.95.154.41,81.95.156.0/22,82.114.64.251] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (25)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407029; rev:36; fwsam: src, 24 hours;)
+alert ip [82.146.56.140,83.222.0.0/19,84.45.24.53,84.45.47.130,84.45.90.141,85.133.4.138,85.17.173.219,85.249.23.0/24,85.255.112.0/20,85.255.112.0/21] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (26)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407030; rev:36; fwsam: src, 24 hours;)
+alert ip [85.255.114.202,85.255.114.206,85.255.115.178,85.255.115.180,85.255.116.0/24,85.255.117.202,85.255.117.205,85.255.117.60,85.255.117.62,85.255.118.0/24] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (27)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407031; rev:36; fwsam: src, 24 hours;)
+alert ip [85.255.119.125,85.255.119.126,85.255.119.251,85.255.119.254,85.255.119.66,85.255.119.67,85.255.120.106,85.255.120.107,85.255.120.50,85.255.121.0/24] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (28)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407032; rev:36; fwsam: src, 24 hours;)
+alert ip [87.117.252.11,87.117.255.20,87.117.255.30,88.201.208.0/20,88.255.90.0/24,88.255.94.0/24,88.255.94.210,89.149.186.77,89.149.186.81,89.149.186.89] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (29)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407033; rev:36; fwsam: src, 24 hours;)
+alert ip [89.208.19.194,91.192.106.0/23,91.193.40.0/22,91.193.56.0/22,91.194.140.0/23,91.195.116.0/23,91.196.232.0/22,91.198.71.0/24] any -> $HOME_NET any (msg:"ET RBN Known Russian Business Network Monitored Domains - BLOCKING (30)"; reference:url,doc.bleedingthreats.net/bin/view/Main/RussianBusinessNetwork; threshold: type limit, track by_src, seconds 60, count 1; sid:2407034; rev:36; fwsam: src, 24 hours;)
+
+

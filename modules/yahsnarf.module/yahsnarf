@@ -1,0 +1,1 @@
+ruby -I ${MODULE_DIR}/${MODULE_NAME}.module/lib ${MODULE_DIR}/${MODULE_NAME}.module/yahsnarf.rb -r ${PCAP_FILE} > ${OUTPUT_DIR}/${OUTPUT_FILE}

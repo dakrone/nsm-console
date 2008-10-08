@@ -1,0 +1,1358 @@
+#
+# $Id: bleeding-policy.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+# Emerging Threats Policy rules. 
+#
+# SID's are 2000000+ to avoid conflicts
+#
+# Only basic testing has been done. At this point all we guarantee is that they won't crash a recent snort release. 
+#
+# More information available at www.emergingthreats.net
+#
+# Please submit any custom rules or ideas to emerging@emergingthreats.net or the emerging-sigs mailing list
+#
+#*************************************************************
+#
+#  Copyright (c) 2003-2008, Emerging Threats
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+#  following conditions are met:
+#  
+#  * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+#    disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+#    following disclaimer in the documentation and/or other materials provided with the distribution.
+#  * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+#
+#
+#by Matt Jonkman, from qru
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY AOL Toolbar User-Agent (AOLToolbar)"; flow:to_server,established; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+AOLToolbar/i"; classtype:policy-violation; sid:2003469; rev:2;)
+
+#Submitted by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY AOL Webmail Message Send"; flow: to_server,established; uricontent:"/compose_frame.adp"; content:"POST"; classtype: policy-violation; sid: 2000571; rev:5;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY AOL Webmail Login"; flow: to_server,established; uricontent:"/login/login.psp?siteId="; content:"triedAimAuth"; classtype: policy-violation; sid: 2000572; rev:5;)
+
+#By merphie. Please test this out, it should work on NT domains and 98. Disabled by default
+#alert udp $HOME_NET any -> $HOME_NET 137 (msg:"ET POLICY Administrator Login Detected"; content:"ebeeenejeoejfdfefcebfeepfc"; nocase; classtype: policy-violation; sid: 2001806; rev:3;)
+
+#this is not for a vuln, but for the use of an easily decrypted password in the clear
+# by Adam Ellison. Use this if you have a policy of not showing passwords in the clear
+#added negates of Anonymous and :, idea from Jon Schiedell
+alert tcp $HOME_NET any -> any $HTTP_PORTS (msg:"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"; flow:established,to_server; content:"|0d 0a|Authorization|3a 20|Basic"; nocase; content:!"YW5vbnltb3VzOg=="; within:32; classtype:policy-violation; sid:2006380; rev:9;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Incoming Basic Auth Base64 HTTP Password detected unencrypted"; flow:established,to_server; content:"|0d 0a|Authorization|3a 20|Basic"; nocase; content:!"YW5vbnltb3VzOg=="; within:32; classtype:policy-violation; sid:2006402; rev:5;)
+
+#Submitted by Joseph Gama
+#Good rules, turn them on if you are interested. They are accurate.
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY Executable and linking format (ELF) file download"; flow: established; content:"|7F|ELF"; content:"|00 00 00 00 00 00 00 00|"; reference:url,www.itee.uq.edu.au/~cristina/students/david/honoursThesis96/bff.htm; classtype: misc-activity; sid: 2000418; rev:8;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY PE EXE or DLL Windows file download"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program cannot be run in DOS mode."; distance: 0; isdataat: 10,relative; content:"PE"; distance: 0; flowbits:set,BE.http.binary; classtype:misc-activity; sid: 2000419; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY REG files version 4 download"; flow: established; content:"REGEDIT4"; content:"|0D 0A|"; content:"["; content:"HKEY_"; nocase; reference:url,www.ss64.com/nt/regedit.html; classtype: misc-activity; sid: 2000420; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY REG files version 5 download"; flow: established; content:"Windows Registry Editor Version 5.00"; content:"|0D 0A|"; content:"["; content:"HKEY_"; nocase; reference:url,www.ss64.com/nt/regedit.html; classtype: misc-activity; sid: 2000421; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY REG files version 5 Unicode download"; flow: established; content:"W|00|i|00|n|00|d|00|o|00|w|00|s|00| |00|R|00|e|00|g|00|i|00|s|00|t|00|r|00|y|00| |00|E|00|d|00|i|00|t|00|o|00|r|00| |00|V|00|e|00|r|00|s|00|i|00|o|00|n|00| |00|5|00|.|00|0|00|0|00|"; content:"|0D 0A|"; content:"[|00|"; content:"H|00|K|00|E|00|Y|00|_|00|"; nocase; reference:url,www.ss64.com/nt/regedit.html; classtype: misc-activity; sid: 2000422; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY NE EXE OS2 file download"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program cannot be run in a DOS session."; isdataat: 6,relative; content:"NE"; distance: 0; reference:url,www.itee.uq.edu.au/~cristina/students/david/honoursThesis96/bff.htm; classtype: misc-activity; sid: 2000423; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY LX EXE OS2 file download"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program cannot be run in a DOS session."; isdataat: 6,relative; content:"LX"; distance: 0; reference:url,www.itee.uq.edu.au/~cristina/students/david/honoursThesis96/bff.htm; classtype: misc-activity; sid: 2000424; rev:8;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY NE EXE Windows 3.x file download"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program requires Microsoft Windows."; isdataat: 10,relative; content:"NE"; distance: 0; reference:url,www.itee.uq.edu.au/~cristina/students/david/honoursThesis96/bff.htm; classtype: misc-activity; sid: 2000425; rev:8;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY EXE compressed PKWARE Windows file download"; flow: established; content:"MZ"; isdataat: 28,relative; content:"PKLITE"; distance: 0; reference:url,www.program-transformation.org/Transform/PcExeFormat; classtype: misc-activity; sid: 2000426; rev:8;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY PE EXE Install Windows file download"; flow: established; content:"MZ"; isdataat: 76,relative; content:"This program must be "; distance: 0; isdataat: 140,relative; content:"PE"; distance: 0; flowbits:set,BE.http.binary; reference:url,www.program-transformation.org/Transform/PcExeFormat; classtype: misc-activity; sid: 2000427; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY ZIP file download"; flow: established; content:"PK|0304|"; byte_test:1, <=, 0x14, 0, string, hex;content:"|00 00 00|"; distance: 0; reference:url,zziplib.sourceforge.net/zzip-parse.print.html; classtype: misc-activity; sid: 2000428; rev:9;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY Download Windows Help File CHM"; flow: established; content:"ITSF|03|"; isdataat: 19,relative; content:"|7C 01 FD 10 7B AA 11 D0 9E 0C 00 A0 C9 22 E6 EC 7C 01 FD 11 7B AA 11 D0 9E 0C 00 A0 C9 22 E6 EC|"; distance: 0; reference:url,www.speakeasy.org/~russotto/chm/chmformat.html; reference:url,www.securiteam.com/windowsntfocus/6V00N000AU.html; classtype: misc-activity; sid: 2000489; rev:8;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY Download Windows Help File CHM 2"; flow: established; content:"ITSF|03|"; isdataat: 19,relative; content:"|10 FD 01 7C AA 7B D0 11 9E 0C 00 A0 C9 22 E6 EC 11 FD 01 7C AA 7B D0 11 9E 0C 00 A0 C9 22 E6 EC|"; distance: 0; reference:url,www.speakeasy.org/~russotto/chm/chmformat.html; reference:url,www.securiteam.com/windowsntfocus/6V00N000AU.html; classtype: misc-activity; sid: 2000429; rev:8;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY MSI (microsoft installer file) download"; flow: established; content:"|D0 CF 11 E0 A1 B1 1A E1|"; classtype: bad-unknown; sid: 2001115; rev:5;)
+
+#Idea by David Glosser, sig by Matt Jonkman
+alert ip [0.0.0.0/7,2.0.0.0/8,5.0.0.0/8,23.0.0.0/8,27.0.0.0/8,31.0.0.0/8,36.0.0.0/7,39.0.0.0/8,42.0.0.0/8,46.0.0.0/8,49.0.0.0/8] any -> $HOME_NET any (msg:"ET POLICY Reserved IP Space Traffic - Bogon Nets 1"; classtype:bad-unknown; reference:url,www.cymru.com/Documents/bogon-list.html; threshold: type limit, track by_src, count 1, seconds 360; sid:2002749; rev:4;)
+alert ip [50.0.0.0/8,100.0.0.0/6,104.0.0.0/5,112.0.0.0/6,173.0.0.0/8,174.0.0.0/7,176.0.0.0/5,184.0.0.0/6] any -> $HOME_NET any (msg:"ET POLICY Reserved IP Space Traffic - Bogon Nets 2"; classtype:bad-unknown; reference:url,www.cymru.com/Documents/bogon-list.html; threshold: type limit, track by_src, count 1, seconds 360; sid:2002750; rev:10;)
+alert ip [192.0.2.0/24,197.0.0.0/8,198.18.0.0/15,223.0.0.0/8] any -> $HOME_NET any (msg:"ET POLICY Reserved IP Space Traffic - Bogon Nets 3"; classtype:bad-unknown; reference:url,www.cymru.com/Documents/bogon-list.html; threshold: type limit, track by_src, count 1, seconds 360; sid:2002751; rev:3;)
+#
+#This is for reserved internal space. Do NOT run this sig on your internal net, commented out by default.
+#alert ip [10.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.168.0.0/16] any -> $HOME_NET any (msg:"ET POLICY Reserved Internal IP Traffic"; classtype:bad-unknown; reference:url,www.cymru.com/Documents/bogon-list.html; threshold: type limit, track by_src, count 1, seconds 360; sid:2002752; rev:3;)
+
+#this is a distributed search engine crawling thing. I am not aware of any spyware-like activity, but it is likely not welcome on a corporate net
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Boitho.com Distributed Crawler in use - User-Agent (boitho.com-dc)"; flow:to_server,established; content:"User-Agent\: boitho.com"; nocase; classtype:trojan-activity; sid:2003653; rev:2;)
+
+#ccproxy is a legitimate program, but has been seen in use by malware to proxy remote http
+# it's aproduct designed for internal network use. Run this sig externally to detect it in use remotely.
+# This would likely be hostile activity
+#by Matt Jonkman from sandnet analysis
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET POLICY CCProxy in use remotely - Possibly Hostile/Malware"; flow:established,from_server; content:"HTTP/1.0 200 Connection established|0d 0a|Proxy-agent\: CCProxy "; offset:0;  depth:58; classtype:trojan-activity; reference:url,www.youngzsoft.net; sid:2007576; rev:2;)
+
+#online tools
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Centralops.net Domain Dossier Utility Probe"; flow:established,to_server; content:"USER-Agent\: Domain Dossier utility (http\://CentralOps.net/)"; nocase; classtype:policy-violation; reference:url,centralops.net; sid:2003623; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Centralops.net Probe"; flow:established,to_server; content:"USER-Agent\: "; nocase; content:"CentralOps.net/)"; within:100; nocase; classtype:policy-violation; reference:url,centralops.net; sid:2003631; rev:2;)
+#Submitted by Matt Jonkman
+alert tcp $HOME_NET 23 -> any any (msg: "ET Cisco Device in Config Mode"; flow: established; content:"Enter configuration commands, one per line"; nocase; classtype: not-suspicious; sid: 2001239; rev:5;)
+alert tcp $HOME_NET 23 -> any any (msg: "ET Cisco Device New Config Built"; flow: established; content:"Building configuration..."; nocase; classtype: not-suspicious; sid: 2001240; rev:5;)
+
+#By Cory Bys, Particle.bored.
+# These are going to increase load on a snort process, and are NOT FOOLPROOF. But they may help reveal issues
+# with informaion flow. NOTE: These will not detect classified UUEncoded docs (email attachments) etc.
+#
+#  Email
+#
+# Non-US Restricted
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Non-US Restricted Outbound"; flow:to_server,established; content:"Subject|3A|"; pcre:"///([A-Z]{3}\s)+RESTRICTED//X5/ism"; classtype:policy-violation; sid:2002410; rev:2;)
+#
+# Non-US Confidential
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Non-US Confidential Outbound"; flow:to_server,established; content:"Subject|3A|"; pcre:"///([A-Z]{3}\s)+CONFIDENTIAL//X5/ism"; classtype:policy-violation; sid:2002411; rev:2;)
+#
+# Non-US Top Secret
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Non-US Top Secret Outbound"; flow:to_server,established; content:"Subject|3A|"; pcre:"///([A-Z]{3}\s)+TOP\sSECRET//X5/ism"; classtype:policy-violation; sid:2002412; rev:2;)
+#
+# Non-US Secret
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Non-US Secret"; flow:to_server,established; content:"Subject|3A|"; pcre:"///([A-Z]{3}\s)+(?<!TOP\s)SECRET//X5/ism"; classtype:policy-violation; sid:2002413; rev:2;)
+#
+# NATO Restricted
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP NATO Restricted"; flow:to_server,established; content:"Subject|3A|"; pcre:"///((NATO\sRESTRICTED)|NR)//MR/ism"; classtype:policy-violation; sid:2002414; rev:2;)
+#
+# NATO Confidential Atomal
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP NATO Confidential Atomal"; flow:to_server,established; content:"Subject|3A|"; pcre:"///((NATO\sCONFIDENTIAL\sATOMAL)|NCA)//MR/ism"; classtype:policy-violation; sid:2002415; rev:2;)
+#
+# NATO Confidential
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP NATO Confidential"; flow:to_server,established; content:"Subject|3A|"; pcre:"///((NATO\sCONFIDENTIAL)|NC)//MR/ism"; classtype:policy-violation; sid:2002416; rev:2;)
+#
+# NATO COSMIC Top Secret Atomal
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP NATO COSMIC Top Secret Atomal"; flow:to_server,established; content:"Subject|3A|"; pcre:"///((COSMIC\sTOP\sSECRET\sATOMAL)|CTSA)//MR/ism"; classtype:policy-violation; sid:2002417; rev:2;)
+#
+# NATO Secret Atomal
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP NATO Secret Atomal"; flow:to_server,established; content:"Subject|3A|"; pcre:"///((NATO\sSECRET\sATOMAL)|NSA)//MR/ism"; classtype:policy-violation; sid:2002418; rev:2;)
+#
+# NATO Secret
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP NATO Secret"; flow:to_server,established; content:"Subject|3A|"; pcre:"///((NATO\sSECRET)|NS)//MR/ism"; classtype:policy-violation; sid:2002419; rev:2;)
+#
+# US Confidential, Electronic Format
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential, Electronic"; flow:to_server,established; content:"Subject|3A|"; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(CC)\r\n)/ism"; classtype:policy-violation; sid:2002420; rev:2;)
+#
+# US Top Secret, Electronic Format
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret, Electronic"; flow:to_server,established; content:"Subject|3A|"; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(TT)\r\n)/ism"; classtype:policy-violation; sid:2002421; rev:2;)
+#
+# US Secret, Electronic Format
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret, Electronic"; flow:to_server,established; content:"Subject|3A|"; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(SS)\r\n)/ism"; classtype:policy-violation; sid:2002422; rev:2;)
+#
+# US Confidential Authorized for Release To
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential REL TO"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002423; rev:2;)
+#
+# US Top Secret Authorized for Release To
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret REL TO"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002424; rev:2;)
+#
+# US Secret Authorized for Release To
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret REL TO"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002425; rev:2;)
+#
+# US Confidential Comint
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential COMINT"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002426; rev:2;)
+#
+# US Top Secret Comint
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret COMINT"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002427; rev:2;)
+#
+# US Secret Comint
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret COMINT"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002428; rev:2;)
+#
+# US Unclassified Communications Security Material
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Unclassified COMSEC"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(UNCLASSIFIED|U)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002429; rev:2;)
+#
+# US Confidential Communications Security Material
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential COMSEC"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002430; rev:2;)
+#
+# US Top Secret Communications Security Material
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret COMSEC"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002431; rev:2;)
+#
+# US Secret Communications Security Material
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret COMSEC"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002432; rev:2;)
+#
+# US Controlled Imagery
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret IMCON"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(IMCON|IMC)[\s\w,/-]*(?=//(X1|MR))/ism"; classtype:policy-violation; sid:2002433; rev:2;)
+#
+# US Top Secret Critical Nuclear Weapon Design Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret CNWDI"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(CRITICAL\sNUCLEAR\sWEAPON\sDESIGN\sINFORMATION|CNWDI)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002434; rev:2;)
+#
+# US Secret Critical Nuclear Weapon Design Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret CNWDI"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(CRITICAL\sNUCLEAR\sWEAPON\sDESIGN\sINFORMATION|CNWDI)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002435; rev:2;)
+#
+# US Top Secret Talent Keyhole
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret TK"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(TALENT\sKEYHOLE|TK)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002436; rev:2;)
+#
+# US Secret Talent Keyhole
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret TK"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(TALENT\sKEYHOLE|TK)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002437; rev:2;)
+#
+# US Foreign Government Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US FGI"; flow:to_server,established; content:"Subject|3A|"; pcre:"///FGI[\s\w,/-]*(?=//X5)/ism"; classtype:policy-violation; sid:2002438; rev:2;)
+#
+# US For Official Use Only
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US FOUO"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(UNCLASSIFIED|U)//(FOR\sOFFICIAL\sUSE\sONLY|FOUO)/ism"; classtype:policy-violation; sid:2002439; rev:2;)
+#
+# US Confidential Not Releasable to Foreign Nationals
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential NOFORN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002440; rev:2;)
+#
+# US Top Secret Not Releasable to Foreign Nationals
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret NOFORN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002441; rev:2;)
+#
+# US Secret Not Releasable to Foreign Nationals
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret NOFORN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002442; rev:2;)
+#
+# US Confidential Originator Controlled
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential ORCON"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002443; rev:2;)
+#
+# US Top Secret Originator Controlled
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret ORCON"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002444; rev:2;)
+#
+# US Secret Originator Controlled
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret ORCON"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002445; rev:2;)
+#
+# US Unclassified Proprietary Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Unclassified PROPIN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(UNCLASSIFIED|U)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002446; rev:2;)
+#
+# US Confidential Proprietary Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential PROPIN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002447; rev:2;)
+#
+# US Top Secret Proprietary Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret PROPIN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002448; rev:2;)
+#
+# US Secret Proprietary Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret PROPIN"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002449; rev:2;)
+#
+# US Confidential Restricted Data
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential RD"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002450; rev:2;)
+#
+# US Top Secret Restricted Data
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret RD"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002451; rev:2;)
+#
+# US Secret Restricted Data
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret RD"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002452; rev:2;)
+#
+# US Sources and Methods Information
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US SAMI"; flow:to_server,established; content:"Subject|3A|"; pcre:"/SAMI[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002453; rev:2;)
+#
+# US Confidential Special Category
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Confidential SPECAT"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002454; rev:2;)
+#
+# US Top Secret Special Category
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret SPECAT"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002455; rev:2;)
+#
+# US Secret Special Category
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Secret SPECAT"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002456; rev:2;)
+#
+# US Top Secret Single Integrated Operations Plan
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP US Top Secret STOP"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*STOP[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002457; rev:2;)
+#
+# The word "private"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Private"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wprivate\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002458; rev:2;)
+#
+# The word "restricted"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Restricted"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!//)\Wrestricted[^\w/]/ism"; classtype:policy-violation; sid:2002459; rev:2;)
+#
+# The word "confidential"
+# alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Confidential"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!//)\Wconfidential[^\w/]/ism"; classtype:policy-violation; sid:2002460; rev:2;)
+#
+# The word "secret"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Secret"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!TOP|//)\Wsecret[^\w/a]/ism"; classtype:policy-violation; sid:2002461; rev:2;)
+#
+# The phrase "top secret"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Top Secret"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!//)\Wtop\ssecret[^\w/a]/ism"; classtype:policy-violation; sid:2002462; rev:2;)
+#
+# The word "sealed"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Sealed"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wsealed\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002463; rev:2;)
+#
+# The word "sensitive"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Sensitive"; flow:to_server,established; content:"Subject|3A|"; pcre:"/(?<!law\senforcement)\Wsensitive\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002464; rev:2;)
+#
+# The word "proprietary"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Proprietary"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wproprietary\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002465; rev:2;)
+#
+# The word "protected"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Protected"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wprotected\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002466; rev:2;)
+#
+# The phrase "law enforcement sensitive"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Law Enorcement Sensitive"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wlaw\senforcement\ssensitive\W/ism"; classtype:policy-violation; sid:2002467; rev:2;)
+#
+# The phrase "internal use only"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Internal Use Only"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Winternal\suse\sonly\W/ism"; classtype:policy-violation; sid:2002468; rev:2;)
+#
+# The phrase "date of birth" or its typical abbreviations
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Date of Birth"; flow:to_server,established; content:"Subject|3A|"; pcre:"/[^\w&]d(ate)?(-)?o(f)?(-)?b(irth)?\W[\s\w,/-]*(?=([0-9]{2}[-/][0-9]{2}[-/][0-9]{2,4})|[0-9]{8})/ism"; classtype:policy-violation; sid:2002469; rev:2;)
+#
+# Health Care Common Procedure Coding System (HCPCS) Codes
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP HCPCS Code"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Whcpcs\W[\s\w,/-]*(?=[a-z][0-9]{10})/ism"; classtype:policy-violation; sid:2002470; rev:2;)
+#
+# International Statistical Classification of Diseases and Related Health Problems 10th Revision (ICD-10) Codes
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP ICD-10 Code"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wicd\W[\s\w,/-]*(?=[a-z][0-9]{2}\.[0-9]{2})/ism"; classtype:policy-violation; sid:2002471; rev:2;)
+#
+# Food and Drug Administration (FDA) National Drug Code (NDC) Codes
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP FDA NDC Code"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wndc\W[\s\w,/-]*(?=([0-9]{4}-[0-9]{4}-[0-9]{2}|[0-9]{5}-[0-9]{3}-[0-9]{2}|[0-9]{5}-[0-9]{4}-[0-9]{1,2}))/ism"; classtype:policy-violation; sid:2002472; rev:2;)
+#
+# American Dental Association (ADA) Dental Procedure Codes
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP ADA Procedure Code"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wada\W[\s\w,/-]*(?=d[0-9]{4})/ism"; classtype:policy-violation; sid:2002473; rev:2;)
+#
+# Diagnostic and Statistical Manual of Mental Disorders (DSM-IV) Codes
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP DSM-IV Code"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wdsm\W[\s\w,/-]*(?=([2-9][0-9]{2}(\.[0-9]{1,2}?)|(v[167][0-9]\.[0-9]{1,2})))/ism"; classtype:policy-violation; sid:2002474; rev:4;)
+#
+# American Medical Association (AMA) Current Procedural Terminology (CPT) Codes
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP AMA CPT Code"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wcpt\W[\s\w,/-]*(?=[0-9]{4}[ft]|[0-9]{5})/ism"; classtype:policy-violation; sid:2002475; rev:2;)
+#
+# Japan Credit Bureau Credit Card Number
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Credit Card, JCB"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wj(apan\s)?c(redit\s)?b(ureau)?\W[\s\w,/-]*(?=(3[12359][0-9]{14})|(1800|2131)[0-9]{11})/ism"; classtype:policy-violation; sid:2002477; rev:2;)
+#
+# The word "password", its typical abbreviations or written/abbreviated in a few forms of "leet"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Password"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\W[p][a4@][sz5]{0,2}[w]([o0][r])?[d]\W/ism"; classtype:policy-violation; sid:2002483; rev:2;)
+#
+# The word "appraisal"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Appraisal"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wappraisal(s)?\W/ism"; classtype:policy-violation; sid:2002484; rev:2;)
+#
+# The phrase "account balance"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Account Balance"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Waccount\sbalance(s)?\W/ism"; classtype:policy-violation; sid:2002485; rev:2;)
+#
+# The phrase "payment history"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Payment History"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wpayment\shistory\W/ism"; classtype:policy-violation; sid:2002486; rev:2;)
+#
+# The phrase "annual income"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Annual Income"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wannual\sincome(s)?\W/ism"; classtype:policy-violation; sid:2002487; rev:3;)
+#
+# The phrase "credit history"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Credit History"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wcredit\shistor(y|ies)\W/ism"; classtype:policy-violation; sid:2002488; rev:2;)
+#
+# The phrase "transaction history"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Transaction History"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wtransaction\shistor(y|ies)\W/ism"; classtype:policy-violation; sid:2002489; rev:2;)
+#
+# The phrase "customer list"
+#alert tcp $SMTP_SERVERS any -> $EXTERNAL_NET 25 (msg:"ET POLICY SMTP Customer List"; flow:to_server,established; content:"Subject|3A|"; pcre:"/\Wcustomer\slist(s)?\W/ism"; classtype:policy-violation; sid:2002490; rev:2;)
+
+##########################################
+#
+# HTTP POST
+#
+# Non-US Restricted
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP Non-US Restricted"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+RESTRICTED//X5/ism"; classtype:policy-violation; sid:2002495; rev:3;)
+#
+# Non-US Confidential
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Non-US Confidential"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+CONFIDENTIAL//X5/ism"; classtype:policy-violation; sid:2002496; rev:3;)
+#
+# Non-US Top Secret
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Non-US Top Secret"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+TOP\sSECRET//X5/ism"; classtype:policy-violation; sid:2002497; rev:3;)
+#
+# Non-US Secret
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Non-US Secret"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+(?<!TOP\s)SECRET//X5/ism"; classtype:policy-violation; sid:2002498; rev:3;)
+#
+# NATO Restricted
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - NATO Restricted"; flow:to_server,established; pcre:"///((NATO\sRESTRICTED)|NR)//MR/ism"; classtype:policy-violation; sid:2002499; rev:3;)
+#
+# NATO Confidential Atomal
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - NATO Confidential Atomal"; flow:to_server,established; pcre:"///((NATO\sCONFIDENTIAL\sATOMAL)|NCA)//MR/ism"; classtype:policy-violation; sid:2002500; rev:3;)
+#
+# NATO Confidential
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - NATO Confidential"; flow:to_server,established; pcre:"///((NATO\sCONFIDENTIAL)|NC)//MR/ism"; classtype:policy-violation; sid:2002501; rev:3;)
+#
+# NATO COSMIC Top Secret Atomal
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - NATO COSMIC Top Secret Atomal"; flow:to_server,established; pcre:"///((COSMIC\sTOP\sSECRET\sATOMAL)|CTSA)//MR/ism"; classtype:policy-violation; sid:2002502; rev:3;)
+#
+# NATO Secret Atomal
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - NATO Secret Atomal"; flow:to_server,established; pcre:"///((NATO\sSECRET\sATOMAL)|NSA)//MR/ism"; classtype:policy-violation; sid:2002503; rev:3;)
+#
+# NATO Secret
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - NATO Secret"; flow:to_server,established; pcre:"///((NATO\sSECRET)|NS)//MR/ism"; classtype:policy-violation; sid:2002504; rev:3;)
+#
+# US Confidential, Electronic Format
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential, Electronic"; flow:to_server,established; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(CC)\r\n)/ism"; classtype:policy-violation; sid:2002505; rev:3;)
+#
+# US Top Secret, Electronic Format
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret, Electronic"; flow:to_server,established; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(TT)\r\n)/ism"; classtype:policy-violation; sid:2002506; rev:3;)
+#
+# US Secret, Electronic Format
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret, Electronic"; flow:to_server,established; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(SS)\r\n)/ism"; classtype:policy-violation; sid:2002507; rev:3;)
+#
+# US Confidential Authorized for Release To
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential REL TO"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002508; rev:3;)
+#
+# US Top Secret Authorized for Release To
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret REL TO"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002509; rev:3;)
+#
+# US Secret Authorized for Release To
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret REL TO"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002510; rev:3;)
+#
+# US Confidential Comint
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential COMINT"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002511; rev:3;)
+#
+# US Top Secret Comint
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret COMINT"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002512; rev:3;)
+#
+# US Secret Comint
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret COMINT"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002513; rev:3;)
+#
+# US Unclassified Communications Security Material
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Unclassified COMSEC"; flow:to_server,established; pcre:"/(UNCLASSIFIED|U)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002514; rev:3;)
+#
+# US Confidential Communications Security Material
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential COMSEC"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002515; rev:3;)
+#
+# US Top Secret Communications Security Material
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret COMSEC"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002516; rev:3;)
+#
+# US Secret Communications Security Material
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret COMSEC"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002517; rev:3;)
+#
+# US Controlled Imagery
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret IMCON"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(IMCON|IMC)[\s\w,/-]*(?=//(X1|MR))/ism"; classtype:policy-violation; sid:2002518; rev:3;)
+#
+# US Top Secret Critical Nuclear Weapon Design Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret CNWDI"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(CRITICAL\sNUCLEAR\sWEAPON\sDESIGN\sINFORMATION|CNWDI)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002519; rev:3;)
+#
+# US Secret Critical Nuclear Weapon Design Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret CNWDI"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(CRITICAL\sNUCLEAR\sWEAPON\sDESIGN\sINFORMATION|CNWDI)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002520; rev:3;)
+#
+# US Top Secret Talent Keyhole
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret TK"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(TALENT\sKEYHOLE|TK)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002521; rev:3;)
+#
+# US Secret Talent Keyhole
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret TK"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(TALENT\sKEYHOLE|TK)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002522; rev:3;)
+#
+# US Foreign Government Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US FGI"; flow:to_server,established; pcre:"///FGI[\s\w,/-]*(?=//X5)/ism"; classtype:policy-violation; sid:2002523; rev:3;)
+#
+# US For Official Use Only
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US FOUO"; flow:to_server,established; pcre:"/(UNCLASSIFIED|U)//(FOR\sOFFICIAL\sUSE\sONLY|FOUO)/ism"; classtype:policy-violation; sid:2002524; rev:3;)
+#
+# US Confidential Not Releasable to Foreign Nationals
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential NOFORN"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002525; rev:3;)
+#
+# US Top Secret Not Releasable to Foreign Nationals
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret NOFORN"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002526; rev:3;)
+#
+# US Secret Not Releasable to Foreign Nationals
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret NOFORN"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002527; rev:3;)
+#
+# US Confidential Originator Controlled
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential ORCON"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002704; rev:2;)
+#
+# US Top Secret Originator Controlled
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret ORCON"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002528; rev:3;)
+#
+# US Secret Originator Controlled
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret ORCON"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002529; rev:3;)
+#
+# US Unclassified Proprietary Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Unclassified PROPIN"; flow:to_server,established; pcre:"/(UNCLASSIFIED|U)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002530; rev:3;)
+#
+# US Confidential Proprietary Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential PROPIN"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002531; rev:3;)
+#
+# US Top Secret Proprietary Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret PROPIN"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002532; rev:3;)
+#
+# US Secret Proprietary Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret PROPIN"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002533; rev:3;)
+#
+# US Confidential Restricted Data
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential RD"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002534; rev:3;)
+#
+# US Top Secret Restricted Data
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret RD"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002535; rev:3;)
+#
+# US Secret Restricted Data
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret RD"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002536; rev:3;)
+#
+# US Sources and Methods Information
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US SAMI"; flow:to_server,established; pcre:"/SAMI[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002537; rev:3;)
+#
+# US Confidential Special Category
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Confidential SPECAT"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002538; rev:3;)
+#
+# US Top Secret Special Category
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret SPECAT"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002539; rev:3;)
+#
+# US Secret Special Category
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Secret SPECAT"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002540; rev:3;)
+#
+# US Top Secret Single Integrated Operations Plan
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - US Top Secret STOP"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*STOP[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002541; rev:3;)
+#
+# The word "private"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Private"; flow:to_server,established; pcre:"/\Wprivate\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002542; rev:3;)
+#
+# The word "restricted"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Restricted"; flow:to_server,established; pcre:"/(?<!//)\Wrestricted[^\w/]/ism"; classtype:policy-violation; sid:2002543; rev:3;)
+#
+# The word "confidential"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Confidential"; flow:to_server,established; pcre:"/(?<!//)\Wconfidential[^\w/]/ism"; classtype:policy-violation; sid:2002544; rev:3;)
+#
+# The word "secret"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Secret"; flow:to_server,established; pcre:"/(?<!TOP|//)\Wsecret[^\w/a]/ism"; classtype:policy-violation; sid:2002545; rev:3;)
+#
+# The phrase "top secret"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Top Secret"; flow:to_server,established; pcre:"/(?<!//)\Wtop\ssecret[^\w/a]/ism"; classtype:policy-violation; sid:2002546; rev:3;)
+#
+# The word "sealed"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Sealed"; flow:to_server,established; pcre:"/\Wsealed\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002547; rev:3;)
+#
+# The word "sensitive"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Sensitive"; flow:to_server,established; pcre:"/(?<!law\senforcement)\Wsensitive\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002548; rev:3;)
+#
+# The word "proprietary"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Proprietary"; flow:to_server,established; pcre:"/\Wproprietary\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002549; rev:3;)
+#
+# The word "protected"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Protected"; flow:to_server,established; pcre:"/\Wprotected\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002550; rev:3;)
+#
+# The phrase "law enforcement sensitive"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Law Enorcement Sensitive"; flow:to_server,established; pcre:"/\Wlaw\senforcement\ssensitive\W/ism"; classtype:policy-violation; sid:2002551; rev:3;)
+#
+# The phrase "internal use only"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Internal Use Only"; flow:to_server,established; pcre:"/\Winternal\suse\sonly\W/ism"; classtype:policy-violation; sid:2002552; rev:3;)
+#
+# The phrase "date of birth" or its typical abbreviations
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Date of Birth"; flow:to_server,established; pcre:"/[^\w&]d(ate)?(-)?o(f)?(-)?b(irth)?\W[\s\w,/-]*(?=([0-9]{2}[-/][0-9]{2}[-/][0-9]{2,4})|[0-9]{8})/ism"; classtype:policy-violation; sid:2002553; rev:3;)
+#
+# Health Care Common Procedure Coding System (HCPCS) Codes
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - HCPCS Code"; flow:to_server,established; pcre:"/\Whcpcs\W[\s\w,/-]*(?=[a-z][0-9]{10})/ism"; classtype:policy-violation; sid:2002554; rev:3;)
+#
+# International Statistical Classification of Diseases and Related Health Problems 10th Revision (ICD-10) Codes
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - ICD-10 Code"; flow:to_server,established; pcre:"/\Wicd\W[\s\w,/-]*(?=[a-z][0-9]{2}\.[0-9]{2})/ism"; classtype:policy-violation; sid:2002555; rev:3;)
+#
+# Food and Drug Administration (FDA) National Drug Code (NDC) Codes
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - FDA NDC Code"; flow:to_server,established; pcre:"/\Wndc\W[\s\w,/-]*(?=([0-9]{4}-[0-9]{4}-[0-9]{2}|[0-9]{5}-[0-9]{3}-[0-9]{2}|[0-9]{5}-[0-9]{4}-[0-9]{1,2}))/ism"; classtype:policy-violation; sid:2002556; rev:3;)
+#
+# American Dental Association (ADA) Dental Procedure Codes
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - ADA Procedure Code"; flow:to_server,established; pcre:"/\Wada\W[\s\w,/-]*(?=d[0-9]{4})/ism"; classtype:policy-violation; sid:2002557; rev:3;)
+#
+# Diagnostic and Statistical Manual of Mental Disorders (DSM-IV) Codes
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - DSM-IV Code"; flow:to_server,established; pcre:"/\Wdsm\W[\s\w,/-]*(?=([2-9][0-9]{2}(\.[0-9]{1,2}?)|(v[167][0-9]\.[0-9]{1,2})))/ism"; classtype:policy-violation; sid:2002558; rev:4;)
+#
+# American Medical Association (AMA) Current Procedural Terminology (CPT) Codes
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - AMA CPT Code"; flow:to_server,established; pcre:"/\Wcpt\W[\s\w,/-]*(?=[0-9]{4}[ft]|[0-9]{5})/ism"; classtype:policy-violation; sid:2002559; rev:3;)
+#
+# Japan Credit Bureau Credit Card Number
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Credit Card, JCB"; flow:to_server,established; pcre:"/\Wj(apan\s)?c(redit\s)?b(ureau)?\W[\s\w,/-]*(?=(3[12359][0-9]{14})|(1800|2131)[0-9]{11})/ism"; classtype:policy-violation; sid:2002561; rev:3;)
+#
+# The word "password", its typical abbreviations or written/abbreviated in a few forms of "leet"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Password"; flow:to_server,established; pcre:"/\W[p][a4@][sz5]{0,2}[w]([o0][r])?[d]\W/ism"; classtype:policy-violation; sid:2002567; rev:3;)
+#
+# The word "appraisal"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Appraisal"; flow:to_server,established; pcre:"/\Wappraisal(s)?\W/ism"; classtype:policy-violation; sid:2002568; rev:3;)
+#
+# The phrase "account balance"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Account Balance"; flow:to_server,established; pcre:"/\Waccount\sbalance(s)?\W/ism"; classtype:policy-violation; sid:2002569; rev:3;)
+#
+# The phrase "payment history"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Payment History"; flow:to_server,established; pcre:"/\Wpayment\shistory\W/ism"; classtype:policy-violation; sid:2002570; rev:3;)
+#
+# The phrase "annual income"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Annual Income"; flow:to_server,established; pcre:"/\Wannual\sincome(s)?\W/ism"; classtype:policy-violation; sid:2002571; rev:3;)
+#
+# The phrase "credit history"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Credit History"; flow:to_server,established; pcre:"/\Wcredit\shistor(y|ies)\W/ism"; classtype:policy-violation; sid:2002572; rev:3;)
+#
+# The phrase "transaction history"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Transaction History"; flow:to_server,established; pcre:"/\Wtransaction\shistor(y|ies)\W/ism"; classtype:policy-violation; sid:2002573; rev:3;)
+#
+# The phrase "customer list"
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY HTTP - Customer List"; flow:to_server,established; pcre:"/\Wcustomer\slist(s)?\W/ism"; classtype:policy-violation; sid:2002574; rev:3;)
+#
+#
+##########################################
+#
+#  High Ports, possibly Passive FTP DATA
+#
+# Non-US Restricted
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Non-US Restricted"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+RESTRICTED//X5/ism"; classtype:policy-violation; sid:2002575; rev:3;)
+#
+# Non-US Confidential
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Non-US Confidential"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+CONFIDENTIAL//X5/ism"; classtype:policy-violation; sid:2002576; rev:3;)
+#
+# Non-US Top Secret
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Non-US Top Secret"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+TOP\sSECRET//X5/ism"; classtype:policy-violation; sid:2002577; rev:3;)
+#
+# Non-US Secret
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Non-US Secret"; flow:to_server,established; pcre:"///([A-Z]{3}\s)+(?<!TOP\s)SECRET//X5/ism"; classtype:policy-violation; sid:2002578; rev:3;)
+#
+# NATO Restricted
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  NATO Restricted"; flow:to_server,established; pcre:"///((NATO\sRESTRICTED)|NR)//MR/ism"; classtype:policy-violation; sid:2002579; rev:3;)
+#
+# NATO Confidential Atomal
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  NATO Confidential Atomal"; flow:to_server,established; pcre:"///((NATO\sCONFIDENTIAL\sATOMAL)|NCA)//MR/ism"; classtype:policy-violation; sid:2002580; rev:3;)
+#
+# NATO Confidential
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  NATO Confidential"; flow:to_server,established; pcre:"///((NATO\sCONFIDENTIAL)|NC)//MR/ism"; classtype:policy-violation; sid:2002581; rev:3;)
+#
+# NATO COSMIC Top Secret Atomal
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  NATO COSMIC Top Secret Atomal"; flow:to_server,established; pcre:"///((COSMIC\sTOP\sSECRET\sATOMAL)|CTSA)//MR/ism"; classtype:policy-violation; sid:2002582; rev:3;)
+#
+# NATO Secret Atomal
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  NATO Secret Atomal"; flow:to_server,established; pcre:"///((NATO\sSECRET\sATOMAL)|NSA)//MR/ism"; classtype:policy-violation; sid:2002583; rev:3;)
+#
+# NATO Secret
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  NATO Secret"; flow:to_server,established; pcre:"///((NATO\sSECRET)|NS)//MR/ism"; classtype:policy-violation; sid:2002584; rev:3;)
+#
+# US Confidential, Electronic Format
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential, Electronic"; flow:to_server,established; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(CC)\r\n)/ism"; classtype:policy-violation; sid:2002585; rev:3;)
+#
+# US Top Secret, Electronic Format
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret, Electronic"; flow:to_server,established; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(TT)\r\n)/ism"; classtype:policy-violation; sid:2002586; rev:3;)
+#
+# US Secret, Electronic Format
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret, Electronic"; flow:to_server,established; pcre:"/QQQQ\r\n(?=(O|P|R|Z)\r\n(SS)\r\n)/ism"; classtype:policy-violation; sid:2002587; rev:3;)
+#
+# US Confidential Authorized for Release To
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential REL TO"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002588; rev:3;)
+#
+# US Top Secret Authorized for Release To
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret REL TO"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002589; rev:3;)
+#
+# US Secret Authorized for Release To
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret REL TO"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*REL\sTO\sUSA[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002590; rev:3;)
+#
+# US Confidential Comint
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential COMINT"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002591; rev:3;)
+#
+# US Top Secret Comint
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret COMINT"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002592; rev:3;)
+#
+# US Secret Comint
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret COMINT"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(COMINT|SI)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002593; rev:3;)
+#
+# US Unclassified Communications Security Material
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Unclassified COMSEC"; flow:to_server,established; pcre:"/(UNCLASSIFIED|U)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002594; rev:3;)
+#
+# US Confidential Communications Security Material
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential COMSEC"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002595; rev:3;)
+#
+# US Top Secret Communications Security Material
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret COMSEC"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002596; rev:3;)
+#
+# US Secret Communications Security Material
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret COMSEC"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*COMSEC[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002597; rev:3;)
+#
+# US Controlled Imagery
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret IMCON"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(IMCON|IMC)[\s\w,/-]*(?=//(X1|MR))/ism"; classtype:policy-violation; sid:2002598; rev:3;)
+#
+# US Top Secret Critical Nuclear Weapon Design Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret CNWDI"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(CRITICAL\sNUCLEAR\sWEAPON\sDESIGN\sINFORMATION|CNWDI)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002599; rev:3;)
+#
+# US Secret Critical Nuclear Weapon Design Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret CNWDI"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(CRITICAL\sNUCLEAR\sWEAPON\sDESIGN\sINFORMATION|CNWDI)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002600; rev:3;)
+#
+# US Top Secret Talent Keyhole
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret TK"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(TALENT\sKEYHOLE|TK)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002601; rev:3;)
+#
+# US Secret Talent Keyhole
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret TK"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(TALENT\sKEYHOLE|TK)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002602; rev:3;)
+#
+# US Foreign Government Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US FGI"; flow:to_server,established; pcre:"///FGI[\s\w,/-]*(?=//X5)/ism"; classtype:policy-violation; sid:2002603; rev:3;)
+#
+# US For Official Use Only
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US FOUO"; flow:to_server,established; pcre:"/(UNCLASSIFIED|U)//(FOR\sOFFICIAL\sUSE\sONLY|FOUO)/ism"; classtype:policy-violation; sid:2002604; rev:3;)
+#
+# US Confidential Not Releasable to Foreign Nationals
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential NOFORN"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002605; rev:3;)
+#
+# US Top Secret Not Releasable to Foreign Nationals
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret NOFORN"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002606; rev:3;)
+#
+# US Secret Not Releasable to Foreign Nationals
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret NOFORN"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*NOFORN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002607; rev:3;)
+#
+# US Confidential Originator Controlled
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential ORCON"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002608; rev:3;)
+#
+# US Top Secret Originator Controlled
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret ORCON"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002609; rev:3;)
+#
+# US Secret Originator Controlled
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret ORCON"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(ORIGINATOR\sCONTROLLED|ORCON)[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002610; rev:3;)
+#
+# US Unclassified Proprietary Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Unclassified PROPIN"; flow:to_server,established; pcre:"/(UNCLASSIFIED|U)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002611; rev:3;)
+#
+# US Confidential Proprietary Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential PROPIN"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002612; rev:3;)
+#
+# US Top Secret Proprietary Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret PROPIN"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002613; rev:3;)
+#
+# US Secret Proprietary Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret PROPIN"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*PROPIN[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002614; rev:3;)
+#
+# US Confidential Restricted Data
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential RD"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002615; rev:3;)
+#
+# US Top Secret Restricted Data
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret RD"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002616; rev:3;)
+#
+# US Secret Restricted Data
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret RD"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*(RESTRICTED\sDATA|RD)[\s\w,/-]*(?=//MR)/ism"; classtype:policy-violation; sid:2002617; rev:3;)
+#
+# US Sources and Methods Information
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US SAMI"; flow:to_server,established; pcre:"/SAMI[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002618; rev:3;)
+#
+# US Confidential Special Category
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Confidential SPECAT"; flow:to_server,established; pcre:"/(CONFIDENTIAL|C)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002619; rev:3;)
+#
+# US Top Secret Special Category
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret SPECAT"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002620; rev:3;)
+#
+# US Secret Special Category
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Secret SPECAT"; flow:to_server,established; pcre:"/(?<!TOP\s|T)(SECRET|S)//[\s\w,/-]*SPECAT[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002621; rev:3;)
+#
+# US Top Secret Single Integrated Operations Plan
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  US Top Secret STOP"; flow:to_server,established; pcre:"/(TOP\sSECRET|TS)//[\s\w,/-]*STOP[\s\w,/-]*(?=//(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002622; rev:3;)
+#
+# The word "private"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Private"; flow:to_server,established; pcre:"/\Wprivate\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002623; rev:3;)
+#
+# The word "restricted"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Restricted"; flow:to_server,established; pcre:"/(?<!//)\Wrestricted[^\w/]/ism"; classtype:policy-violation; sid:2002624; rev:3;)
+#
+# The word "confidential"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Confidential"; flow:to_server,established; pcre:"/(?<!//)\Wconfidential[^\w/]/ism"; classtype:policy-violation; sid:2002625; rev:3;)
+#
+# The word "secret"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Secret"; flow:to_server,established; pcre:"/(?<!TOP|//)\Wsecret[^\w/a]/ism"; classtype:policy-violation; sid:2002626; rev:3;)
+#
+# The phrase "top secret"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Top Secret"; flow:to_server,established; pcre:"/(?<!//)\Wtop\ssecret[^\w/a]/ism"; classtype:policy-violation; sid:2002627; rev:3;)
+#
+# The word "sealed"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Sealed"; flow:to_server,established; pcre:"/\Wsealed\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002628; rev:3;)
+#
+# The word "sensitive"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Sensitive"; flow:to_server,established; pcre:"/(?<!law\senforcement)\Wsensitive\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002629; rev:3;)
+#
+# The word "proprietary"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Proprietary"; flow:to_server,established; pcre:"/\Wproprietary\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002630; rev:4;)
+#
+# The word "protected"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Protected"; flow:to_server,established; pcre:"/\Wprotected\W(?!/(25)?X[1-9])/ism"; classtype:policy-violation; sid:2002631; rev:4;)
+#
+# The phrase "law enforcement sensitive"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Law Enorcement Sensitive"; flow:to_server,established; pcre:"/\Wlaw\senforcement\ssensitive\W/ism"; classtype:policy-violation; sid:2002632; rev:4;)
+#
+# The phrase "internal use only"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Internal Use Only"; flow:to_server,established; pcre:"/\Winternal\suse\sonly\W/ism"; classtype:policy-violation; sid:2002633; rev:4;)
+#
+# The phrase "date of birth" or its typical abbreviations
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Date of Birth"; flow:to_server,established; pcre:"/[^\w&]d(ate)?(-)?o(f)?(-)?b(irth)?\W[\s\w,/-]*(?=([0-9]{2}[-/][0-9]{2}[-/][0-9]{2,4})|[0-9]{8})/ism"; classtype:policy-violation; sid:2002634; rev:4;)
+#
+# Health Care Common Procedure Coding System (HCPCS) Codes
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  HCPCS Code"; flow:to_server,established; pcre:"/\Whcpcs\W[\s\w,/-]*(?=[a-z][0-9]{10})/ism"; classtype:policy-violation; sid:2002635; rev:4;)
+#
+# International Statistical Classification of Diseases and Related Health Problems 10th Revision (ICD-10) Codes
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  ICD-10 Code"; flow:to_server,established; pcre:"/\Wicd\W[\s\w,/-]*(?=[a-z][0-9]{2}\.[0-9]{2})/ism"; classtype:policy-violation; sid:2002636; rev:4;)
+#
+# Food and Drug Administration (FDA) National Drug Code (NDC) Codes
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  FDA NDC Code"; flow:to_server,established; pcre:"/\Wndc\W[\s\w,/-]*(?=([0-9]{4}-[0-9]{4}-[0-9]{2}|[0-9]{5}-[0-9]{3}-[0-9]{2}|[0-9]{5}-[0-9]{4}-[0-9]{1,2}))/ism"; classtype:policy-violation; sid:2002637; rev:4;)
+#
+# American Dental Association (ADA) Dental Procedure Codes
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  ADA Procedure Code"; flow:to_server,established; pcre:"/\Wada\W[\s\w,/-]*(?=d[0-9]{4})/ism"; classtype:policy-violation; sid:2002638; rev:4;)
+#
+# Diagnostic and Statistical Manual of Mental Disorders (DSM-IV) Codes
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  DSM-IV Code"; flow:to_server,established; pcre:"/\Wdsm\W[\s\w,/-]*(?=([2-9][0-9]{2}(\.[0-9]{1,2}?)|(v[167][0-9]\.[0-9]{1,2})))/ism"; classtype:policy-violation; sid:2002639; rev:6;)
+#
+# American Medical Association (AMA) Current Procedural Terminology (CPT) Codes
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  AMA CPT Code"; flow:to_server,established; pcre:"/\Wcpt\W[\s\w,/-]*(?=[0-9]{4}[ft]|[0-9]{5})/ism"; classtype:policy-violation; sid:2002640; rev:4;)
+#
+# Japan Credit Bureau Credit Card Number
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Credit Card, JCB"; flow:to_server,established; pcre:"/\Wj(apan\s)?c(redit\s)?b(ureau)?\W[\s\w,/-]*(?=(3[12359][0-9]{14})|(1800|2131)[0-9]{11})/ism"; classtype:policy-violation; sid:2002642; rev:4;)
+#
+# The word "password", its typical abbreviations or written/abbreviated in a few forms of "leet"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Password"; flow:to_server,established; pcre:"/\W[p][a4@][sz5]{0,2}[w]([o0][r])?[d]\W/ism"; classtype:policy-violation; sid:2002648; rev:4;)
+#
+# The word "appraisal"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Appraisal"; flow:to_server,established; pcre:"/\Wappraisal(s)?\W/ism"; classtype:policy-violation; sid:2002649; rev:4;)
+#
+# The phrase "account balance"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Account Balance"; flow:to_server,established; pcre:"/\Waccount\sbalance(s)?\W/ism"; classtype:policy-violation; sid:2002650; rev:4;)
+#
+# The phrase "payment history"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Payment History"; flow:to_server,established; pcre:"/\Wpayment\shistory\W/ism"; classtype:policy-violation; sid:2002651; rev:4;)
+#
+# The phrase "annual income"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Annual Income"; flow:to_server,established; pcre:"/\Wannual\sincome(s)?\W/ism"; classtype:policy-violation; sid:2002652; rev:4;)
+#
+# The phrase "credit history"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Credit History"; flow:to_server,established; pcre:"/\Wcredit\shistor(y|ies)\W/ism"; classtype:policy-violation; sid:2002653; rev:4;)
+#
+# The phrase "transaction history"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Transaction History"; flow:to_server,established; pcre:"/\Wtransaction\shistor(y|ies)\W/ism"; classtype:policy-violation; sid:2002654; rev:4;)
+#
+# The phrase "customer list"
+#alert tcp $HOME_NET 1024: -> $EXTERNAL_NET 1024: (msg:"ET POLICY High Ports -  Customer List"; flow:to_server,established; pcre:"/\Wcustomer\slist(s)?\W/ism"; classtype:policy-violation; sid:2002655; rev:4;)
+#
+#by Matt Jonkman, sandnetted binary
+#  App on port 20000 for this casino stuff. Not malicious, but likely not allowed in most environments
+alert tcp $HOME_NET any -> $EXTERNAL_NET 20000 (msg:"ET POLICY Club World Casino Client in Use"; flow:established,to_server; dsize:23; content:"Club World Casinos"; classtype:policy-violation; sid:2007754; rev:3;)
+
+#Submitted by Matt Jonkman
+#Thees rules are disabled by default. They should generally be run on the outside of your network, not internally. Enable it where useful.
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (16 digit spaced)"; pcre:"/ (6011|5[1-5]\d{2}|4\d{3}|3\d{3}) \d{4} \d{4} \d{4}/"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001375; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (16 digit dashed)"; pcre:"/ (6011|5[1-5]\d{2}|4\d{3}|3\d{3})-\d{4}-\d{4}-\d{4}/"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001376; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (16 digit)"; pcre:"/ (6011|5[1-5]\d{2}|4\d{3}|3\d{3})\d{12} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001377; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (15 digit)"; pcre:"/ (3[4|7]\d{2}|2014|2149|2131|1800)\d{11} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001378; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (15 digit spaced)"; pcre:"/ (3[4|7]\d{2}|2014|2149|2131|1800) \d{4} \d{4} \d{3} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001379; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (15 digit dashed)"; pcre:"/ (3[4|7]\d{2}|2014|2149|2131|1800)-\d{4}-\d{4}-\d{3} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001380; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (14 digit)"; pcre:"/ (30[0-5]\d|36\d{2}|38\d{2})\d{10} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001381; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (14 digit spaced)"; pcre:"/ (30[0-5]\d|36\d{2}|38\d{2}) \d{4} \d{4} \d{2} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001382; rev:10;)
+#alert ip any any -> any any (msg: "ET Credit Card Number Detected in Clear (14 digit dashed)"; pcre:"/ (30[0-5]\d|36\d{2}|38\d{2})-\d{4}-\d{4}-\d{2} /"; reference:url,www.beachnet.com/~hstiles/cardtype.html; classtype: policy-violation; sid: 2001383; rev:10;)
+
+#Submitted by Joseph Gama
+#alert udp $DNS_SERVERS 53 -> any any (msg:"ET DNS - Standard query response, Format error"; pcre:"/..[\x81\x82\x83\x84\x85\x86\x87]\x81/"; classtype: not-suspicious; sid: 2001116; rev:3;)
+#alert udp $DNS_SERVERS 53 -> any any (msg:"ET DNS - Standard query response, Name Error"; pcre:"/..[\x81\x82\x83\x84\x85\x86\x87]\x83/"; classtype: not-suspicious; sid: 2001117; rev:3;)
+#alert udp $DNS_SERVERS 53 -> any any (msg:"ET DNS - Standard query response, Not Implemented"; pcre:"/..[\x81\x82\x83\x84\x85\x86\x87]\x84/"; classtype: not-suspicious; sid: 2001118; rev:3;)
+#alert udp $DNS_SERVERS 53 -> any any (msg:"ET DNS - Standard query response, Refused"; pcre:"/..[\x81\x82\x83\x84\x85\x86\x87]\x85/"; classtype: not-suspicious; sid: 2001119; rev:3;)
+
+#Adapted from nextsoft.cz
+alert udp any 53 -> ![$DNS_SERVERS,$SMTP_SERVERS] any (msg:"ET POLICY Unusual number of DNS No Such Name Responses"; content:"|83|"; offset:3; depth:1; threshold: type both , track by_dst, count 50, seconds 300; classtype:bad-unknown; sid:2003195; rev:4;)
+    
+#by Myron Davis
+alert udp $HOME_NET any -> $EXTERNAL_NET 53 (msg:"ET POLICY nstx DNS Tunnel Outbound"; content:"cT"; offset:12; depth:3; content:"|00 10 00 01 00 00 29 08|"; within:255; classtype:bad-unknown; reference:url,savannah.nongnu.org/projects/nstx/; reference:url,nstx.dereference.de/nstx; sid:2002676; rev:2;)
+
+#Submitted by Ole-Martin
+alert tcp any any -> $HOME_NET any (msg:"ET POLICY Dameware Remote Control Service Install"; flow: to_server,established; content:"DWRCK.DLL"; nocase; classtype: successful-admin; sid: 2001294; rev:3;)
+
+#Blake Hartstein of Demarc
+#Potentially noisy, Not recommended unless you disallow exe files. written for executable virii that spread through email
+#alert tcp $EXTERNAL_NET any -> $SMTP_SERVERS 25 (msg:"ET POLICY SMTP Executable attachment"; flow:established,to_server; content:"filename="; nocase; content:".exe"; nocase; distance:0; pcre:"/filename=\s*[^\n]+\.exe/i"; classtype:policy-violation; sid:2003325; rev:3;)
+
+#Matt Jonkman
+# To catch generic exe downloads via http. This does not mean it's a problem, just of interest.
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY exe download via HTTP - Informational"; flow:established,to_server; uricontent:".exe"; nocase; content:"GET "; nocase; offset:0; depth:4; classtype:policy-violation; sid:2003595; rev:2;)
+
+#to catch the common urls for storm worm downloads, etc
+#by Jack Pepper and Reg Quinton
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Possible Ecard Trojan download"; flow:established,to_server; uricontent:".exe"; nocase; pcre:"/(card|gif|jpg|jpeg|cartao)\.exe/Ui"; classtype:trojan-activity; sid:2006434; rev:4;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY exe download without User Agent"; flow:established,to_server; uricontent:".exe"; nocase; content:".exe"; depth:150; nocase; content:"GET "; nocase; depth:4; offset:0; content:!"User-Agent\:"; content:!"download.windowsupdate.com"; content:!"mms\://"; nocase; classtype:policy-violation; sid:2003179; rev:4;)
+
+#From Charles Lacroix
+# All form elements are encoded before they are sent to the server
+# This makes things a bit more complicated to decode via snort at least
+# for me. This rule will trigger when a user is starting to place
+# an item for sale on the ebay site.
+#
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg: "ET POLICY eBay Bid Placed"; flow: to_server,established; uricontent:"/ws/eBayISAPI.dll/"; nocase; content:"maxbid="; nocase; content:"offer.ebay.com"; nocase; classtype: policy-violation; sid: 2001898; rev:3;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg: "ET POLICY eBay Placing Item for sale"; flow: to_server,established; uricontent:"/ws2/eBayISAPI.dll"; nocase; content:".ebay.com"; nocase; classtype: policy-violation; sid: 2001907; rev:3;)
+# Look for a single item
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg: "ET POLICY eBay View Item"; flow: to_server,established; uricontent:"/ws/eBayISAPI.dll"; nocase; content:"ViewItem"; nocase; content:".ebay.com"; nocase; classtype: policy-violation; sid: 2001908; rev:4;)
+# Mark an item to watch
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg: "ET POLICY eBay Watch This Item"; flow: to_server,established; uricontent:"/ws/eBayISAPI.dll"; nocase; content:"MakeTrack&Item="; nocase; content:".ebay.com"; nocase; classtype: policy-violation; sid: 2001909; rev:4;)
+
+#by Steven Adair at securityzone.org
+#Rule to catch all FTP logins that do not start with "anonymous" or "ftp"
+# and do not contain "pass " (pass followed by a space). -steven@securityzone
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg:"ET POLICY FTP Login Attempt (non-anonymous)"; flow:to_server,established; content:"USER"; content:!"PASS "; nocase; pcre:!"/^USER\s+(anonymous|ftp)/smi"; classtype:misc-activity; sid:2003303; rev:2;)
+
+#By CunningPike
+alert tcp $HOME_NET 21 -> $EXTERNAL_NET any (msg:"ET POLICY FTP Login Successful (non-anonymous)"; flow:from_server,established; flowbits:isset,ftp.user.login; flowbits:isnotset,ftp.user.logged_in; flowbits:set,ftp.user.logged_in; content:"230 "; pcre:!"/^230(\s+USER)?\s+(anonymous|ftp)/smi"; classtype:misc-activity; sid:2003410; rev:5;)
+
+#by Will Metcalf
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY FOX,ABC On-demand UA"; flow:to_server,established; content:"User-Agent\: QSP"; nocase; pcre:"/User-Agent\:[^\n]+QSP\s*\d+\:\d+\s*/i"; classtype:policy-violation; sid:2007639; rev:3;)
+
+#by Jamian Mason of Deepnines.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Gazzag.com Social Site Access"; flow:established,to_server; content:"Host\: www.gazzag.com"; threshold: type both, track by_src, count 5, seconds 300; classtype:policy-violation; sid:2003456; rev:2;)
+
+# Submitted 2006-10-17 by Adam Nunn
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 (msg:"ET POLICY docs.google.com Activity"; flow:established,to_server; content:"Host|3a| docs.google.com"; nocase; classtype:policy-violation; reference:url,docs.google.com; sid:2003121; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 (msg:"ET POLICY Possible docs.google.com Activity"; flow:established,to_server; content:"WRITELY_SID"; nocase; classtype:policy-violation; reference:url,docs.google.com; sid:2003122; rev:3;)
+
+# Matt Jonkman
+# Google calendar in the news as most entries are public
+# I'm sure it's a good calendar, but folks have to realize what's public and what's not
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Google Calendar in Use"; flow:established,to_server; uricontent:"/calendar/"; content:"GET /calendar/"; rawbytes; offset:0; content:"Host\: www.google.com|0d 0a|"; nocase; threshold:type both, count 1, seconds 60, track by_src; classtype:policy-violation; reference:url,www.computerworld.com.au/index.php?id=1687889918&eid=-255; sid:2003597; rev:2;)
+
+#By Matt Jonkman. Reviving this rule as it's been dropped from the snort.org rulesets.
+alert tcp $HOME_NET any -> 66.151.158.177 any (msg:"ET POLICY GotoMyPC Polling Client"; flow: established; threshold: type limit, track by_src, count 1, seconds 360; classtype: policy-violation; sid: 2000309; rev:7;)
+#This intends to be a more intelligent version of the old gotomypc rule, eventually to replace the old if it catches everything
+alert tcp 66.151.158.177 8200 -> $HOME_NET any (msg:"ET POLICY GotoMyPC poll.gotomypc.com Server Response to Polling Client OK"; flow: established,from_server; content:"cnt=0"; nocase; depth: 40; content:"eventid="; nocase; depth: 40; threshold: type limit, track by_src, count 1, seconds 360; classtype: policy-violation; sid: 2002022; rev:3;)
+
+#by Mikael Keri
+# Groove is a legitimate application, but may not be approved in all environments. Use these rules only if appropriate
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Groove.net Virtual Office Suite Install/Startup Report"; flow:established,to_server; content:"User-Agent\: GrooveInstallValidator|0d 0a|"; depth:200; offset:0; classtype:policy-violation; reference:url,www.groove.net; reference:url,doc.emergingthreats.net/bin/view/Main/GrooveNet; sid:2003599; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Groove.net Virtual Office Suite Install Report"; flow:established,to_server; content:"User-Agent\: Groove Install|0d 0a|"; depth:200; offset:0; classtype:policy-violation; reference:url,www.groove.net; reference:url,doc.emergingthreats.net/bin/view/Main/GrooveNet; sid:2003600; rev:3;)
+alert tcp any 2492 -> any 2492 (msg:"ET POLICY Groove.net Virtual Office In Use"; flow:established,to_server; content:"dpp\://"; nocase; content:"groove.net"; nocase; distance:0; classtype:policy-violation; reference:url,www.groove.net; reference:url,doc.emergingthreats.net/bin/view/Main/GrooveNet; sid:2003601; rev:3;)
+alert udp $HOME_NET any -> 255.255.255.255 1211 (msg:"ET POLICY Groove.net Virtual Office Local Service Discovery Broadcast"; content:"dpp\://"; nocase; content:"groove.net"; nocase; distance:0; classtype:policy-violation; reference:url,www.groove.net; reference:url,doc.emergingthreats.net/bin/view/Main/GrooveNet; sid:2003602; rev:3;)
+
+# Submitted 2006-08-30 by Robert Sharp
+#alert tcp $HOME_NET any <> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Gmail gtalk"; flow:established; pcre:"/\[\[\d{1,3}\,\[\\\"\w\\\"\,\\\".+@gmail.com.+\\\"\,\\\"/i"; classtype:policy-violation; sid:2003092; rev:2;)
+
+#Submitted by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Hotmail Inbox Access"; flow: to_server,established; content:"hotmail.msn.com"; pcre:"/(GET |GET (http|https)\:\/\/[-0-9a-z.]*)\/cgi-bin\/HoTMaiL\?curmbox=/i"; classtype: policy-violation; sid: 2000035; rev:10;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Hotmail Message Access"; flow: to_server,established; content:"hotmail.msn.com"; pcre:"/(GET |GET (http|https)\:\/\/[-0-9a-z.]*)\/cgi-bin\/getmsg\?msg=MSG/i"; classtype: policy-violation; sid: 2000036; rev:10;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Hotmail Compose Message Access"; flow: to_server,established; content:"curmbox="; nocase; content:"hotmail.msn.com"; nocase; pcre:"/(GET |GET (http|https)\:\/\/[-0-9a-z.]*)\/cgi-bin\/compose\?/i"; classtype: policy-violation; sid: 2000037; rev:10;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Hotmail Compose Message Submit"; flow: to_server,established; content:"hotmail.msn.com"; nocase; pcre:"/(POST |POST (http|https)\:\/\/[-0-9a-z.]*)\/cgi-bin\/premail/i"; classtype: policy-violation; sid: 2000038; rev:9;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Hotmail Compose Message Submit Data"; flow: to_server,established; content:"curmbox="; nocase; content:"login="; nocase; content:"msghdrid"; nocase; content:"sigflag="; nocase; classtype: policy-violation; sid: 2000039; rev:7;)
+
+#Submitted by Thomas Alex
+alert tcp $EXTERNAL_NET any -> $HOME_NET 8000 (msg:"ET MISC HP Web JetAdmin ExecuteFile admin access"; flow: to_server,established; content:"/plugins/framework/script/content.hts"; nocase; content:"ExecuteFile"; nocase; reference:bugtraq,10224; classtype: attempted-admin; sid: 2001055; rev:5;)
+
+#Submitted by Brandon Barnes
+#pass tcp any any -> any any ( msg:"ET HTTP CONNECT Tunnel"; content:"CONNECT "; nocase; content:"80"; content:" HTTP/1."; nocase; flow:to_server,established; classtype:misc-activity; sid:2000549; rev:4;)
+#pass tcp any any -> any any ( msg:"ET HTTP CONNECT Tunnel"; content:"CONNECT "; nocase; content:"443"; content:" HTTP/1."; nocase; flow:to_server,established; classtype:misc-activity; sid:2000550; rev:4;)
+#alert tcp any any -> any any (msg:"ET HTTP CONNECT Tunnel"; flow: to_server,established; content:"CONNECT "; nocase; content:!"80"; content:" HTTP/1."; nocase; classtype: misc-activity; sid: 2000547; rev:6;)
+#alert tcp any any -> any any (msg:"ET HTTP CONNECT Tunnel"; flow: to_server,established; content:"CONNECT "; nocase; content:!"443"; content:" HTTP/1."; nocase; classtype: misc-activity; sid: 2000548; rev:6;)
+#Submitted by Jason
+#alert tcp any any -> any any (msg:"ET HTTP CONNECT Tunnel Attempt"; flow: to_server,established; content:"CONNECT "; nocase; content:"|0d 0a|"; within: 1024; distance: 0; content:"HTTP/1."; nocase; within: 8; distance: -10; content:!"\:80"; within: 4; distance: -11; content:"CONNECT "; nocase; content:"|0d 0a|"; within: 1024; distance: 0; content:"HTTP/1."; nocase; within: 8; distance: -10; content:!"\:443"; within: 5; distance: -12; classtype: misc-activity; sid: 2000560; rev:7;)
+
+#idea from Blake Hartstein, use these only if you like. Not a definite indication of hostile activity
+#add a pass rule like below for any expected ports you use that are not listed
+
+#pass tcp $HOME_NET any -> $EXTERNAL_NET 8080 (msg:"ET POLICY HTTP GET on Normal Port 8080 - Passing"; flow:established,to_server; content:"GET "; nocase; depth:4; offset:0; flowbits:set,BS.HTTP.ok; flowbits:noalert; classtype:policy-violation; sid:2006407; rev:2;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET 81:65535 (msg:"ET POLICY HTTP GET on unusual Port -- Possibly Hostile"; flowbits:isnotset,BS.HTTP.ok; flow:established,to_server; content:"GET "; nocase; depth:4; offset:0; classtype:policy-violation; sid:2006408; rev:2;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET 81:65535 (msg:"ET POLICY HTTP POST on unusual Port -- Possibly Hostile"; flowbits:isnotset,BS.HTTP.ok; flow:established,to_server; content:"POST "; nocase; depth:5; offset:0; classtype:policy-violation; sid:2006409; rev:2;)
+
+#by Dajackman
+alert tcp $HOME_NET any -> 64.34.106.33 12975 (msg:"ET POLICY Outbound Hamachi VPN Connection Attempt"; flags:S,12; threshold:type limit, track by_src, count 1, seconds 120; classtype:policy-violation; reference:url,www.hamachi.cc; sid:2002729; rev:2;)
+
+#by Jamian Mason of Deepnines.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Hi5.com Social Site Access"; flow:established,to_server; content:"Host\: www.hi5.com"; threshold: type both, track by_src, count 5, seconds 300; classtype:policy-violation; sid:2003455; rev:2;)
+
+#Dutch myspace style social networking site. Not a security threat, just a generally not permissable thing for the workplace
+# by Cees Elzinga
+# Both hyves.nl and hyves.net are used, so check for "hyves."
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Hyves Login Attempt"; flow:established,to_server; content:"Host\: www.hyves."; content:"login_username"; classtype:policy-violation; sid:2007627; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Hyves Inbox Access"; flow:established,to_server; content:"Host\: www.hyves."; uricontent:"/messages/inbox/"; classtype:policy-violation; sid:2007628; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Hyves Message Access"; flow:established,to_server; content:"Host\: www.hyves."; uricontent:"/messages/inbox/messages/"; classtype:policy-violation; sid:2007629; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Hyves Compose Message"; flow:established,to_server; content:"Host\: www.hyves."; uricontent:"index.php?l1=mg"; classtype:policy-violation; sid:2007630; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Hyves Message Submit"; flow:established,to_server; content:"Host\: www.hyves."; uricontent:"/messages/"; content:"POST /messages/"; content:"postman_secret"; classtype:policy-violation; sid:2007631; rev:3;)
+
+#By Merphie from the forums
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5190 (msg:"ET POLICY ICQ Status Invisible"; flow: from_client,established; content:"|2A02|"; depth: 2; content:"|001900130005|"; offset: 4; depth: 6; classtype: policy-violation; sid: 2001801; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5190 (msg:"ET POLICY ICQ Status Change (1)"; flow: from_client,established; content:"|2A02|"; depth: 2; content:"|000E00010011|"; offset: 4; depth: 6; classtype: policy-violation; sid: 2001802; rev:5;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5190 (msg:"ET POLICY ICQ Status Change (2)"; flow: from_client,established; content:"|2A02|"; depth: 2; content:"|00120001001E|"; offset: 4; depth: 6; classtype: policy-violation; sid: 2001803; rev:5;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5190 (msg:"ET POLICY ICQ Login"; flow: from_client,established; content:"|2A01|"; depth: 2; content:"|00010001|"; offset: 8; depth: 4; classtype: policy-violation; sid: 2001804; rev:4;)
+alert tcp $HOME_NET any <> $EXTERNAL_NET any (msg:"ET POLICY ICQ Message"; flow: established; content:"|2A02|"; depth: 2; content:"|000400060000|"; offset: 6; depth: 6; classtype: policy-violation; sid: 2001805; rev:4;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY ICQ Install Direct download - Not normal mode of install"; flow:established,to_server; uricontent:"/pub/ICQ_Win95_98_NT4/"; nocase; classtype: policy-violation; sid:2002986; rev:2;)
+
+#by Mark Tombaugh
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5222 (msg:"ET POLICY Google Talk (Jabber) Client Login"; flow:established,to_server; content:"gmail.com"; nocase; content:"jabber"; nocase; distance:9; within:6; classtype:policy-violation; reference:url,talk.google.com; reference:url,www.xmpp.org; sid:2002327; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 443 (msg:"ET POLICY Google Talk TLS Client Traffic"; flow:established,to_server; content:"gmail.com"; nocase; content:"jabber"; nocase; distance:64; within:78; classtype:policy-violation; reference:url,talk.google.com; reference:url,www.xmpp.org; sid:2002330; rev:3;)
+
+#by Brad Doctor
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY Google IM traffic Windows client user sign-on"; flow:to_server; content:"ms\:xml\:ns\:xmpp-s"; content:"X-GOOGLE-TOKEN\">"; classtype:policy-violation; reference:url,www.google.com/talk; sid:2002332; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY Google IM traffic friend invited"; flow:to_server; content:"\"><invitati"; content:"on xmlns=\"google"; classtype:policy-violation; reference:url,www.google.com/talk; sid:2002333; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5222 (msg:"ET POLICY Google IM traffic Jabber client sign-on"; flow:to_server; pcre:"/gmail.com/i"; pcre:"/jabber.org/i"; pcre:"/version=/"; classtype:policy-violation; reference:url,www.google.com/talk; sid:2002334; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY Google IM traffic Windows client user sign-off"; flow:to_server; content:"|3C 2F|stream\:s"; content:"tream>"; classtype:policy-violation; reference:url,www.google.com/talk; sid:2002335; rev:5;)
+
+#Submitted by Joel Esler
+alert tcp $HOME_NET any <> $EXTERNAL_NET any (msg:"ET CHAT MSN file transfer request"; flow: established; content:"MSG "; depth: 4; content:"Content-Type|3A|"; nocase; distance: 0; content:"text/x-msmsgsinvite"; nocase; distance: 0; content:"Application-Name|3A|"; content:"File Transfer"; nocase; distance: 0; classtype: policy-violation; sid: 2001241; rev:4;)
+alert tcp $HOME_NET any <> $EXTERNAL_NET any (msg:"ET CHAT MSN file transfer accept"; flow: established; content:"MSG "; depth: 4; content:"Content-Type|3A|"; nocase; content:"text/x-msmsgsinvite"; distance: 0; content:"Invitation-Command|3A|"; content:"ACCEPT"; distance: 1; classtype: policy-violation; sid: 2001242; rev:4;)
+alert tcp $HOME_NET any <> $EXTERNAL_NET any (msg:"ET CHAT MSN file transfer reject"; flow: established; content:"MSG "; depth: 4; content:"Content-Type|3A|"; nocase; content:"text/x-msmsgsinvite"; distance: 0; content:"Invitation-Command|3A|"; content:"CANCEL"; distance: 0; content:"Cancel-Code|3A|"; nocase; content:"REJECT"; nocase; distance: 0; classtype: policy-violation; sid: 2001243; rev:4;)
+
+#Matt Jonkman, more msn
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY MSN IM Poll via HTTP"; flow: established,to_server; uricontent:"/gateway/gateway.dll?Action=poll&SessionID="; nocase; threshold: type limit, track by_src, count 10, seconds 3600; classtype: policy-violation; sid: 2001682; rev:7;)
+
+#Submitted by Scott Melnick
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY MSN status change"; flow:established,to_server; content:"CHG "; depth:55; classtype:policy-violation; sid:2002192; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg: "ET POLICY MSN Game Loading"; flow:established,to_server; content:"|6D 73 6E 67 61 6D 65 2E 61 73 70 78|"; within:90; classtype:policy-violation; sid:2002312; rev:2;)
+
+#Submitted by Joel Esler
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET CHAT Yahoo IM successful logon"; flow: from_server,established; content:"YMSG"; nocase; depth: 4; content:"|00 01|"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001253; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET CHAT Yahoo IM voicechat"; flow: from_server,established; content:"YMSG"; nocase; depth: 4; content:"|00|J"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001254; rev:4;)
+#Commenting out, duplicated in Snort.org set
+#alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM ping"; flow: to_server,established; content:"YMSG"; nocase; depth: 4; content:"|00 12|"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001255; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET CHAT Yahoo IM conference invitation"; flow: from_server,established; content:"YMSG"; nocase; depth: 4; content:"|00 18|"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001256; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET CHAT Yahoo IM conference logon success"; flow: from_server,established; content:"YMSG"; nocase; depth: 4; content:"|00 19|"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001257; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM conference message"; flow: to_server,established; content:"YMSG"; nocase; depth: 4; content:"|00 1D|"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001258; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM Unavailable Status"; flow: to_server,established; content:"|59 47 00 0b 00 00 00 00 00 12 00 00 00 00|"; depth: 55; classtype: policy-violation; sid: 2001427; rev:4;)
+alert tcp $HOME_NET any <> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM file transfer request"; flow: established; content:"YMSG"; nocase; depth: 4; content:"|00|M"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001259; rev:5;)
+#alert tcp $HOME_NET any <> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM message"; flow: established; content:"YMSG"; depth: 4; classtype: policy-violation; sid: 2001260; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET CHAT Yahoo IM successful chat join"; flow: from_server,established; content:"YMSG"; nocase; depth: 4; content:"|00 98|"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001261; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM conference offer invitation"; flow: to_server,established; content:"YMSG"; nocase; depth: 4; content:"|00|P"; offset: 10; depth: 2; classtype: policy-violation; sid: 2001262; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET CHAT Yahoo IM conference request"; flow: to_server,established; content:"<R"; depth: 2; pcre:"/^\x3c(REQIMG|RVWCFG)\x3e/ism"; classtype: policy-violation; sid: 2001263; rev:4;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET CHAT Yahoo IM conference watch"; flow: from_server,established; content:"|0D 00 05 00|"; depth: 4; classtype: policy-violation; sid: 2001264; rev:4;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET CHAT Yahoo IM Client Install"; flow: to_server,established; uricontent:"/ycontent/stats.php?version="; nocase; uricontent:"EVENT=InstallBegin"; nocase; classtype: policy-violation; sid: 2002659; rev:3;)
+
+#by Chris Newton 
+alert tcp $HOME_NET any -> $EXTERNAL_NET 5050 (msg:"ET POLICY Yahoo Chat Signin Inside Webmail"; flow:established,to_server; content:"content-length\:"; nocase; depth:15; content:"<Ymsg Command=|22|550|22|"; nocase; classtype:policy-violation; reference:url,yahoo.com; sid:2007066; rev:2;)
+alert tcp $EXTERNAL_NET 5050 -> $HOME_NET any (msg:"ET POLICY Yahoo Chat Signin Success Inside Webmail"; flow:established,to_server; content:"content-length\:"; nocase; depth:15; content:"<Ymsg Command=|22|85|22|"; nocase; classtype:policy-violation; reference:url,yahoo.com; sid:2007067; rev:2;)
+alert tcp $EXTERNAL_NET 5050 <> $HOME_NET any (msg:"ET POLICY Yahoo Chat Activity Inside Webmail"; flow:established,to_server; content:"content-length\:"; nocase; depth:15; content:"<Ymsg Command=|22|"; nocase; classtype:policy-violation; reference:url,yahoo.com; sid:2007068; rev:2;)
+alert tcp $EXTERNAL_NET 5050 <> $HOME_NET any (msg:"ET POLICY Yahoo Chat Activity Inside Webmail (2)"; flow:established,to_server; content:"<Ymsg Command=|22|"; depth:15; nocase; classtype:policy-violation; reference:url,yahoo.com; sid:2007069; rev:2;)
+
+#Submitted by Vernon Stark
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY IRC authorization message"; flow: established; content:"NOTICE AUTH"; content:"Looking up your hostname..."; nocase; classtype: misc-activity; sid: 2000355; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY IRC connection"; flow: established; content:"Welcome to the "; content:"IRC Network"; nocase; classtype: misc-activity; sid: 2000356; rev:4;)
+
+#by Matt Jonkman
+#alert ip any any -> any any (msg:"ET POLICY EIN in the clear (US-IRS Employer ID Number)"; pcre:"/ \d\d-\d{7} /"; reference:url,policy.ssa.gov/poms.nsf/lnx/0101001004; reference:url,policy.ssa.gov/poms.nsf/lnx/0101001001?opendocument; classtype:policy-violation; sid:2002658; rev:3;)
+
+#by Cam Beasley. Experimental, please report your experiences
+alert tcp $EXTERNAL_NET 1024: -> $HOME_NET 25 (msg:"ET POLICY Possible Image Spam Inbound (simple rule)"; flow:established,to_server; content:"Content-Transfer-Encoding|3A|"; content:"AMAgAOAgAABAACBAAEBAAGBAAIBAAKBAAMBAAOBAAABgACBgAEBgAGBgAIBgAKBgAMBgAOBg"; depth:575; content:"AACAACCAAECAAGCAAICAAKCAAMCAAOCAAACgACCgAECgAGCgAICgAKCgAMCgAOCgAADAACDA"; content:"AEDAAGDAAIDAAKDAAMDAAODAAADgACDgAEDgAGDgAIDgAKDgAMDgAODgAAAAQCAAQEAAQGAA"; classtype:misc-activity; sid:2003096; rev:2;)
+
+alert tcp $EXTERNAL_NET 1024: -> $HOME_NET 25 (msg:"ET POLICY Possible Image Spam Inbound (complex rule)"; flow:established,to_server; content:"Content-Transfer-Encoding|3A|"; content:"AMAgAOAgAABAACBAAEBAAGBAAIBAAKBAAMBAAOBAAABgACBgAEBgAGBgAIBgAKBgAMBgAOBg"; depth:575; content:"AACAACCAAECAAGCAAICAAKCAAMCAAOCAAACgACCgAECgAGCgAICgAKCgAMCgAOCgAADAACDA"; content:"AEDAAGDAAIDAAKDAAMDAAODAAADgACDgAEDgAGDgAIDgAKDgAMDgAODgAAAAQCAAQEAAQGAA"; content:"QIAAQKAAQMAAQOAAQAAgQCAgQEAgQGAgQIAgQKAgQMAgQOAgQABAQCBAQEBAQGBAQIBAQKBA"; content:"QMBAQOBAQABgQCBgQEBgQGBgQIBgQKBgQMBgQOBgQACAQCCAQECAQGCAQICAQKCAQMCAQOCA"; content:"QACgQCCgQECgQGCgQICgQKCgQMCgQOCgQADAQCDAQEDAQGDAQIDAQKDAQMDAQODAQADgQCDg"; content:"QEDgQGDgQIDgQKDgQMDgQODgQAAAgCAAgEAAgGAAgIAAgKAAgMAAgOAAgAAggCAggEAggGAg"; content:"gIAggKAggMAggOAggABAgCBAgEBAgGBAgIBAgKBAgMBAgOBAgABggCBggEBggGBggIBggKBg"; content:"gMBggOBggACAgCCAgECAgGCAgICAgKCAgMCAgOCAgACggCCggECggGCggICggKCggMCggOCg"; content:"gADAgCDAgEDAgGDAgIDAgKDAgMDAgODAgADggCDggEDggGDggIDggKDggMDggODggAAAwCAA"; content:"wEAAwGAAwIAAwKAAwMAAwOAAwAAgwCAgwEAgwGAgwIAgwKAgwMAgwOAgwABAwCBAwEBAwGBA"; content:"wIBAwKBAwMBAwOBAwABgwCBgwEBgwGBgwIBgwKBgwMBgwOBgwACAwCCAwECAwGCAwICAwKCA"; content:"wMCAwOCAwACgwCCgwECgwGCgwICgwKCgwMCgwOCgwADAwCDAwEDAwGDAwIDAwKDAwP/78KCg"; classtype:misc-activity; sid:2003097; rev:2;)
+
+#Another from Cam Beasley
+alert tcp $EXTERNAL_NET 1024: -> $HOME_NET 25 (msg:"ET POLICY Possible Image Spam Inbound (3)"; flow:established,to_server; content:"Content-Transfer-Encoding|3A|"; content:"R0lGODlh"; depth:575; content:"AOAgAABAACBAAEBAAGBAAIBAAKBAAMBAAOBAAABgACBgAEBgAGBgAIBgAKBgAMBgAOBgAACAACCA";content:"AECAAGCAAICAAKCAAMCAAOCAAACgACCgAECgAGCgAICgAKCgAMCgAOCgAADAACDAAEDAAGDAAIDA"; classtype:misc-activity; sid:2003120; rev:2;)
+
+#Moved from Malware, this is likely not spyware related
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Unusual User Agent (Client)"; flow: to_server,established; content:"User-Agent\: Client|0d 0a|"; nocase; content:!".microsoft.com|0d 0a|"; nocase; classtype: trojan-activity; reference:url,doc.emergingthreats.net/2002082; sid:2002082; rev:9;)
+
+#from Russ Mcree
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY iTunes User Agent"; flow: established,to_server; content:"User-Agent\: "; nocase; pcre:"/User-Agent\:[^\n]+iTunes/i"; reference:url,hcsoftware.sourceforge.net/jason-rohrer/itms4all/; classtype:policy-violation; threshold: type limit, count 1, seconds 360, track by_src; sid:2002878; rev:3;)
+
+#Submitted by Jonathan Miner
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY KitCo Kcast Ticker (agtray)"; flow: to_server,established; uricontent:"/pr/agtray.txt"; nocase; classtype: policy-violation; sid: 2000569; rev:5;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY KitCo Kcast Ticker (autray)"; flow: to_server,established; uricontent:"/pr/autray.txt"; nocase; classtype: policy-violation; sid: 2000570; rev:5;)
+
+#by William Metcalf
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Logmein.com Host List Download"; flow:established,to_server; content:"GET "; depth:4; uricontent:"/myrahost/list.aspx?"; nocase; content:!"|0d 0a|Host\: "; classtype:policy-violation; sid:2007765; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Logmein.com Update Activity"; flow:to_server,established; content:"GET "; depth:4; uricontent:"/update.logmein.com/"; nocase; content:!"|0d 0a|Host\: "; classtype:policy-violation; sid:2007766; rev:2;)
+
+#by William Bell
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY MP3 File Transfer Outbound"; flow:established; content:"ID3|03|"; distance: 0; content:"TIT2"; distance:6; within:10; reference:url,filext.com/detaillist.php?extdetail=mp3&Search=Search; classtype:policy-violation; sid: 2002722; rev:2;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY MP3 File Transfer Inbound"; flow: established; content:"ID3|03|"; distance: 0; content:"TIT2"; distance:6; within:10; reference:url,filext.com/detaillist.php?extdetail=mp3&Search=Search; classtype:policy-violation; sid: 2002723; rev:2;)
+
+#by Jeff Kell
+# Microsoft teredo tunnel
+alert udp $HOME_NET any -> $EXTERNAL_NET 3544 (msg:"ET POLICY Microsoft TEREDO IPv6 tunneling"; content:"|FE 80 00 00 00 00 00 00 80 00|TEREDO"; offset:21; depth:16; classtype:misc-activity; sid:2003155; rev:3;)
+
+#by Stephen Nesman at Monster.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Majestic-12 Spider Bot User-Agent (MJ12bot)"; flow:to_server,established; content:"|0d 0a|User-Agent\: MJ12bot|0d 0a|"; reference:url,www.majestic12.co.uk/; classtype:trojan-activity; sid:2003409; rev:3;)
+
+#by cunningpike
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Majestic-12 Spider Bot User-Agent Inbound (MJ12bot)"; flow:to_server,established; content:"|0d 0a|User-Agent\: MJ12bot"; reference:url,www.majestic12.co.uk/; classtype:trojan-activity; sid:2007762; rev:3;)
+
+#Matt Jonkman
+#This will let you know when McAffee is updating sigs. Not a security threat, but could be of interest to folks using mcafee to track updates
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY McAfee Update User Agent -NOT HOSTILE- (McAfee AutoUpdate)"; flow:to_server,established; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+McAfee AutoUpdate/i"; classtype:not-suspicious; sid:2003381; rev:3;)
+
+#by Will Metcalf
+#Rapidshare is a video sharing service, uses VERY ppor auth, and can be used for non-work appropriate material.
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Metacafe.com family filter off"; flow:established,to_server; content:"POST"; depth:4; content:"Host\: www.metacafe.com"; content:"submit=Continue+-+I%27m+over+18"; classtype:policy-violation; sid:2006367; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Rapidshare download unauthd image post"; flow:to_server,established; content:"POST"; depth: 4; uricontent:"/files/"; nocase; content:"Host\:"; nocase; content:"rapidshare.com"; nocase; within: 40; content:"&accesscode="; nocase; content:"&actionstring=Download"; nocase; within:50; reference:url,en.wikipedia.org/wiki/RapidShare; classtype:policy-violation; sid:2006368; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Rapidshare auth cookie download"; flow:to_server,established; content:"GET"; depth: 3; uricontent:"/files/"; content:"Host\:"; nocase; content:"rapidshare.com"; nocase; within:40; content:"Cookie\: user="; nocase; reference:url,en.wikipedia.org/wiki/RapidShare; classtype:policy-violation; sid:2006369; rev:2;)
+
+#by Jamian Mason of Deepnines.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Metacafe.com Social Site Access"; flow:established,to_server; content:"Host\: www.metacafe.com"; threshold: type both, track by_src, count 5, seconds 300; classtype:policy-violation; sid:2003457; rev:2;)
+
+#Submitted by Joseph Gama
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY Mozilla XPI install files download"; flow: from_server,established; content:"content-type\: application/x-xpinstall"; nocase; classtype: bad-unknown; sid: 2001114; rev:5;)
+
+#by dajackman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Myspace Login Attempt"; flow:established,to_server; content:"login.myspace.com"; uricontent:"/index.cfm?fuseaction=login"; classtype:policy-violation; sid:2002872; rev:3;)
+
+#by Matt Jonkman
+#These sigs aren't signs of hostile activity, just something of interest in some places
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Nagios HTTP Monitoring Connection"; flow:established,to_server; content:"User-Agent\: check_http/"; nocase; content:"(nagios-plugins "; nocase; within:30; classtype:not-suspicious; sid:2006779; rev:2;)
+
+#by Will Metcalf, Netflix on demand UA
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Netflix On-demand User-Agent"; flow:to_server,established; content:"User-Agent\: WmpHostInternetConnection"; nocase; classtype:policy-violation; sid:2007638; rev:2;)
+
+#Submitted by Lance Boon
+alert udp any any -> any any (msg:"ET POLICY Netop Remote Control Usage"; content:"|554b30303736305337473130|"; reference:url,www.netop.com; classtype: policy-violation; sid: 2001597; rev:4;)
+
+#by Jamian Mason of Deepnines.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Netvacy.com Anonymizing Proxy Access"; flow:established,to_server; content:"Host\: www.netvacy.com"; classtype:policy-violation; sid:2003453; rev:2;)
+
+#New way to do ssh. First to detect legit ssh sessions on normal ports. Enable these ONLY if you need to know about
+# normal ssh sessions
+#Written by Erik Fichtner, adapted some
+
+#alert tcp any $SSH_PORTS -> any any (msg:"ET POLICY SSH Server Banner Detected on Expected Port";  flowbits:noalert; flow: from_server,established; content:"SSH-"; offset: 0; depth: 4; byte_test:1,>,48,0,relative;byte_test:1,<,51,0,relative;byte_test:1,=,46,1,relative;flowbits: set,is_ssh_server_banner; classtype:misc-activity; sid: 2001973; rev:6;)
+#alert tcp any any -> any $SSH_PORTS (msg:"ET POLICY SSH Client Banner Detected on Expected Port";  flowbits:isset,is_ssh_server_banner; flowbits:noalert; flow: from_client,established; content:"SSH-"; offset: 0; depth: 4; byte_test:1,>,48,0,relative;byte_test:1,<,51,0,relative;byte_test:1,=,46,1,relative;flowbits: set,is_ssh_client_banner; classtype:misc-activity; sid: 2001974; rev:6;)
+#alert tcp any $SSH_PORTS -> any any (msg:"ET POLICY SSHv2 Server KEX Detected on Expected Port";  flowbits:isset,is_ssh_client_banner; flowbits:noalert; flow: from_server,established; byte_test:1,=,20,5; flowbits: set,is_ssh_server_kex; classtype:misc-activity; sid: 2001975; rev:6;)
+#alert tcp any any -> any $SSH_PORTS (msg:"ET POLICY SSHv2 Client KEX Detected on Expected Port";  flowbits:isset,is_ssh_server_kex; flowbits:noalert; flow: from_client,established; byte_test:1,=,20,5;flowbits: set,is_ssh_client_kex; classtype:misc-activity; sid: 2001976; rev:7;)
+#alert tcp any any -> any $SSH_PORTS (msg:"ET POLICY SSHv2 Client New Keys detected on Expected Port"; flowbits:noalert; flowbits:isset,is_ssh_client_kex; flow: from_client,established; byte_test:1,=,21,5;flowbits: set,is_proto_ssh; classtype:misc-activity; sid: 2001977; rev:7;)
+#alert tcp any any <> any $SSH_PORTS (msg:"ET POLICY SSH session in progress on Expected Port"; flowbits: isset,is_proto_ssh; threshold: type both, track by_src, count 2, seconds 300; classtype:misc-activity; sid: 2001978; rev:5;)
+
+#And now to detect Non-standard port usage
+alert tcp any !$SSH_PORTS -> any any (msg:"ET POLICY SSH Server Banner Detected on Unusual Port"; flowbits:noalert; flow: from_server,established; content:"SSH-"; offset: 0; depth: 4; byte_test:1,>,48,0,relative;byte_test:1,<,51,0,relative;byte_test:1,=,46,1,relative;flowbits: set,is_ssh_server_banner; classtype:misc-activity; sid: 2001979; rev:6;)
+alert tcp any any -> any !$SSH_PORTS (msg:"ET POLICY SSH Client Banner Detected on Unusual Port"; flowbits:noalert; flowbits:isset,is_ssh_server_banner; flow: from_client,established; content:"SSH-"; offset: 0; depth: 4; byte_test:1,>,48,0,relative;byte_test:1,<,51,0,relative;byte_test:1,=,46,1,relative; flowbits: set,is_ssh_client_banner; classtype:misc-activity; sid: 2001980; rev:7;)
+alert tcp any !$SSH_PORTS -> any any (msg:"ET POLICY SSHv2 Server KEX Detected on Unusual Port"; flowbits:isset,is_ssh_client_banner; flowbits:noalert; flow: from_server,established; byte_test:1,=,20,5;flowbits: set,is_ssh_server_kex; classtype:misc-activity; sid: 2001981; rev:6;)
+alert tcp any any -> any !$SSH_PORTS (msg:"ET POLICY SSHv2 Client KEX Detected on Unusual Port"; flowbits:noalert; flowbits:isset,is_ssh_server_kex; flow: from_client,established; byte_test:1,=,20,5; flowbits: set,is_ssh_client_kex; classtype:misc-activity; sid: 2001982; rev:7;)
+alert tcp any any -> any !$SSH_PORTS (msg:"ET POLICY SSHv2 Client New Keys Detected on Unusual Port"; flowbits:isset,is_ssh_client_kex; flowbits:noalert; flow: from_client,established; byte_test:1,=,21,5; flowbits: set,is_proto_ssh; classtype:misc-activity; sid: 2001983; rev:7;)
+alert tcp any any <> any !$SSH_PORTS (msg:"ET POLICY SSH session in progress on Unusual Port"; flowbits: isset,is_proto_ssh; threshold: type both, track by_src, count 2, seconds 300; classtype:misc-activity; sid: 2001984; rev:5;)
+
+#by Jamian Mason of Deepnines.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Orkut.com Social Site Access"; flow:established,to_server; content:"Host\: www.orkut.com"; threshold: type both, track by_src, count 5, seconds 300; classtype:policy-violation; sid:2003458; rev:2;)
+
+#Submitted by Scott Melnick
+alert tcp $HOME_NET any -> any !$HTTP_PORTS (msg:"ET POLICY PCMesh Anonymous Proxy client connect"; flow: from_client,established; content:"http|3a|//www.pcmesh.com|3a|80/ip-check.cgi"; depth:37; offset:4; classtype: policy-violation; sid:2003040; rev:3;)
+
+#Only enable if you do not use and internal Proxy server with your
+#clients or change your HTTP_PORTS to match your Proxy server port
+#alert tcp $HOME_NET any -> any !$HTTP_PORTS (msg:"ET POLICY Anonymous Proxy Traffic from Inside"; flow: from_client,established; flags: *AP,12; content:"GET http|3a|//"; depth:11; offset:0; content:"HTTP/1.0"; within:50; offset:11; classtype: policy-violation; sid:2003069; rev:2;)
+
+#by Will Metcalf. These will detect a php proxy/anonymizer/content control evasion site in use
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY PHP Anonymizing/Evasion Proxy In Use"; flow: to_server,established; content:"GET "; depth: 4; uricontent:"/index.php?q="; nocase; pcre:"/index\.php\?q=(uggc|jjj|http|www|aHR0c|d3d3)/Ui"; reference:url,sourceforge.net/projects/php-proxy/; classtype:policy-violation; sid:2006410; rev:3;)
+
+#by Jonathan Scheidell
+#Pingdom.com is an otherwise legitimate org that does free distributed ping monitoring
+# This sig will let you know if you're being monitored.
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET POLICY Pingdom.com Monitoring detected"; flow: to_server,established; content: "User-Agent\: Pingdom GIGRIB"; nocase; classtype:attempted-recon; reference:url,royal.pingdom.com/?p=46; sid:2003214; rev:3;)
+#This will tell you if a local host is signed up as a pingdom monitoring node
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Pingdom.com Monitoring Node Active"; flow: to_server,established; content: "User-Agent\: Pingdom GIGRIB"; nocase; classtype:attempted-recon; reference:url,royal.pingdom.com/?p=46; sid:2003215; rev:3;)
+
+#by Matt Jonkman
+# A large number of trojans report an infection by sending a blank email to a gmail or other free provider
+# They're pretty bland, other than they almost always use the Indy Mail lib. So the mail is slightly unique
+# This sig should catch them outbound
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET POLICY Possible Infection Report Mail - Indy Mail lib and No Message Body - Priority 1"; flow:established,to_server; content:"|0d 0a|X-Priority\: 1|0d 0a|X-Library\: Indy "; content:"|0d 0a 0d 0a 2e 0d 0a|"; within:30; classtype:trojan-activity; sid:2007611; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET POLICY Possible Infection Report Mail - Indy Mail lib and No Message Body - Priority 3"; flow:established,to_server; content:"|0d 0a|X-Priority\: 3|0d 0a|X-Library\: Indy "; content:"|0d 0a 0d 0a 2e 0d 0a|"; within:30; classtype:trojan-activity; sid:2007612; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET POLICY Possible Infection Report Mail - Indy Mail lib and MAC Message Body - Priority 1"; flow:established,to_server; content:"|0d 0a|X-Priority\: 1|0d 0a|X-Library\: Indy "; content:"|0d 0a|MAC......."; nocase; within:20; classtype:trojan-activity; sid:2007613; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET POLICY Possible Infection Report Mail - Indy Mail lib and MAC Message Body - Priority 3"; flow:established,to_server; content:"|0d 0a|X-Priority\: 3|0d 0a|X-Library\: Indy "; content:"|0d 0a|MAC......."; nocase; within:20; classtype:trojan-activity; sid:2007614; rev:3;)
+
+# Added by Frank Knobbe
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY Prospero Chat Session in Progress"; flow: established,to_server; content:"PCHAT2 "; offset: 0; depth: 7; content:"v='"; nocase; offset: 8; depth: 400; content:"jv='"; nocase; offset: 8; depth: 400; content:"u='"; nocase; offset: 8; depth: 400; reference:url,www.prospero.com/technology.htm; classtype: policy-violation; sid: 2001989; rev:4;)
+
+#Seeing some bots and proxy evasion apps use these proxy judges to find their way out
+#by Scotty Melnick
+alert tcp any any -> any $HTTP_PORTS (msg:"ET POLICY Proxy Judge Discovery/Evasion (prxjdg.cgi)"; flow: established,to_server; uricontent:"/prxjdg.cgi"; nocase; classtype:policy-violation; sid:2003047; rev:2;)
+alert tcp any any -> any $HTTP_PORTS (msg:"ET POLICY Proxy Judge Discovery/Evasion (proxyjudge.cgi)"; flow: established,to_server; uricontent:"/proxyjudge.cgi"; nocase; classtype:policy-violation; sid:2003048; rev:2;)
+
+#By Sam Pabon
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY RAR File Outbound"; flow: established; content:"|52 61 72 21|"; offset: 0; depth: 4; tag: session; classtype: not-suspicious; sid: 2001950; rev:3;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY RAR File Inbound"; flow: established; content:"|52 61 72 21|"; offset: 0; depth: 4; tag: session; classtype: not-suspicious; sid: 2001951; rev:3;)
+
+#Submitted by James Ashton
+alert tcp $EXTERNAL_NET any -> $HOME_NET 3389 (msg:"ET POLICY RDP connection request"; flow: to_server,established; content:"|03|"; offset: 0; depth: 1; content:"|E0|"; offset: 5; depth: 1; classtype: misc-activity; sid: 2001329; rev:7;)
+alert tcp $HOME_NET 3389 -> $EXTERNAL_NET any (msg:"ET POLICY RDP connection confirm"; flow: from_server,established; content:"|03|"; offset: 0; depth: 1; content:"|D0|"; offset: 5; depth: 1; classtype: misc-activity; sid: 2001330; rev:7;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 3389 (msg:"ET POLICY RDP disconnect request"; flow: to_server,established; content:"|03|"; offset: 0; depth: 1; content:"|80|"; offset: 5; depth: 1; classtype: misc-activity; sid: 2001331; rev:7;)
+
+#By Scott Melnick
+#Users can connect to remote machines by port forwarding 3389 through personal routers.
+alert tcp $HOME_NET any -> $EXTERNAL_NET !3389 (msg:"ET POLICY Remote Desktop Connection via non RDP Port"; flow:established,to_server; content:"|03|"; offset: 0; depth: 1; content:"|E0|"; offset: 5; depth: 1; content:"Cookie\:"; offset: 11; depth: 7; classtype: policy-violation; sid:2007571; rev:3;) 
+
+#Matt Jonkman
+alert tcp any any -> $HOME_NET 1024:65535 (msg:"ET POLICY Radmin Remote Control Session Setup Initiate"; flow:established,to_server; content:"|01 00 00 00 01 00 00 00 08 08|"; flowbits:set,BE.Radmin.Challenge; classtype:not-suspicious; reference:url,www.radmin.com; sid:2003479; rev:2;)
+alert tcp $HOME_NET 1024:65535 -> any any (msg:"ET POLICY Radmin Remote Control Session Setup Response"; flowbits:isset,BE.Radmin.Challenge; flow:established,from_server; dsize:<50; content:"|01 00 00 00 25 00 00 02 12 08 02 00 00 0a 00 00 00 00 00 00|"; flowbits:noalert; classtype:not-suspicious; reference:url,www.radmin.com; sid:2003480; rev:2;)
+alert tcp any any -> $HOME_NET 1024:65535 (msg:"ET POLICY Radmin Remote Control Session Authentication Initiate"; flow:established,to_server; dsize:<20; content:"|01 00 00 00 05 00 00 02 27 27 02 00 00 00|"; flowbits:set,BE.Radmin.Auth.Challenge; classtype:not-suspicious; reference:url,www.radmin.com; sid:2003481; rev:2;)
+alert tcp $HOME_NET 1024:65535 -> any any (msg:"ET POLICY Radmin Remote Control Session Authentication Response"; flowbits:isset,BE.Radmin.Auth.Challenge; flow:established,from_server; dsize:<20; content:"|01 00 00 00 05 00 00 00 27 27 00 00 00 00|"; flowbits:noalert; classtype:not-suspicious; reference:url,www.radmin.com; sid:2003482; rev:2;)
+
+#Matt jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Real.com Game Arcade Install (User agent)"; flow: established,to_server; content:"User-Agent\:"; nocase;  pcre:"/User-Agent\:[^\n]+ARCADE_BUNDLE_DOWNLOADER/i"; classtype: policy-violation; sid: 2003045; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Real.com Game Arcade Install"; flow: established,to_server; content:"/gameconsole/bundlescripts/"; classtype: policy-violation; sid:2003046; rev:2;)
+
+#Matt Jonkman
+# This is a commercial product, but we see it very often used in malware. Send this email on install
+alert tcp $HOME_NET any -> $EXTERNAL_NET 25 (msg:"ET POLICY SC-KeyLog Keylogger Installed - Sending Initial Email Report"; flow:established,to_server; content:"Installation of SC-KeyLog on host "; nocase; content:"<p>You will receive a log report every "; nocase; content:"Document sent by <a href='http\://www.soft-central.net/keylog.php'>SC-KeyLog</a>"; nocase; classtype:trojan-activity; reference:url,www.soft-central.net/keylog.php; sid:2002979; rev:2;)
+
+#by matt Jonkman
+#TLS/SSL State Machine for 8081 and up
+#if you have sessions that do NOT trip this please let me know.
+#I only know this will work for sslv2, sslv3, and most TLS.
+
+#Adding these sigs to prevent known ssl ports from being included. You may need to duplicate some of these
+# to exclude known ssl traffic in your environment.
+#  You can also avoid falses by suppressing sigs 2003002-5 for the hosts that you expect unusual port SSL to/from
+#
+alert tcp any any -> any 443 (msg:"ET POLICY Known SSL traffic on port 443 being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003026; rev:3;)
+alert tcp any any -> any 9001 (msg:"ET POLICY Known SSL traffic on port 9001 (aol) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2004598; rev:2;)
+alert tcp any any -> any 8000 (msg:"ET POLICY Known SSL traffic on port 8000 being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003027; rev:3;)
+alert tcp any any -> any 8080 (msg:"ET POLICY Known SSL traffic on port 8080 being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003028; rev:3;)
+alert tcp any any -> any 8200 (msg:"ET POLICY Known SSL traffic on port 8200 being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003029; rev:3;)
+alert tcp any any -> any 8443 (msg:"ET POLICY Known SSL traffic on port 8443 being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003030; rev:3;)
+alert tcp any any -> any 5222 (msg:"ET POLICY Known SSL traffic on port 5222 (Jabber) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003031; rev:3;)
+alert tcp any any -> any 5223 (msg:"ET POLICY Known SSL traffic on port 5223 (Jabber) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003032; rev:3;)
+alert tcp any any -> any 2967 (msg:"ET POLICY Known SSL traffic on port 2967 (Symantec) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003033; rev:2;)
+alert tcp any any -> any 3128 (msg:"ET POLICY Known SSL traffic on port 3128 (proxy) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003035; rev:2;)
+alert tcp any any -> any 8080 (msg:"ET POLICY Known SSL traffic on port 8080 (proxy) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003036; rev:2;)
+alert tcp any any -> any 8292 (msg:"ET POLICY Known SSL traffic on port 8292 (Bloomberg) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003037; rev:2;)
+alert tcp any any -> any 8294 (msg:"ET POLICY Known SSL traffic on port 8294 (Bloomberg) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003038; rev:2;)
+alert tcp any any -> any 1521 (msg:"ET POLICY Known SSL traffic on port 1521 (Oracle) being excluded from SSL Alerts"; flow:established,to_server; flowbits:noalert; flowbits:set,BS.SSL.Known.Port; classtype:not-suspicious; sid:2003934; rev:2;)
+
+#Client Hello
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Hello on Unusual Port TLS"; flowbits:isnotset,BS.SSL.Known.Port; flowbits:isnotset,BS.SSL.Client.Hello; flow:established,to_server; content:"|16 03 01|"; depth:3; content:"|01|"; within:6; content:"|03 01|"; within:5; flowbits:set,BS.SSL.Client.Hello; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003002; rev:6;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Hello on Unusual Port SSLv3"; flowbits:isnotset,BS.SSL.Known.Port; flowbits:isnotset,BS.SSL.Client.Hello; flow:established,to_server; content:"|16 03 00|"; depth:3; content:"|01|"; within:2; content:"|03 00|"; within:3; flowbits:set,BS.SSL.Client.Hello; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003003; rev:6;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Hello on Unusual Port Case 2"; flowbits:isnotset,BS.SSL.Known.Port; flowbits:isnotset,BS.SSL.Client.Hello; flow:established; content:"|01 03 01|"; depth:5; offset:2; flowbits:set,BS.SSL.Client.Hello; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003004; rev:6;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Hello on Unusual Port SSLv3"; flowbits:isnotset,BS.SSL.Known.Port; flowbits:isnotset,BS.SSL.Client.Hello; flow:established; content:"|01 03 00|"; depth:5; flowbits:set,BS.SSL.Client.Hello; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003005; rev:7;)
+
+#Client Key exch and setup
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Key Exchange on Unusual Port"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 01|"; content:"|10|"; within:6; flowbits:set,BS.SSL.Client.Key; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003006; rev:5;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Key Exchange on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 00|"; content:"|10|"; within:6; flowbits:set,BS.SSL.Client.Key; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003007; rev:5;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Cipher Set on Unusual Port"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|14 03 01 00 01 01|"; flowbits:set,BS.SSL.Client.Cipher; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003008; rev:5;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Client Cipher Set on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|14 03 00 00 01 01|"; flowbits:set,BS.SSL.Client.Cipher; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003009; rev:5;)
+
+#Server Hello 
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Hello on Unusual Port"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 01|"; depth:3; content:"|02|"; within:6; content:"|03 01|"; within:6; flowbits:set,BS.SSL.Server.Hello; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003010; rev:5;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Hello on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 00|"; depth:3; content:"|02|"; within:6; content:"|03 00|"; within:6; flowbits:set,BS.SSL.Server.Hello; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003011; rev:5;)
+
+#Server cert and key exchange
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Certificate Exchange on Unusual Port"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 01|"; content:"|0b|"; within:6; flowbits:set,BS.SSL.Server.Cert; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003012; rev:5;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Certificate Exchange on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 00|"; content:"|0b|"; within:6; flowbits:set,BS.SSL.Server.Cert; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003013; rev:4;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Key Exchange on Unusual Port"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 01|"; content:"|0c|"; within:6; flowbits:set,BS.SSL.Server.Key; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003014; rev:5;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Key Exchange on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Client.Hello; flow:established; content:"|16 03 00|"; content:"|0c|"; within:6; flowbits:set,BS.SSL.Server.Key; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003015; rev:4;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Hello Done on Unusual Port"; flowbits:isset,BS.SSL.Server.Key; flow:established; content:"|16 03 01|"; content:"|0e|"; within:6; flowbits:set,BS.SSL.Server.Hello.Done; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003016; rev:5;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Hello Done on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Server.Key; flow:established; content:"|16 03 00|"; content:"|0e|"; within:6; flowbits:set,BS.SSL.Server.Hello.Done; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003017; rev:4;)
+
+#Server Cipher set
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Cipher Set on Unusual Port"; flowbits:isset,BS.SSL.Client.Cipher; flow:established; content:"|14 03 01 00 01|"; flowbits:set,BS.SSL.Established; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003018; rev:5;)
+alert tcp any 1024:65535 -> any any (msg:"ET POLICY TLS/SSL Server Cipher Set on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Client.Cipher; flow:established; content:"|14 03 00 00 01|"; flowbits:set,BS.SSL.Established; flowbits:noalert; classtype:unusual-client-port-connection; sid:2003019; rev:5;)
+
+#Application data stream
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Encrypted Application Data on Unusual Port"; flowbits:isset,BS.SSL.Established; flow:established,from_server; content:"|17 03 01|"; depth:4; threshold:type limit, count 1, seconds 120, track by_src; classtype:unusual-client-port-connection; sid:2003020; rev:6;)
+alert tcp any any -> any 1024:65535 (msg:"ET POLICY TLS/SSL Encrypted Application Data on Unusual Port SSLv3"; flowbits:isset,BS.SSL.Established; flow:established,to_server; content:"|17 03 00|"; depth:4; threshold:type limit, count 1, seconds 120, track by_src; classtype:unusual-client-port-connection; sid:2003021; rev:6;)
+
+
+
+#Submitted by Patrick Harper. pcre by Matt Jonkman
+#This rule is disabled by default. It should generally be run on the outside of your network, not internally. Enable it where useful.
+#alert tcp any any -> any any (msg:"ET POLICY SSN Detected in Clear Text"; flow: established; pcre:"/ ([0-6]\d\d|7[0-256]\d|73[0-3]|77[0-2])-\d{2}-\d{4} /"; classtype: policy-violation; sid: 2001328; rev:9;)
+#alert tcp any any -> any any (msg:"ET POLICY SSN Detected in Clear Text"; flow: established; pcre:"/ ([0-6]\d\d|7[0-256]\d|73[0-3]|77[0-2]) \d{2} \d{4} /"; classtype: policy-violation; sid: 2001384; rev:9;)
+
+#By Chich Thierry
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Skype VOIP Checking Version (Startup)"; flow: to_server,established; uricontent:"/ui/"; nocase; uricontent:"/getlatestversion?ver="; nocase; reference:url,www1.cs.columbia.edu/~library/TR-repository/reports/reports-2004/cucs-039-04.pdf; classtype: policy-violation; sid: 2001595; rev:8;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Skype VOIP Reporting Install"; flow: to_server,established; uricontent:"/ui/"; nocase; uricontent:"/installed"; nocase; reference:url,www1.cs.columbia.edu/~library/TR-repository/reports/reports-2004/cucs-039-04.pdf; classtype: policy-violation; sid: 2001596; rev:8;)
+
+#By Robert Grabowsky
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Skype User-Agent detected"; flow:to_server,established; content:"|0d 0a|User-Agent\: "; content:"Skype"; distance:0; within:100; pcre:"/User-Agent\:[^(\n|\r)]+Skype/i"; classtype:policy-violation; sid:2002157; rev:4;)
+
+#by Reg Quinton
+alert udp $HOME_NET 1024:65535 -> $EXTERNAL_NET 33033 (msg:"ET POLICY Skype Bootstrap Node (udp)"; reference:url,www1.cs.columbia.edu/~library/TR-repository/reports/reports-2004/cucs-039-04.pdf; classtype:policy-violation; sid:2003022; rev:3;)
+
+#Idea by Martin Holste, sigs by Matt Jonkman
+# The idea here is that most legitimate exe downloads are more than 1meg, most malicious are far less than 1 meg. 
+# This is evadable of course, and doesn't work with non-compliant web servers, but this will catch many...
+
+#First we qualify this as a packet containing the header return info from the get request and is likely binary content
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET POLICY Likely Binary in HTTP by Type Flowbit"; flow:established,from_server; flowbits:isnotset,BE.http.binary; content:"HTTP/1"; depth:6; content:"|0d 0a|Content-Type\: application/"; nocase; flowbits:noalert; flowbits:set,BE.http.binary; classtype:not-suspicious; sid:2007670; rev:2;)
+
+#next we check that the content-length is less than 7 digits, thus under 1,000,000 bytes.
+# note: I re-check for the leading HTTP/1 to make sure we're still in the header packet, not in the rest of the binary stream
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET POLICY Binary Download Smaller than 1 MB -- Likely Hostile"; flow:established,from_server; flowbits:isset,BE.http.binary; content:"HTTP/1"; depth:6; content:"MZ"; isdataat: 76,relative; content:"This program "; distance: 0; pcre:"/\x0d\x0aContent-Length\: \d{0,6}\x0d\x0a/"; classtype:policy-violation; sid:2007671; rev:6;)
+
+#by Will Metcalf
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY CBS Streaming Video"; flow:established,to_server; content:"GET "; depth:4; content:"Host\:"; nocase; content:"cbs.com"; nocase; within:40; uricontent:"/innertube/player.php?"; classtype:policy-violation; sid:2007763; rev:2;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY NBC Streaming Video"; flow:established,to_server; content:"GET "; depth:4; content:"Host\:|20|video.nbcuni.com"; nocase; pcre:"/(\.smil)$/Ui"; classtype: policy-violation; sid:2007764; rev:2;)
+
+#Matt Jonkman, major updates by Chris Byrd
+#Experimenting with this idea. When a bot comes up live and starts spamming, it 
+#  does a massive number of dns queries. This may be an extra way to identify infections
+alert udp ![$DNS_SERVERS,$SMTP_SERVERS] any -> $DNS_SERVERS 53 (msg:"ET POLICY Possible Spambot -- Host DNS MX Query High Count"; content: "|01 00|"; offset: 2; depth: 4; content: "|00 0f 00 01|"; distance: 8; threshold:type both, count 30, seconds 10, track by_src; classtype:bad-unknown; sid:2003330; rev:4;)
+
+#Submitted by an anonymous researcher
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY TOR 1.0 Server Key Retrieval"; flow:established,to_server;content:"|47 45 54 20 2f 74 6f 72 2f 73 65 72 76 65 72 2f|"; threshold:type limit, track by_src, count 1, seconds 60; classtype:policy-violation; reference:url,tor.eff.org; sid:2002950; rev:4;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY TOR 1.0 Status Update"; flow:established,to_server;content:"|47 45 54 20 2f 74 6f 72 2f 73 74 61 74 75 73 2f|"; threshold:type limit, track by_src, count 1, seconds 60; classtype:policy-violation; reference:url,tor.eff.org; sid:2002951; rev:3;)
+#this sig is good as long as the client isn't recompiled to use an identifier other than TOR.. 
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET POLICY TOR 1.0 Inbound Circuit Traffic"; flow:established; content:"|54 4f 52|"; content:"|3C 69 64 65 6E 74 69 74 79 3E|"; rawbytes; distance:10; within:35; threshold:type limit, track by_src, count 1, seconds 120; classtype:policy-violation; reference:url,tor.eff.org; sid:2002952; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY TOR 1.0 Outbound Circuit Traffic"; flow:established; content:"|54 4f 52|"; content:"|3C 69 64 65 6E 74 69 74 79 3E|"; rawbytes; distance:10; within:35; threshold:type limit, track by_src, count 1, seconds 120; classtype:policy-violation; reference:url,tor.eff.org; sid:2002953; rev:3;)
+
+#Submitted by Erik Vincent
+#alert tcp $HOME_NET any -> $EXTERNAL_NET 80 (msg:"ET POLICY Proxy Connection detected"; flow: established; content:"Proxy-Connection"; classtype: attempted-user; sid: 2001449; rev:4;)
+
+#
+#You MUST add the SMTP_SERVERS var to your snort.conf!!!!
+alert tcp !$SMTP_SERVERS any -> !$HOME_NET 25 (msg: "ET POLICY Outbound Multiple Non-SMTP Server Emails"; flow:established; content:"mail from\:"; nocase; threshold: type threshold, track by_src,count 10, seconds 120; classtype: misc-activity; sid: 2000328; rev:10;)
+alert tcp !$HOME_NET any -> $HOME_NET 25 (msg: "ET POLICY Inbound Frequent Emails - Possible Spambot Inbound"; flow:established; content:"mail from\:"; nocase; threshold: type threshold, track by_src,count 10, seconds 60; classtype: misc-activity; sid: 2002087; rev:8;)
+
+#Seeing some bots use 587 as an outbound mail stream. Use this if you do NOT use 587 locally
+alert tcp !$SMTP_SERVERS any -> !$HOME_NET 587 (msg: "ET POLICY Outbound SMTP on port 587"; flow:established; content:"mail from\:"; nocase; threshold: type threshold, track by_src,count 1, seconds 60; classtype: misc-activity; sid: 2003864; rev:2;)
+
+#by Matt Jonkman, sandnetted binary
+#  App on port 20000 for this casino stuff. Not malicious, but likely not allowed in most environments
+alert tcp $HOME_NET any -> $EXTERNAL_NET 20000 (msg:"ET POLICY Gold VIP Club Casino Client in Use"; flow:established,to_server; dsize:25; content:"Gold VIP Club Casino"; classtype:policy-violation; sid:2007746; rev:4;)
+
+# Submitted by Jason Alvarado
+alert tcp $HOME_NET any -> [208.8.81.0/24,64.68.96.0/19] 443 (msg:"ET POLICY MyWebEx Server Traffic"; flow: to_server,established; dsize: <50; content:"|17|"; offset: 0; depth: 1; threshold: type limit,track by_src, count 1, seconds 360; reference:url,www.mywebexpc.com/how.php; classtype: policy-violation; sid: 2001712; rev:4;)
+alert tcp $HOME_NET any -> [208.8.81.0/24,64.68.96.0/19] $HTTP_PORTS (msg:"ET POLICY MyWebEx Installation"; flow: to_server,established; content:"/pc/r.php?AT=RS"; nocase; threshold: type limit, track by_src, count 1, seconds 30; reference:url,www.mywebexpc.com/how.php; classtype: policy-violation; sid: 2001713; rev:4;)
+alert tcp [208.8.81.0/24,64.68.96.0/19] 443 -> $HOME_NET any (msg:"ET POLICY MyWebEx Incoming Connection"; flow: to_client,established; content:"|16 03|"; offset: 0; depth: 2; content:"Comodo"; nocase; depth: 240; content:"accessanywhere.com"; nocase; offset: 592; depth: 48; reference:url,www.mywebexpc.com/how.php; classtype: policy-violation; sid: 2001714; rev:4;)
+
+#By Robert Grabowsky
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY WebshotsNetClient"; flow: to_server,established; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+WebshotsNetClient/i"; reference:url,www.webshots.com; classtype:policy-violation; sid:2002407; rev:3;)
+
+#by Jacob Kitchel of infotex
+#These are of particular use in detecting recon for phishing, etc. 
+#alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET POLICY Wget User Agent"; flow:established,to_server; content:"Wget"; nocase; pcre:"/User-Agent\:[^\n]+Wget/i"; reference:url,www.gnu.org/software/wget; classtype: attempted-recon; sid:2002822; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY POSSIBLE Web Crawl using Wget"; flow:established,to_server; content:"Wget"; nocase; pcre:"/User-Agent\:[^\n]+Wget/i"; threshold: type both, track by_src, count 10, seconds 60; classtype: attempted-recon; reference:url,www.gnu.org/software/wget/; sid:2002823; rev:2;)
+
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY CURL User Agent"; flow:established,to_server; content:"curl"; nocase; pcre:"/User-Agent\:[^\n]+curl/i"; reference:url,curl.haxx.se; classtype: attempted-recon; sid:2002824; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY POSSIBLE Web Crawl using Curl"; flow:established,to_server; content:"curl"; nocase; pcre:"/User-Agent\:[^\n]+curl/i"; threshold: type both, track by_src, count 10, seconds 60; classtype:attempted-recon; reference:url,curl.haxx.se; sid:2002825; rev:3;)
+
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY fetch User Agent"; flow:established,to_server; content:"fetch"; nocase; pcre:"/User-Agent\:[^\n]+fetch/i"; reference:url,gobsd.com/code/freebsd/lib/libfetch; classtype: attempted-recon; sid:2002826; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY POSSIBLE Crawl using Fetch"; flow:established,to_server; content:"fetch"; nocase; pcre:"/User-Agent\:[^\n]+fetch/i"; threshold: type both, track by_src, count 10, seconds 60; classtype: attempted-recon; reference:url,gobsd.com/code/freebsd/lib/libfetch; sid:2002827; rev:2;)
+
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY libwww-perl User Agent"; flow:established,to_server; content:"libwww-perl/"; nocase; pcre:"/User-Agent\:[^\n]+libwww-perl\/\d\.\d+/i"; reference:url,www.linpro.no/lwp/; classtype: attempted-recon; sid:2002934; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY libwww-perl User Agent"; flow:established,to_server; content:"libwww-perl/"; nocase; pcre:"/User-Agent\:[^\n]+libwww-perl\/\d\.\d+/i"; threshold: type both, track by_src, count 10, seconds 60; reference:url,www.linpro.no/lwp/; classtype: attempted-recon; sid:2002935; rev:2;)
+
+#These aren't security issues necessarily, but you may be interested in seeing how often these crawlers hit you
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY googlebot User Agent";  flow:established,to_server; content:"googlebot";  nocase; pcre:"/User-Agent\:[^\n]+googlebot/i"; reference:url,www.google.com/webmasters/bot.html; classtype:not-suspicious; sid:2002828; rev:3;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Googlebot Crawl"; flow:established,to_server;  content:"googlebot"; nocase; pcre:"/User-Agent\:[^\n]+googlebot/i"; threshold: type both, track by_src, count 10, seconds 60; classtype: attempted-recon; reference:url,www.google.com/webmasters/bot.html; sid:2002829; rev:2;)
+
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY msnbot User Agent";  flow:established,to_server; content:"msnbot";  nocase; pcre:"/User-Agent\:[^\n]+msnbot/i"; reference:url,search.msn.com/msnbot.htm; classtype:not-suspicious; sid:2002830; rev:3;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Msnbot Crawl"; flow:established,to_server;  content:"msnbot"; nocase; pcre:"/User-Agent\:[^\n]+msnbot/i"; threshold: type both, track by_src, count 10, seconds 60; classtype: attempted-recon; reference:url,search.msn.com/msnbot.htm; sid:2002831; rev:3;)
+
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Yahoo Crawler User Agent";  flow:established,to_server; content:"Yahoo-MMCrawler";  nocase; pcre:"/User-Agent\:[^\n]+Yahoo-MMCrawler/i"; reference:url,mms-mmcrawler-support@yahoo-inc.com; classtype:not-suspicious; sid:2002832; rev:4;)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Yahoo Crawler Crawl"; flow:established,to_server;  content:"Yahoo-MMCrawler"; nocase; pcre:"/User-Agent\:[^\n]+Yahoo-MMCrawler/i"; threshold: type both, track by_src, count 10, seconds 60; classtype: attempted-recon; reference:url,mms-mmcrawler-support@yahoo-inc.com; sid:2002833; rev:2;)
+
+#by Jacob Kitchel
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY python.urllib User Agent"; flow:established,to_server; content:"python.urllib/"; nocase; pcre:"/User-Agent\:[^\n]+python.urllib\/\d\.\d+/i"; reference:url,docs.python.org/lib/module-urllib.html; classtype: attempted-recon;  sid:2002944; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY python.urllib User Agent Web Crawl"; flow:established,to_server; content:"python.urllib/"; nocase; pcre:"/User-Agent\:[^\n]+python.urllib\/\d\.\d+/i"; threshold: type both, track by_src, count 10, seconds 60; reference:url,docs.python.org/lib/module-urllib.html; classtype: attempted-recon; sid:2002943; rev:3;)
+
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Java Url Lib User Agent"; flow:established,to_server; content:"User-agent\:"; nocase; content:"Java/"; nocase; within:50; pcre:"/User-Agent\:[^\n]+Java/\d\.\d+/i"; reference:url,www.mozilla.org/docs/netlib/seealso/netmods.html; classtype: attempted-recon; sid:2002946; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Java Url Lib User Agent Web Crawl"; flow:established,to_server; content:"User-agent\:"; nocase; content:"Java/"; nocase; within:50; pcre:"/User-Agent\:[^\n]+Java/\d\.\d+/i"; threshold: type both, track by_src, count 10, seconds 60; reference:url,www.mozilla.org/docs/netlib/seealso/netmods.html; classtype: attempted-recon; sid:2002945; rev:4;)
+
+#Originally posted by Matt Jonkman, major tweaks by Matt Watchinski.
+#Less useful rules are disabled, feel free to enable if you require the information. They are functional and accurate
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Mail Inbox View"; flow: to_server,established; uricontent:"/ym/ShowFolder"; nocase; content:"rb=Inbox"; nocase; classtype: policy-violation; sid: 2000041; rev:10;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Mail Message View"; flow: to_server,established; uricontent:"/ym/ShowLetter"; nocase; content:"MsgId"; nocase; classtype: policy-violation; sid: 2000042; rev:10;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Mail Message Compose Open"; flow: to_server,established; uricontent:"/ym/Compose"; nocase; classtype: policy-violation; sid: 2000043; rev:9;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Mail Message Send"; flow: to_server,established; uricontent:"/ym/Compose"; nocase; classtype: policy-violation; sid: 2000044; rev:8;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Mail Message Send Info Capture"; flow: to_server,established; content:"crumb="; nocase; content:"Subject="; nocase; classtype: policy-violation; sid: 2000045; rev:9;)
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Mail General Page View"; flow: to_server,established; uricontent:"/ym/login"; nocase; content:".rand="; nocase; classtype: policy-violation; sid: 2000341; rev:7;)
+
+#Submitted by Jonathan Miner
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET Yahoo Briefcase Upload"; flow: to_server,established; content:"briefcase.yahoo.com"; uricontent:"/process_bcmultipart_form"; nocase; classtype: policy-violation; sid: 2001044; rev:5;)
+
+#Submitted by Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Gmail Inbox Access"; flow: to_server,established; uricontent:"/gmail?view=tl&search=inbox&start="; nocase; classtype: policy-violation; sid: 2001424; rev:5;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Gmail File Send"; flow: to_server,established; content:"Content-Disposition\: form-data\; name=\"msgbody\""; nocase; content:"name=\"form-data\; file0\"\; filename=\""; nocase; classtype: policy-violation; sid: 2001425; rev:6;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Gmail Message Send"; flow: to_server,established; content:"Content-Disposition\: form-data\; name=\"to\""; nocase; content:"Content-Disposition\: form-data\; name=\"msgbody\""; nocase; classtype: policy-violation; sid: 2001426; rev:5;)
+
+#by Andrew Wood
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Winamp Streaming User Agent"; flow:established,to_server; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+WinampMPEG/i"; classtype:policy-violation; sid: 2003168; rev:2;)
+
+#this sig is to catch HTTP User agents that specify Windows 98 as the platform
+# Mostly to catch spyware and auto-downloaders that still use these as fake User Agent strings
+# You may also use this to catch any local win98 machines if they're no longer supposed to be in production
+#  (which for goodness sake they shouldn't!! Haven't been patched for years!)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Windows 98 User-Agent Detected - Possible Malware or Non-Updated System"; flow:established,to_server; content:"|0d 0a|User-Agent\: "; content:"Windows 98\;"; within:200; pcre:"/User-Agent\:[^\n]+Windows 98/i"; classtype:policy-violation; reference:url,doc.emergingthreats.net/bin/view/Main/Windows98UA; sid:2007695; rev:6;)
+
+#by Jacob Kitchel of infotex
+#Windows update operates over port 80 or 443 (443 not detected here). It uses this user
+#agent with the hostname. This sig can be used to identify internal hosts that are
+#not using an internal patching server, 
+#alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY External Windows Update in Progress"; flow:established,to_server; content:"Windows-Update-Agent"; content:"Host\:"; nocase; within:20; pcre:"/User-Agent\:[^\n]+Windows-Update-Agent/i"; threshold: type limit, count 1, seconds 300, track by_src; reference:url,windowsupdate.microsoft.com; classtype:policy-violation; sid:2002948; rev:5;)
+
+#this sig can be used to track internal updates, or updates in general
+#alert tcp $HOME_NET any -> any $HTTP_PORTS (msg:"ET POLICY Windows Update in Progress"; flow:established,to_server; content:"Windows-Update-Agent"; content:"Host\:"; nocase; within:20; pcre:"/User-Agent\:[^\n]+Windows-Update-Agent/i"; threshold: type limit, count 1, seconds 300, track by_src; reference:url,windowsupdate.microsoft.com; classtype:policy-violation; sid:2002949; rev:5;)
+
+#Microsoft BITS (Background Intelligent Transfer Agent) user agent sig
+#Thresholded like the Windows-User-Agent user agent sig (after suggestion from Eduardo)
+#alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET POLICY Microsoft BITS User Agent"; flow:established,to_server; content:"Microsoft BITS/"; content:"Host\:"; within: 20; pcre:"/\/User-Agent\:[^\n]+Microsoft BITS\//i"; threshold: type limit, track by_src, count 1, seconds 300; reference:url,au.download.windowsupdate.com; classtype:policy-violation; sid:2002969; rev:5;)
+
+#Matt Jonkman
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS  (msg:"ET POLICY Winpcap Installation in Progress"; flow:established,to_server; uricontent:"/install/banner/"; nocase; pcre:"/\d/\d+.jpg/Ui"; content:"Host\: www.winpcap.org"; nocase; content:"User-Agent\: NSISDL"; nocase; reference:url,www.winpcap.org; classtype: policy-violation; sid:2002866; rev:2;)
+
+#by Mark Tombaugh
+alert udp $HOME_NET any -> $EXTERNAL_NET 88 (msg:"ET POLICY X-Box Live Connecting"; content:"<Xbox Version="; content:" Title=0x"; distance:4; within:32; reference:url,www.microsoft.com/xbox/; classtype:policy-violation; sid:2002796; rev:3;)
+
+#by Jamian Mason of Deepnines.com
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Yahoo 360 Social Site Access"; flow:established,to_server; content:"Host\: 360.yahoo.com"; threshold: type both, track by_src, count 5, seconds 300; classtype:policy-violation; sid:2003454; rev:2;)
+
+#Submitted by Joel Esler
+#alert tcp any any -> any any (msg:"ET POLICY ZIPPED DOC in transit"; flow: established; content:"|50 4B 03 04|"; content:"|00|"; content:".doc"; nocase; classtype: not-suspicious; sid: 2001402; rev:4;)
+#alert tcp any any -> any any (msg:"ET POLICY ZIPPED XLS in transit"; flow: established; content:"|50 4B 03 04|"; content:"|00|"; content:".xls"; nocase; classtype: not-suspicious; sid: 2001403; rev:4;)
+#alert tcp any any -> any any (msg:"ET POLICY ZIPPED EXE in transit"; flow: established; content:"|50 4B 03 04|"; content:"|00|"; content:".exe"; nocase; classtype: not-suspicious; sid: 2001404; rev:4;)
+#alert tcp any any -> any any (msg:"ET POLICY ZIPPED PPT in transit"; flow: established; content:"|50 4B 03 04|"; content:"|00|"; content:".ppt"; nocase; classtype: not-suspicious; sid: 2001405; rev:4;)
+#From David Glosser
+alert tcp $EXTERNAL_NET any <> $HOME_NET any (msg:"ET POLICY Possible hidden zip extension .cpl"; flowbits: isnotset,tagged; content:"|20 20 2E 63 70 6C 50 4B|"; nocase; tag: host,1,packets,src; flowbits:set,tagged; classtype: suspicious-filename-detect; sid: 2001406; rev:6;)
+alert tcp $EXTERNAL_NET any <> $HOME_NET any (msg:"ET POLICY Possible hidden zip extension .pif"; flowbits:isnotset,tagged; content:"|20 20 2E 70 69 66 50 4B|"; nocase; tag: host,1,packets,src; flowbits:set,tagged; classtype: suspicious-filename-detect; sid: 2001407; rev:6;)
+alert tcp $EXTERNAL_NET any <> $HOME_NET any (msg:"ET POLICY Possible hidden zip extension .scr"; flowbits:isnotset,tagged; content:"|20 20 2E 73 63 72 50 4B|"; nocase; tag: host,1,packets,src; flowbits:set,tagged; classtype: suspicious-filename-detect; sid: 2001408; rev:6;)
+
+# Submitted 2006-09-17 by Mark Warren
+# This signature was designed to detect access to http://www.bodog.com
+# This website contains pornography, gambling, sports and sports related betting
+# The commercials for this website state that portions of the site were designed
+# to bypass security filters.
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY Porn-Sports-Gambling site designed to bypass restrictions"; flow:to_server,established; content:"Host\:"; nocase; pcre:"/Host\:[^\n]+\.(bodog|bodogbeat|bodognation|bodogmusic|bodogconference|bodogpokerchampionships)\.com/i";  reference:url,www.bodog.com; classtype:policy-violation; sid:2003100; rev:3;)
+
+# Submitted 2006-08-30 by Russ McRee
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET POLICY iMesh 6 User Agent"; flow:established,to_server; content:"/kiss"; nocase; content:"|0d 0a|User-Agent\: "; pcre:"/User-Agent\:[^\n]+MusicNet/i"; classtype:policy-violation; threshold: type limit, count 1, seconds 360, track by_src; sid:2003093; rev:2;)
+

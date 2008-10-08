@@ -1,0 +1,3 @@
+SNORT_CONF=${MODULE_DIR}/${MODULE_NAME}.module/snort.conf
+SNORT_OPTIONS=-A full -b -y
+OUTPUT_FILE=${PCAP_BASE}.snort

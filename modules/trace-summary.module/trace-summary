@@ -1,0 +1,1 @@
+python ${MODULE_DIR}/${MODULE_NAME}.module/trace-summary.py ${OPTS} ${PCAP_FILE} > ${OUTPUT_DIR}/${OUTPUT_FILE}

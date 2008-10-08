@@ -1,0 +1,14 @@
+test -e ${ARG3_FLOW_FILE} || argus ${ARGUS_OPTIONS} -r ${PCAP_FILE} -w ${ARG3_FLOW_FILE} ${ARGUS_FILTER}
+
+test -e ${ARG3_SESS_FILE} || racluster -n -r ${ARG3_FLOW_FILE} -w ${ARG3_SESS_FILE} ${RACLUSTER_FILTER}
+
+racluster -f ${MODULE_DIR}/${MODULE_NAME}.module/racluster-TopN.conf ${RACLUSTER_OPTIONS} -r ${ARG3_SESS_FILE} -w - ${RACLUSTER_FILTER} | rasort -L0 -m pkts -s saddr dpkts spkts dbytes sbytes > ${TOP_N_OUTPUT}
+
+racluster -f ${MODULE_DIR}/${MODULE_NAME}.module/racluster-Matrix.conf ${RACLUSTER_OPTIONS} -r ${ARG3_SESS_FILE} -w - ${RACLUSTER_FILTER} | rasort -L0 -m pkts -s saddr daddr pkts bytes > ${TOP_MATRIX_OUTPUT}
+
+racluster -f ${MODULE_DIR}/${MODULE_NAME}.module/racluster-HostProto.conf ${RACLUSTER_OPTIONS} -r ${ARG3_SESS_FILE} -w - ${RACLUSTER_FILTER} | rasort -L0 -m pkts -s saddr proto dpkts spkts dbytes sbytes > ${TOP_HOSTPROTO_OUTPUT}
+
+racluster -f ${MODULE_DIR}/${MODULE_NAME}.module/racluster-Svc.conf ${RACLUSTER_OPTIONS} -r ${ARG3_SESS_FILE} -w - ${RACLUSTER_FILTER} | rasort -L0 -m pkts -s proto dport spkts dpkst sbytes dbytes > ${TOP_SVC_OUTPUT} 
+
+racluster -f ${MODULE_DIR}/${MODULE_NAME}.module/racluster-HostSvc.conf ${RACLUSTER_OPTIONS} -r ${ARG3_SESS_FILE} -w - ${RACLUSTER_FILTER} | rasort -L0 -m pkts -s saddr proto dport dpkts spkts dbytes sbytes > ${TOP_HOSTSVC_OUTPUT}
+

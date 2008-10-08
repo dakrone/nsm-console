@@ -1,0 +1,4 @@
+The hash module creates md5 and sha256 checksums for the pcap file
+
+http://en.wikipedia.org/wiki/MD5
+http://en.wikipedia.org/wiki/SHA_hash_functions

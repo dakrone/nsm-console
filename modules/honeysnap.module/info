@@ -1,0 +1,8 @@
+This module runs honeysnap against the particular pcap file, analyzing all
+flows. For more information see: http://www.honeynet.org/tools/honeysnap/
+
+http://www.honeynet.org/tools/honeysnap/
+
+Defaults:
+HONEYSNAP_CFG - The honeysnap config file, default: ${MODULE_DIR}/${MODULE_NAME}.module/honeysnap.cfg
+HOST_LIST - A comma separated list of the honeypots, default: 192.168.1.1,192.168.1.100,192.168.1.101

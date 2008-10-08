@@ -1,0 +1,1 @@
+capinfos ${PCAP_FILE} >> ${OUTPUT_DIR}/${OUTPUT_FILE}

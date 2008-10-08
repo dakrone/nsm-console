@@ -1,0 +1,2 @@
+OPTIONS=-qzio,phs -n
+OUTPUT_FILE=${PCAP_BASE}.tshark

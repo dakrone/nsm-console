@@ -1,0 +1,4 @@
+This module will analyze the pcap file with the Bro Intrustion Detection System 
+Flow connection records will be put in the 'connection' directory
+
+http://www.bro-ids.org/

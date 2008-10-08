@@ -1,0 +1,15 @@
+nsm
+lib/colors.rb
+lib/command_manager.rb
+lib/commands.rb
+lib/encodelib.rb
+lib/history.rb
+lib/logging.rb
+lib/nsm_alias.rb
+lib/nsm_category.rb
+lib/nsm_console.rb
+lib/nsm_helper.rb
+lib/nsm_module.rb
+lib/pcaplib.rb
+lib/pcapparser.rb
+

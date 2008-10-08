@@ -1,0 +1,6 @@
+The pads module passively detects assets from a pcap file.
+
+http://passive.sourceforge.net/
+
+Options:
+OUTPUT_FILENAME - The csv output file (default: ${PCAP_BASE}.pads)

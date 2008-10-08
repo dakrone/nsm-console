@@ -1,0 +1,2 @@
+mkdir -p ${OUTPUT_DIR}/contents
+. ${MODULE_DIR}/${MODULE_NAME}.module/bro.cfg; cd ${OUTPUT_DIR}/contents &&  bro -r ${PCAP_FILE} contents

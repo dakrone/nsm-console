@@ -1,0 +1,4 @@
+FILTER=udp port 53
+FLAGS=-4 -6
+LEVEL=7
+OUTPUT_FILE=${OUTPUT_DIR}/${PCAP_BASE}.dnstop

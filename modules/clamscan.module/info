@@ -1,0 +1,10 @@
+The clamscan module scans any extracted executables for malware.
+
+NOTE:
+This module REQUIRES that the tcpxtract module be run previously.
+
+http://www.clamav.net
+
+Variables:
+OUTPUT_FILE - The output file for clamscan, default: ${PCAP_BASE}.clamscan
+EXTRACT_MODULE - What module to look for the files in, default: tcpxtract

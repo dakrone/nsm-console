@@ -1,0 +1,1 @@
+snort -c ${SNORT_CONF} ${SNORT_OPTIONS} -r ${PCAP_FILE} -l ${OUTPUT_DIR}

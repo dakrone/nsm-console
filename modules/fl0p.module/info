@@ -1,0 +1,7 @@
+The fl0p module using lcamtuf's tool for fingerprinting packet flow.
+
+http://lcamtuf.coredump.cx/
+
+Options:
+OPTIONS - Additional command-line options. Default: -U
+OUTPUT_FILE - Output filename. Default: ${PCAP_BASE}.fl0p

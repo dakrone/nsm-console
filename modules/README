@@ -1,0 +1,43 @@
+How to create a module:
+
+1. Create a directory called <name>.module where <name> is the name of your module
+
+Inside the <name>.module directory:
+
+2. Create a file called <name> containing commands, may be multiple lines.
+Example: 
+
+tcpdump -X -n -vvv -r ${PCAP_FILE} >> ${OUTPUT_DIR}/${OUTPUT_FILE}
+echo "Hello world" >> ${OUTPUT_DIR}/${OUTPUT_FILE}
+
+Note that every line is given a clean environment, so in order to change directories, put the following on one line:
+
+cd dir && echo "do some stuff"
+
+3. Create a file called 'description' with a 1-line description of the module's actions
+
+4. Create a file called 'info' giving detailed information about your module
+
+5. Create a file called 'defaults' that has options for your module
+Example:
+
+OUTPUT_FILE=${PCAP_BASE}.out
+
+It is a good idea to explain what this option means in the info file.
+
+6. If desired, add the module to a category in the categories directory
+
+
+##################################################################
+##################################################################
+The following variables are RESERVED and will ALWAYS be replaced:
+
+${PCAP_FILE} - The location of the pcap file
+${PCAP_BASE} - The basename of the pcap file
+${MODULE_DIR} - The module directory
+${MODULE_NAME} - The name of the module
+${OUTPUT_DIR} - The output directory
+
+Any other variable can be declared
+##################################################################
+##################################################################

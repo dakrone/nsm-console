@@ -1,0 +1,57 @@
+--------------------------------------------------------------------------------
+Log for nsm-console begun at 2008                 -10-7 14                 :5:30
+--------------------------------------------------------------------------------
+[nsmcrc] set honeysnap HOST_LIST 10.254.77.71,10.254.77.2,10.254.77.129,10.254.77.94
+[nsmcrc] alias ls = list
+[nsmcrc] alias ll = list
+[nsmcrc] alias serv = e cat /etc/services | grep
+[nsmcrc] alias rp = eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcrc] eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcmd] dump 
+[nsmcmd] dump 1 a.out
+[nsmcmd] q 
+--------------------------------------------------------------------------------
+Log for nsm-console begun at 2008                 -10-7 14                 :6:12
+--------------------------------------------------------------------------------
+[nsmcrc] set honeysnap HOST_LIST 10.254.77.71,10.254.77.2,10.254.77.129,10.254.77.94
+[nsmcrc] alias ls = list
+[nsmcrc] alias ll = list
+[nsmcrc] alias serv = e cat /etc/services | grep
+[nsmcrc] alias rp = eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcrc] eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcmd] dump 1 a.out
+[nsmcmd] dump -f 2-5 b.out
+[nsmcmd] q 
+--------------------------------------------------------------------------------
+Log for nsm-console begun at 2008                 -10-7 14                 :38:2
+--------------------------------------------------------------------------------
+[nsmcrc] set honeysnap HOST_LIST 10.254.77.71,10.254.77.2,10.254.77.129,10.254.77.94
+[nsmcrc] alias ls = list
+[nsmcrc] alias ll = list
+[nsmcrc] alias serv = e cat /etc/services | grep
+[nsmcrc] alias rp = eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcrc] eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcmd] iplist 
+[nsmcmd] q 
+--------------------------------------------------------------------------------
+Log for nsm-console begun at 2008                 -10-7 14                 :38:57
+--------------------------------------------------------------------------------
+[nsmcrc] set honeysnap HOST_LIST 10.254.77.71,10.254.77.2,10.254.77.129,10.254.77.94
+[nsmcrc] alias ls = list
+[nsmcrc] alias ll = list
+[nsmcrc] alias serv = e cat /etc/services | grep
+[nsmcrc] alias rp = eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcrc] eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcmd] iplist 
+[nsmcmd] q 
+--------------------------------------------------------------------------------
+Log for nsm-console begun at 2008                 -10-7 14                 :41:26
+--------------------------------------------------------------------------------
+[nsmcrc] set honeysnap HOST_LIST 10.254.77.71,10.254.77.2,10.254.77.129,10.254.77.94
+[nsmcrc] alias ls = list
+[nsmcrc] alias ll = list
+[nsmcrc] alias serv = e cat /etc/services | grep
+[nsmcrc] alias rp = eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcrc] eval $CPROMPT = "[#{$GREEN}nsm#{$RESET}:" + $basefile.to_s.chomp + "]$ "
+[nsmcmd] iplist 
+[nsmcmd] q 

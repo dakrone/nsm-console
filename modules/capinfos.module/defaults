@@ -1,0 +1,1 @@
+OUTPUT_FILE=${PCAP_BASE}.capinfos

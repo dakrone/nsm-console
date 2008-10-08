@@ -1,0 +1,1 @@
+CONFIG_FILE=${MODULE_DIR}/${MODULE_NAME}.module/rp-tcpxtract.conf

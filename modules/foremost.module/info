@@ -1,0 +1,7 @@
+The foremost module extracts files out of a data file, in this case, a packet capture.
+
+http://foremost.sourceforge.net/
+
+Variables:
+EXTRACT_TYPES - What kind of files to extract, default: -t all
+FOREMOST_OPTS - Other options for foremost, default: -v

@@ -1,0 +1,11 @@
+The iploc module will read the pcap file and query the hostip.info database for
+the locations of inbound and outbound traffic, it will then dump the results
+into a comma-separated file to be read by a different program. The format is as
+follows:
+
+<ip address>,<country>,<city and state>,<latitude>,<longitude>,<packet count>
+
+http://thnetos.wordpress.com/other-projects/
+
+Variables:
+OUTPUT_FILE - The file to save csv values into. Default: ${PCAP_BASE}.iploc.csv

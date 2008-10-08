@@ -1,0 +1,332 @@
+#
+# $Id: bleeding-web.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+# Emerging Threats web rules. 
+#
+# SID's are 2000000+ to avoid conflicts
+#
+# Only basic testing has been done. At this point all we guarantee is that they won't crash a recent snort release. 
+#
+# More information available at www.emergingthreats.net
+#
+# Please submit any custom rules or ideas to emerging@emergingthreats.net or the emerging-sigs mailing list
+#
+#*************************************************************
+#
+#  Copyright (c) 2003-2008, Emerging Threats
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+#  following conditions are met:
+#  
+#  * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+#    disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+#    following disclaimer in the documentation and/or other materials provided with the distribution.
+#  * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+#
+#
+#by tinytwitty
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Adobe RoboHelp XSS Attempt -- whstart.js"; flow:established,to_server; uricontent:"/whstart.js?"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-1280; reference:url,www.securityfocus.com/archive/1/archive/1/468360/100/0/threaded; sid:2003897; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Adobe RoboHelp XSS Attempt -- whcsh_home.htm"; flow:established,to_server; uricontent:"/whcsh_home.htm?"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-1280; reference:url,www.securityfocus.com/archive/1/archive/1/468360/100/0/threaded; sid:2003898; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Adobe RoboHelp XSS Attempt -- wf_startpage.js"; flow:established,to_server; uricontent:"/wf_startpage.js?"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-1280; reference:url,www.securityfocus.com/archive/1/archive/1/468360/100/0/threaded; sid:2003899; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Adobe RoboHelp XSS Attempt -- wf_startqs.htm"; flow:established,to_server; uricontent:"/wf_startqs.htm?"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-1280; reference:url,www.securityfocus.com/archive/1/archive/1/468360/100/0/threaded; sid:2003900; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Adobe RoboHelp XSS Attempt -- WindowManager.dll"; flow:established,to_server; uricontent:"/WindowManager.dll?"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-1280; reference:url,www.securityfocus.com/archive/1/archive/1/468360/100/0/threaded; sid:2003901; rev:2;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB WebAPP Apage.CGI Remote Command Execution Attempt"; flow: to_server,established; uricontent:"/apage.cgi?f="; nocase; pcre:"/(\.\|.+\|)/"; reference:bugtraq,13637; classtype: web-application-attack; sid: 2001945; rev:5;)
+
+#From Adam Hogan
+alert tcp any any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Proxy GET Request"; flow: to_server,established; content:"GET http\://"; nocase; depth: 11; classtype: bad-unknown; sid: 2001669; rev:4;)
+alert tcp any any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Proxy HEAD Request"; flow: to_server,established; content:"HEAD http\://"; nocase; depth: 12; classtype: bad-unknown; sid: 2001670; rev:5;)
+alert tcp any any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Proxy POST Request"; flow: to_server,established; content:"POST http\://"; nocase; depth: 12; classtype: bad-unknown; sid: 2001674; rev:4;)
+alert tcp any any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Proxy CONNECT Request"; flow: to_server,established; content:"CONNECT "; nocase; depth: 8; classtype: bad-unknown; sid: 2001675; rev:4;)
+
+# Submitted 2006-10-30 by Frank Knobbe
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Crewbox Proxy Scan"; flow:established,to_server; uricontent:".php?"; nocase; uricontent:"crewbox.by.ru/crew/"; nocase; classtype:attempted-recon; sid:2003156; rev:2;)
+#Blake Hartstein at Demarc
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WEB-CLIENT Apple Quicktime RTSP Overflow (1)"; flow:established,from_server; content:"|22|rtsp|3a|//"; nocase; isdataat:400,relative; content:!"|0a|"; distance:0; within:400; content:!"|22|"; distance:0; within:400; reference:cve,2007-0015; reference:bugtraq,21829; classtype:attempted-admin; sid:2003326; rev:3;)
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WEB-CLIENT Apple Quicktime RTSP Overflow (2)"; flow:established,from_server; content:"|27|rtsp|3a|//"; nocase; isdataat:400,relative; content:!"|0a|"; distance:0; within:400; content:!"|27|"; distance:0; within:400; reference:cve,2007-0015; reference:bugtraq,21829; classtype:attempted-admin; sid:2003327; rev:3;) 
+
+#Joint contribution from Andre Ludwig, Blake Hartstein, and Chris Byrd at riosec.com
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WEB-CLIENT Apple Quicktime RTSP Content-Type overflow attempt"; flow:established,from_server; content:"RTSP/"; nocase; depth:5; content:"|0a|Content-Type|3a|"; nocase; distance:0; content:!"|0a|"; within:50; reference:url,www.kb.cert.org/vuls/id/659761; reference: url,www.milw0rm.com/exploits/4657; classtype:attempted-user; sid:2007703; rev:4;)
+alert udp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WEB-CLIENT Apple Quicktime RTSP Content-Type overflow attempt"; content:"RTSP/"; nocase; depth:5; content:"|0a|Content-Type|3a|"; nocase; distance:0; content:!"|0a|"; within:50; reference:url,www.kb.cert.org/vuls/id/659761; reference: url,www.milw0rm.com/exploits/4657; classtype:attempted-user; sid:2007704; rev:2;)
+
+#by Akash Mahajan
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WEB Apple QuickTime <= 7.4.1 QTPlugin.ocx Multiple Remote Stack Overflow"; flow:to_client,established; content:"CLSID"; nocase; content:"02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"; nocase; content:"String"; nocase; pcre:"/[0-9]{4,}/"; pcre:"/(SetBgColor|SetMovieName|SetTarget|SetMatrix|SetHREF)/i"; reference:bugtraq,27769; reference:cve,CVE-2008-0778; reference:url,www.milw0rm.com/exploits/5110; classtype:web-application-attack; sid:2007878; rev:1;)
+
+#by Blake Hartstein
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB CGI AWstats Migrate Command Attempt"; flow:established,to_server; uricontent:"/awstats.pl?"; nocase; pcre:"/migrate\s*=\s*\|/Ui"; reference:bugtraq,17844; classtype:web-application-attack; sid:2002900; rev:2;) 
+
+# Submitted 2005-09-04 by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Barracuda Spam Firewall img.pl Remote Command Execution Attempt"; flow: to_server,established; uricontent:"/cgi-bin/img.pl?"; nocase; pcre:"/(f=.+\|)/Ui"; reference:bugtraq,14712; classtype: web-application-attack; sid:2002362; rev:2;)
+
+# Submitted 2005-11-22 by David Maciejak (with thanks to Nicob for pointing it out)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Barracuda Spam Firewall img.pl Remote Directory Traversal Attempt"; flow: to_server,established; uricontent:"/cgi-bin/img.pl?"; nocase; pcre:"/(f=\.\..+)/Ui"; reference:bugtraq,14710; classtype: web-application-attack; sid:2002685; rev:2;)
+
+# Submitted 2008-08-14 by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Barracuda Spam Firewall preview_email.cgi Remote Command Execution"; flow: to_server,established; uricontent:"/cgi-bin/preview_email.cgi?"; nocase; pcre:"/file=.*\|/Ui"; reference:bugtraq,19276; classtype:web-application-attack; sid:2003086; rev:2;) 
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Barracuda Spam Firewall preview_email.cgi Remote Directory Traversal Attempt"; flow: to_server,established; uricontent:"/cgi-bin/preview_email.cgi?"; nocase; pcre:"/file=.+\.\..+\|/Ui"; reference:bugtraq,19276; classtype:web-application-attack; sid:2003087; rev:3;)
+
+# Submitted 2005-12-06 by Bob Grabowsky
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB includer.cgi Remote Command Execution Attempt"; flow: to_server,established; uricontent:"/includer.cgi?|7c|"; nocase; classtype: web-application-attack; reference:url,isc.sans.org/diary.php?storyid=823; sid:2002711; rev:4;)
+
+# Submitted by Mark Tombaugh, 2005/07/18
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti Input Validation Attack"; flow:established,to_server; content:"GET"; depth:3; nocase; pcre:"/(config_settings|top_graph_header)\.php\?.*=(http|https)\:\//Ui"; classtype:web-application-activity; reference:url,www.cacti.net; reference:url,www.idefense.com/application/poi/display?id=265&type=vulnerabilities; reference:url,www.idefense.com/application/poi/display?id=266&type=vulnerabilities; sid:2002129; rev:5;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti graph_image.php Remote Command Execution Attempt"; flow:to_server,established; uricontent:"/graph_image.php?"; nocase; pcre:"/(graph_start=%0a.+%0a)/i"; reference:cve,CAN-2005-1524; reference:bugtraq,14129; reference:bugtraq,14042; classtype: web-application-attack; sid:2002313; rev:5;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti cmd.php Remote Arbitrary SQL Command Execution Attempt"; flow:to_server,established; uricontent:"/cmd.php?"; nocase; uricontent:"UNION"; nocase; uricontent:"SELECT"; nocase; reference:cve,CVE-2006-6799; reference:bugtraq,21799; classtype: web-application-attack; sid:2003334; rev:2;)
+
+#by Akash Mahajan of stillsecure
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- graph_view graph_list UNION SELECT"; flow:established,to_server; uricontent:"graph_view.php?"; nocase; uricontent:"graph_list="; nocase; uricontent:"UNION"; nocase; pcre:"/.+UNION\s+SELECT/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007889; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- graph_view graph_list INSERT"; flow:established,to_server; uricontent:"graph_view.php?"; nocase; uricontent:"graph_list="; nocase; uricontent:"INSERT"; nocase; pcre:"/.+INSERT.+INTO/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007890; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- graph_view graph_list DELETE"; flow:established,to_server; uricontent:"graph_view.php?"; nocase; uricontent:"graph_list="; nocase; uricontent:"DELETE"; nocase; pcre:"/.+DELETE.+FROM/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007891; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- graph_view graph_list UPDATE"; flow:established,to_server; uricontent:"graph_view.php?"; nocase; uricontent:"graph_list="; nocase; uricontent:"UPDATE"; nocase; pcre:"/.+UPDATE.+SET/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007892; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- tree.php leaf_id SELECT"; flow:established,to_server; uricontent:"tree.php?"; nocase; uricontent:"leaf_id="; nocase; uricontent:"SELECT"; nocase; pcre:"/.+SELECT.+FROM/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007893; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- tree.php leaf_id UNION SELECT"; flow:established,to_server; uricontent:"tree.php?"; nocase; uricontent:"leaf_id="; nocase; uricontent:"UNION"; nocase; pcre:"/.+UNION\s+SELECT/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007894; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- tree.php leaf_id INSERT"; flow:established,to_server; uricontent:"tree.php?"; nocase; uricontent:"leaf_id="; nocase; uricontent:"INSERT"; nocase; pcre:"/.+INSERT.+INTO/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007895; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- tree.php leaf_id DELETE"; flow:established,to_server; uricontent:"tree.php?"; nocase; uricontent:"leaf_id="; nocase; uricontent:"DELETE"; nocase; pcre:"/.+DELETE.+FROM/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007896; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cacti SQL Injection Vulnerability -- tree.php leaf_id UPDATE"; flow:established,to_server; uricontent:"tree.php?"; nocase; uricontent:"leaf_id="; nocase; uricontent:"UPDATE"; nocase; pcre:"/.+UPDATE.+SET/Ui"; classtype:web-application-attack; reference:cve,CVE-2008-0785; reference:bugtraq,27749; sid:2007897; rev:1;)
+
+#by Blake Hartstein
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Cisco IOS HTTP set enable password attack"; flow:established,to_server; uricontent:"/configure/"; uricontent:"/enable/"; classtype:web-application-attack; reference:cve,2005-3921; reference:bugtraq,15602; reference:url,www.infohacking.com/INFOHACKING_RESEARCH/Our_Advisories/cisco/index.html; sid:2002721; rev:2;)
+
+#by tinytwitty
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Cisco CallManager XSS Attempt -- serverlist.asp pattern"; flow:established,to_server; uricontent:"/CCMAdmin/serverlist.asp?"; nocase; uricontent:"pattern="; nocase; pcre:"/.*<?(java|vb)?script>?.*<.+\/script>?/iU"; classtype:web-application-attack; reference:cve,CVE-2007-2832; reference:url,www.secunia.com/advisories/25377; sid:2004556; rev:2;)
+
+
+#some kind of robot/scripted web scanner. Some reports that it's looking for awstats installs
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB DataCha0s Web Scanner/Robot"; flow:established,to_server; content:"User-Agent\: DataCha0s"; nocase; classtype:web-application-activity; reference:url,www.internetofficer.com/web-robot/datacha0s.html; sid:2003616; rev:2;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB IBM Lotus Domino BaseTarget XSS attempt"; flow:to_server,established; uricontent:"OpenForm"; nocase; pcre:"/BaseTarget=.*?\"/iU"; reference:bugtraq,14845; classtype:web-application-attack; sid:2002376; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB IBM Lotus Domino Src XSS attempt"; flow:to_server,established; uricontent:"OpenFrameSet"; nocase; pcre:"/src=.*\"><\/FRAMESET>.*<script>.*<\/script>/iU"; reference:bugtraq,14846; classtype: web-application-attack; sid:2002377; rev:5;)
+
+#by David Maciejak
+#Requires port 3443 to be included in http_inspect ports
+alert tcp $EXTERNAL_NET any -> $HOME_NET 3443 (msg:"ET WEB HP OpenView Network Node Manager Remote Command Execution Attempt"; flow: to_server,established; uricontent:"/OvCgi/connectedNodes.ovpl?"; nocase; pcre:"/node=.*\|.+\|/i"; reference:bugtraq,14662; classtype: web-application-attack; sid:2002365; rev:4;)
+
+# Submitted on 2006-04-21 by Mark Tombaugh
+# This will trigger on the Horde 3.0.9-3.1.0 Remote PHP
+# Metasploit Plugin hosted at milw0rm. Dated: 2006-04-10
+ alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Horde 3.0.9-3.1.0 Help Viewer Remote PHP Exploit"; flow:established,to_server; uricontent:"/services/help/"; nocase; pcre:"/module=[^\;]*\;.*\"/UGi"; reference:url,www.milw0rm.com/exploits/1660; reference:cve,2006-1491; reference:bugtraq,17292; classtype:web-application-attack; sid:2002867; rev:4;)
+
+# This will trigger on access to the Horde help directory
+# Horde Access
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Horde Web Mail Help Access"; flow:established,to_server; uricontent:"/horde/services/help/"; nocase; reference:cve,2006-1491; reference:bugtraq,17292; classtype:web-application-activity; sid:2002868; rev:4;)
+
+#by Eric Wolfe of Terradon
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Horde README access probe"; flow:to_server,established; uricontent:"/horde"; nocase; pcre:"/\/horde((2|3|-3\.(0\.[1-9]|1\.0)))?\/{1,2}README/Ui"; classtype:web-application-activity; reference:cve,CVE-2006-1491; reference:url,csirt.terradon.com/postarchive.php?month=4&year=2006#article28; sid:2002897; rev:4;)
+
+#Submitted by mjp
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC Alternate Data Stream source view attempt"; flow: to_server,established; uricontent:"|3A 3A|$DATA"; reference:url,support.microsoft.com/kb/q188806/; reference:cve,1999-0278; classtype: web-application-activity; sid: 2001365; rev:7;)
+
+#simple sig, but should work for the time being
+#by Matt Jonkman
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB IIS Auth Bypass Attempt"; flow:established,to_server; uricontent:"Webhitsfile="; uricontent:"CiRestriction="; uricontent:"CiHiliteType=full"; classtype:attempted-admin; reference:url,support.microsoft.com/kb/328832; sid:2004115; rev:3;)
+
+#Submitted by Matt Jonkman
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-IIS ASP.net Auth Bypass / Canonicalization"; flow: to_server,established; uricontent:".aspx"; nocase; content:"GET"; nocase; depth: 3; content:"|5C|"; within: 200; content:"aspx"; nocase; within: 100; classtype: web-application-attack; sid: 2001342; rev:19;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-IIS ASP.net Auth Bypass / Canonicalization % 5 C"; flow: to_server,established; uricontent:".aspx"; nocase; content:"GET"; nocase; depth: 3; content:"%5C"; depth: 200; nocase; content:"aspx"; within:100; classtype: web-application-attack; sid: 2001343; rev:17;)
+
+#Submitted by Matt Jonkman
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS 443 (msg:"ET WEB THCIISLame IIS SSL Exploit Attempt"; flow: to_server,established; content:"THCOWNZIIS!"; reference:url,www.thc.org/exploits/THCIISSLame.c; reference:url,isc.sans.org/diary.php?date=2004-07-17; classtype: web-application-attack; sid: 2000559; rev:11;)
+
+#by Blake Hartstein of Demarc
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WEB JuniperSetup Control Buffer Overflow"; flow:established,from_server; content:"E5F5D008-DD2C-4D32-977D-1A0ADF03058B"; nocase; pcre:"/param[^>]*name\s*=\s*["']?productname["']?[^>]*\s+value\s*=\s*(['"])((?!\1).|\\['"]){200}/Ri"; reference:url,www.eeye.com/html/research/advisories/AD20060424.html; classtype:attempted-user; sid:2002889; rev:3;) 
+
+# A LINK method request... weird. Anyone remember what caused this?
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC LINK Method"; flow: to_server,established; content:"LINK "; offset: 0; depth: 5; tag: host,10,packets; reference:url,www.w3.org/Protocols/HTTP/Methods/Link.html; classtype: web-application-activity; sid: 2001546; rev:6;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Light Weight Calendar 'date' Arbitrary Remote Code Execution"; flow: to_server,established; uricontent:"/index.php?"; nocase; pcre:"/date=\d{8}\)\;.+/Ui"; classtype:web-application-attack; sid:2002777; rev:2;)
+
+#Submitted by Joseph Gama
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"ET WEB Suspicious Encrypted Webpage Content"; flow: established; content:"<script"; nocase; pcre:"/<SCRIPT[^>]*>[\s]*VAR[\s]+[\w]+[\s]*=[\s]*['"]([a-fA-F0-9]{2}){20}/i"; classtype: bad-unknown; sid: 2001021; rev:8;)
+
+#From Joe Stewart, LURHQ
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET WEB Encoded javascriptdocument.write - usually hostile"; flow: established,to_client; content:"|313030|,111,99,117,109,101,110,116,46,119,114,105,116,101"; classtype: misc-activity; sid: 2001811; rev:4;)
+
+#Submitted by bdoctor
+alert tcp $HOME_NET $HTTP_PORTS -> any any (msg:"ET WEB MS SQL Server OLEDB asp error"; flow: established,from_server; content:"Microsoft OLE DB Provider for SQL Server error"; reference:url,www.wiretrip.net/rfp/p/doc.asp/i2/d42.htm; classtype: web-application-activity; sid: 2001768; rev:5;)
+
+#by Blake Hartstein of Demarc
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Minishare GET Overflow"; flow:established,to_server; content:"GET "; depth:4; isdataat:200,relative; content:!"/"; distance:0; within:200; reference:cve,2004-2271; reference:bugtraq,11620; classtype:web-application-attack; sid:2002846; rev:4;)
+
+#Submitted by Joseph Gama, Tweaks by Owen Crowe
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt IMG onerror or onload"; flow: to_server,established; content:"<IMG"; nocase; pcre:"/\bonerror\b[\s]*=/Ri"; classtype: web-application-attack; sid: 2001075; rev:4;)
+#alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt TYPE + JAVASCRIPT"; flow: to_server,established; content:"text/javascript"; nocase; pcre:"/TYPE\s*=\s*['"]text\/javascript/i"; classtype: web-application-attack; sid: 2001076; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + JAVASCRIPT"; flow: to_server,established; content:"application/x-javascript"; nocase; pcre:"/TYPE\s*=\s*['"]application\/x-javascript/i"; classtype: web-application-attack; sid: 2001077; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + JSCRIPT"; flow: to_server,established; content:"text/jscript"; nocase; pcre:"/TYPE\s*=\s*['"]text\/jscript/i"; classtype: web-application-attack; sid: 2001078; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + VBSCRIPT 1"; flow: to_server,established; content:"text/vbscript"; nocase; pcre:"/TYPE\s*=\s*['"]text\/vbscript/i"; classtype: web-application-attack; sid: 2001079; rev:7;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + VBSCRIPT 2"; flow: to_server,established; content:"application/x-vbscript"; nocase; pcre:"/TYPE\s*=\s*['"]application\/x-vbscript/i"; classtype: web-application-attack; sid: 2001080; rev:7;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + ECMACRIPT"; flow: to_server,established; content:"text/ecmascript"; nocase; pcre:"/TYPE\s*=\s*['"]text\/ecmascript/i"; classtype: web-application-attack; sid: 2001081; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + EXPRESSION 1"; flow: to_server,established; content:"expression"; nocase; pcre:"/STYLE[\s]*=[\s]*[^>]expression[\s]*\(/i"; classtype: web-application-attack; sid: 2001082; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt STYLE + EXPRESSION 2"; flow: to_server,established; content:"expression"; pcre:"/[\s]*expression[\s]*\([^}]}[\s]*<\/STYLE>/i"; classtype: web-application-attack; sid: 2001083; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt using XML"; flow: to_server,established; content:"<XML"; content:"<![CDATA[<]]>SCRIPT"; nocase; classtype: web-application-attack; sid: 2001084; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt executing hidden Javascript 1"; flow: to_server,established; content:"innerhtml"; nocase; pcre:"/eval[\s]*\([\s]*[^\.]\.innerHTML[\s]*\)/i"; classtype: web-application-attack; sid: 2001085; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt executing hidden Javascript 2"; flow: to_server,established; content:"window.execscript"; nocase; pcre:"/window.execScript[\s]*\(/i"; classtype: web-application-attack; sid: 2001086; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt to execute Javascript code"; flow: to_server,established; content:"javascript"; nocase; pcre:"/(((URL|SRC|HREF|LOWSRC)[\s]*=)|(url[\s]*[\(]))[\s]*['"]*javascript[\:]/i"; classtype: web-application-attack; sid: 2001087; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt to execute VBScript code"; flow: to_server,established; content:"vbscript"; nocase; pcre:"/(((URL|SRC|HREF|LOWSRC)[\s]*=)|(url[\s]*[\(]))[\s]*['"]*vbscript[\:]/i"; classtype: web-application-attack; sid: 2001088; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting attempt to access SHELL\:"; flow: to_server,established; content:"shell"; nocase; pcre:"/(((URL|SRC|HREF|LOWSRC)[\s]*=)|(url[\s]*[\(]))[\s]*['"]*shell[\:]/i"; classtype: web-application-attack; sid: 2001089; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting stealth attempt to execute Javascript code"; flow: to_server,established; pcre:"/(((URL|SRC|HREF|LOWSRC)[\s]*=)|(url[\s]*[\(]))[\s]*['"]*[\x09\x0a\x0b\x0c\x0d]*j[\x09\x0a\x0b\x0c\x0d]*a[\x09\x0a\x0b\x0c\x0d]*v[\x09\x0a\x0b\x0c\x0d]*a[\x09\x0a\x0b\x0c\x0d]*s[\x09\x0a\x0b\x0c\x0d]*c[\x09\x0a\x0b\x0c\x0d]*r[\x09\x0a\x0b\x0c\x0d]*i[\x09\x0a\x0b\x0c\x0d]*p[\x09\x0a\x0b\x0c\x0d]*t[\x09\x0a\x0b\x0c\x0d]*[\:]/i"; content:"="; content:!"javascript\:"; nocase; classtype: web-application-attack; sid: 2001090; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting stealth attempt to execute VBScript code"; flow: to_server,established; pcre:"/(((URL|SRC|HREF|LOWSRC)[\s]*=)|(url[\s]*[\(]))[\s]*['"]*[\x09\x0a\x0b\x0c\x0d]*v[\x09\x0a\x0b\x0c\x0d]*b[\x09\x0a\x0b\x0c\x0d]*s[\x09\x0a\x0b\x0c\x0d]*c[\x09\x0a\x0b\x0c\x0d]*r[\x09\x0a\x0b\x0c\x0d]*i[\x09\x0a\x0b\x0c\x0d]*p[\x09\x0a\x0b\x0c\x0d]*t[\x09\x0a\x0b\x0c\x0d]*[\:]/i"; content:"="; content:!"vbscript\:"; nocase; classtype: web-application-attack; sid: 2001091; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC cross site scripting stealth attempt to access SHELL\:"; flow: to_server,established; pcre:"/(((URL|SRC|HREF|LOWSRC)[\s]*=)|(url[\s]*[\(]))[\s]*['"]*[\x09\x0a\x0b\x0c\x0d]*s[\x09\x0a\x0b\x0c\x0d]*h[\x09\x0a\x0b\x0c\x0d]*e[\x09\x0a\x0b\x0c\x0d]*l[\x09\x0a\x0b\x0c\x0d]*l[\x09\x0a\x0b\x0c\x0d]*[\:]/i";content:"=";  content:!"shell\:"; nocase; classtype: web-application-attack; sid: 2001092; rev:7;)
+
+#by shirkdog
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB PHP Attack Tool Morfeus F Scanner"; flow:established,to_server; content:"User-Agent\:"; nocase; pcre:"/User-Agent\:[^\n]+Morfeus\x20F/i";  reference:url,www.webmasterworld.com/search_engine_spiders/3227720.htm; classtype:web-application-attack; sid:2003466; rev:2;)
+
+#Thanks to dxp
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET WEB Neosploit 1.5.x URL Loader"; flow:to_server,established; content:"GET "; depth:4; nocase; pcre:"/\?u\d_\d_\d{3,4}_\d_\d_\d{10}_\d{10}_\d{9,10}[_\da-z]{0,9}$/Ui"; classtype:web-application-attack; sid:2007705; rev:2;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Netquery Remote Command Execution Attempt"; flow: to_server,established; uricontent:"/nquser.php?"; nocase; pcre:"/(host=\|.+)/i"; reference:bugtraq,14373; classtype: web-application-attack; sid:2002361; rev:3;)
+
+#by Blake Hartstein at Demarc
+alert tcp $EXTERNAL_NET any -> $HOME_NET 8300 (msg:"ET WEB MISC Novell GroupWise Messenger Accept Language Buffer Overflow"; flow:established,to_server; content:"Accept-Language"; nocase; pcre:"/^Accept-Language\:[^\n]*?[^,\;\n]{17}/mi"; reference:cve,2006-0992; reference:bugtraq,17503; classtype:attempted-user; sid:2002865; rev:2;)
+
+#by Michael Scheidell
+alert tcp $HOME_NET $HTTP_PORTS -> $EXTERNAL_NET any (msg:"ET WEB osCommerce vulnerable web application extras update.php exists"; flow:to_server,established; content:"Select an SQL file to install";reference:url,retrogod.altervista.org/oscommerce_22_adv.html; classtype:attempted-recon; sid:2002863; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB osCommerce extras/update.php disclosure"; flow:to_server,established; uricontent:"extras/update.php"; nocase; reference:url,retrogod.altervista.org/oscommerce_22_adv.html;classtype:attempted-recon; sid:2002864; rev:3;)
+
+#Submitted by bdoctor
+alert tcp $HOME_NET $HTTP_PORTS -> any any (msg:"ET WEB ORACLE OLEDB asp error"; flow: established,from_server; content:"OraOLEDB error"; reference:url,www.wiretrip.net/rfp/p/doc.asp/i2/d42.htm; classtype: web-application-activity; sid: 2001767; rev:6;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB ORACLE rwcgi60 information leak attempt"; flow: established,to_server; uricontent:"cgi-bin/rwcgi60"; nocase; reference:url,www.kb.cert.org/vuls/id/997403; classtype: attempted-recon; sid: 2001781; rev:5;)
+
+# Submitted by Mark Tombaugh, 2005/07/20
+# Note: Oracle Reports can run on any TCP port. Please configure HTTP_PORTS appropriately.
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Oracle Reports XSS Attempt"; flow:established,to_server; content:"GET"; depth:3; nocase; pcre:"/(showenv|parsequery|rwservlet)\?.*=\</Ui"; classtype:web-application-activity; reference:url,www.oracle.com/technology/products/reports/index.html; reference:url,www.red-database-security.com/advisory/oracle_reports_various_css.html; sid:2002130; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Oracle Reports XML Information Disclosure"; flow:established,to_server; content:"GET"; depth:3; nocase; pcre:"/(showenv|parsequery|rwservlet)\?.*CUSTOMIZE=\//Ui"; classtype:web-application-activity; reference:url,www.oracle.com/technology/products/reports/index.html; reference:url,www.red-database-security.com/advisory/oracle_reports_read_any_xml_file.html; sid:2002131; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Oracle Reports DESFORMAT Information Disclosure"; flow:established,to_server; content:"GET"; depth:3; nocase; pcre:"/(showenv|parsequery|rwservlet)\?.*destype=file.*desformat=\//Ui"; classtype:web-application-activity; reference:url,www.oracle.com/technology/products/reports/index.html; reference:url,www.red-database-security.com/advisory/oracle_reports_read_any_file.html; sid:2002132; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB Oracle Reports OS Command Injection Attempt"; flow:established,to_server; content:"GET"; depth:3; nocase; pcre:"/(showenv|parsequery|rwservlet)\?.*report=.*\.(rdf|rep)/Ui"; classtype:web-application-activity; reference:url,www.oracle.com/technology/products/reports/index.html; reference:url,www.red-database-security.com/advisory/oracle_reports_run_any_os_command.html; sid:2002133; rev:4;)
+#By Blake Hartstein at Demarc
+#Split into 2 rules, so they can be prequalified with a stronger uri check
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHP Remote File Inclusion (monster list http)"; flow:established,to_server; uricontent:".php"; nocase; uricontent:"http"; nocase; pcre:"/(path|page|lib|dir|file|root|icon|lang(uage)?|folder|type|agenda|gallery|domain|calendar|settings|news|name|auth|prog|config|cfg|incl|ext|fad|mod|sbp|rf|id|df|[a-z](\[.*\])+)\s*=\s*https?/Ui"; reference:url,www.sans.org/top20/; classtype:web-application-attack; sid:2002997; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHP Remote File Inclusion (monster list ftp)"; flow:established,to_server; uricontent:".php"; nocase; uricontent:"ftp\:"; nocase; pcre:"/(path|page|lib|dir|file|root|icon|lang(uage)?|folder|type|agenda|gallery|domain|calendar|settings|news|name|auth|prog|config|cfg|incl|ext|fad|mod|sbp|rf|id|df|[a-z](\[.*\])+)\s*=\s*ftp/Ui"; reference:url,www.sans.org/top20/; classtype:web-application-attack; sid:2003098; rev:3;)
+#Adding a php version, as pointed out by James Riden php also recognizes this
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHP Remote File Inclusion (monster list php)"; flow:established,to_server; uricontent:".php"; nocase; uricontent:"php"; nocase; pcre:"/(path|page|lib|dir|file|root|icon|lang(uage)?|folder|type|agenda|gallery|domain|calendar|settings|news|name|auth|prog|config|cfg|incl|ext|fad|mod|sbp|rf|id|df|[a-z](\[.*\])+)\s*=\s*php/Ui"; reference:url,www.sans.org/top20/; classtype:web-application-attack; sid:2003935; rev:2;)
+
+# Submitted 2005-12-22 by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHPGedView Remote Script Code Execution attempt"; flow:to_server,established; uricontent:"/help_text_vars.php?"; nocase; pcre:"/PGV_BASE_DIRECTORY=(f|ht)tp\:\//Ui"; reference:bugtraq,15983; classtype: web-application-attack; sid:2002730; rev:5;)
+
+#By David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHPOutsourcing Zorum prod.php Remote Command Execution Attempt"; flow:to_server,established; uricontent:"/prod.php?"; nocase; pcre:"/(argv[1]=\|.+)/"; reference:bugtraq,14601; classtype: web-application-attack; sid:2002314; rev:4;)
+
+#Written by Cory Altheide, Incidents.org
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-PHP EasyDynamicPages exploit"; flow: established,to_server; uricontent:"edp_relative_path="; reference:url,www.securitytracker.com/alerts/2004/Jan/1008584.html; reference:cve,CAN-2004-0073; classtype: web-application-activity; sid: 2001344; rev:5;)
+
+#By Blake Hartstein at Demarc
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHP ZeroBoard .htaccess upload"; flow:established,to_server; content:"filename="; nocase; pcre:"/^\s*\.htaccess/Ri"; reference:url,secunia.com/advisories/20592/; classtype:web-application-activity; sid:2002972; rev:2;)
+
+# Submitted by Chris Norton, updates by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PHP vBulletin Remote Command Execution Attempt"; flow: established,to_server; uricontent:"forumdisplay.php?"; nocase; uricontent:"comma="; nocase; pcre:"/(\.system\(.+\)\.)/i"; reference:bugtraq,12542; classtype: web-application-attack; sid: 2001738; rev:8;)
+
+#By Mark Tombaugh
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB vBulletin misc.php Template Name Arbitrary Code Execution"; flow:established,to_server; uricontent:"/misc.php?"; uricontent:"&template=.*{${"; classtype:web-application-attack; reference:url,www.osvdb.org/14047; reference:cve,2005-0511; reference:url,metasploit.com/projects/Framework/exploits.html#php_vbulletin_template; sid:2002388; rev:4;)
+
+#by Ferdy Riphagen
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB PmWiki Globals Variables Overwrite Attempt"; flow:to_server,established; uricontent:"/pmwiki.php"; nocase; content:"GLOBALS[FarmD]="; nocase; pcre:"/GLOBALS\x5bFarmD\x5d\x3d/i"; reference:cve,CVE-2006-0479; reference:bugtraq,16421; reference:nessus,20891; classtype:web-application-attack; sid:2002837; rev:2;)
+
+#from Michael Scheidell
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB PacketShaper DoS attempt"; flow:to_server,established; uricontent:"/rpttop.htm"; pcre:"/MEAS\.TYPE=(?!(link|class)&)/U"; classtype:denial-of-service; sid:2004449; rev:2;)
+
+#by Akash Mahajan
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Philips VOIP841 Web Server Directory Traversal"; flow:to_server,established; content:"GET "; depth:4; pcre:"/(\.\.\/){1,}/"; uricontent:"/etc/passwd";classtype:web-application-attack; reference:url,www.milw0rm.com/exploits/5113; reference:bugtraq,27790; sid:2007871; rev:1;)
+
+#by Rmkml
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Piranha default passwd attempt"; flow:to_server,established; uricontent:"/piranha/secure/control.php3"; content:"Authorization\: Basic cGlyYW5oYTp"; reference:bugtraq,1148; reference:cve,2000-0248; reference:nessus,10381; classtype:attempted-recon; sid:2002331; rev:2;)
+
+#by Blake Hartstein of Demarc
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"ET WEB MISC PunkBuster Server webkey Buffer Overflow"; flow:established,to_server; uricontent:"/pbsvweb"; nocase; content:"webkey="; nocase; isdataat:500,relative; pcre:"/^[^&\n]{500}/R"; reference:url,aluigi.altervista.org/adv/pbwebbof-adv.txt; classtype:attempted-admin; sid:2002947; rev:2;)
+
+#matt Jonkman
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB RSA Web Auth Exploit Attempt - Long URL"; flow:to_server,established; uricontent:"/WebID/IISWebAgentIF.dll"; uricontent:"?Redirect?"; nocase; pcre:"/url=.{8000}/i"; reference:url,secunia.com/advisories/17281; reference:url,www.metasploit.com/projects/Framework/modules/exploits/rsa_iiswebagent_redirect.pm; classtype:web-application-activity; sid:2002660; rev:4;)
+
+#by Reg Quinton at UW. These are intended to be an overall catch for suspected sql injection
+# in web urls. There are more specific sigs for many of these, but these will catch all
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Possible SQL Injection Attempt -- DELETE FROM"; flow:established,to_server; uricontent:"DELETE "; nocase; uricontent:" FROM "; nocase; pcre:"/DELETE.+FROM/Ui"; classtype:web-application-attack; reference:url,en.wikipedia.org/wiki/SQL_injection; sid:2006443; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Possible SQL Injection Attempt -- INSERT INTO"; flow:established,to_server; uricontent:"INSERT "; nocase; uricontent:" INTO "; nocase; pcre:"/INSERT.+INTO/Ui"; classtype:web-application-attack; reference:url,en.wikipedia.org/wiki/SQL_injection; sid:2006444; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Possible SQL Injection Attempt -- SELECT FROM"; flow:established,to_server; uricontent:"SELECT "; nocase; uricontent:" FROM "; nocase; pcre:"/SELECT.+FROM/Ui"; classtype:web-application-attack; reference:url,en.wikipedia.org/wiki/SQL_injection; sid:2006445; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Possible SQL Injection Attempt -- UNION SELECT"; flow:established,to_server; uricontent:"UNION "; nocase; uricontent:" SELECT "; nocase; pcre:"/UNION\s+SELECT/Ui"; classtype:web-application-attack; reference:url,en.wikipedia.org/wiki/SQL_injection; sid:2006446; rev:4;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Possible SQL Injection Attempt -- UPDATE SET"; flow:established,to_server; uricontent:"UPDATE "; nocase; uricontent:" SET "; nocase; pcre:"/[&\?].*UPDATE.+SET/Ui"; classtype:web-application-attack; reference:url,en.wikipedia.org/wiki/SQL_injection; sid:2006447; rev:5;)
+
+#by tinytwitty
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Microsoft SharePoint XSS Attempt -- default.aspx"; flow:established,to_server; uricontent:"/default.aspx?"; nocase; uricontent:"script"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-2581; reference:url,www.securityfocus.com/bid/23832; sid:2003903; rev:3;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Microsoft SharePoint XSS Attempt -- index.php form[mail]"; flow:established,to_server; uricontent:"/contact/contact/index.php?"; nocase; uricontent:"form[mail]="; nocase; uricontent:"script"; nocase; pcre:"/<?(java|vb)?script>?.*<.+\/script>?/Ui"; classtype:web-application-attack; reference:cve,CVE-2007-2579; reference:url,www.securityfocus.com/bid/23834; sid:2003904; rev:3;)
+
+#by tinytwitty
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion site_conf.php ordnertiefe"; flow:established,to_server; uricontent:"/site_conf.php?"; nocase; uricontent:"ordnertiefe="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003705; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion class.csv.php tt_docroot"; flow:established,to_server; uricontent:"/class.csv.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003706; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion produkte_nach_serie.php tt_docroot"; flow:established,to_server; uricontent:"/produkte_nach_serie.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003707; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion ref_kd_rubrik.php tt_docroot"; flow:established,to_server; uricontent:"/functionen/ref_kd_rubrik.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003708; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion hg_referenz_jobgalerie.php tt_docroot"; flow:established,to_server; uricontent:"/hg_referenz_jobgalerie.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003709; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion surfer_anmeldung_NWL.php tt_docroot"; flow:established,to_server; uricontent:"/surfer_anmeldung_NWL.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003710; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion produkte_nach_serie_alle.php tt_docroot"; flow:established,to_server; uricontent:"/produkte_nach_serie_alle.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003711; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion surfer_aendern.php tt_docroot"; flow:established,to_server; uricontent:"/surfer_aendern.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003712; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion ref_kd_rubrik.php tt_docroot"; flow:established,to_server; uricontent:"/ref_kd_rubrik.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003715; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion referenz.php tt_docroot"; flow:established,to_server; uricontent:"/module/referenz.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003713; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion lay.php tt_docroot"; flow:established,to_server; uricontent:"/standard/1/lay.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003714; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TellTarget CMS Remote Inclusion 3_lay.php tt_docroot"; flow:established,to_server; uricontent:"/standard/3/lay.php?"; nocase; uricontent:"tt_docroot="; nocase; classtype:web-application-attack; reference:cve,CVE-2007-2597; reference:url,www.milw0rm.com/exploits/3885; sid:2003867; rev:2;)
+
+# Submitted by David Maciejak, 2005-10-24
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TWiki INCLUDE remote command execution attempt"; flow:to_server,established; uricontent:"INCLUDE"; nocase; pcre:"/%INCLUDE\s*{.*rev=\"\d+\|.+\".*}\s*%/i"; reference:bugtraq,14960; classtype: web-application-attack; sid:2002662; rev:4;)
+
+# By David Maciejak, 2006-07-14
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB TWiki Configure Script TYPEOF Remote Command Execution Attempt"; flow:to_server,established; uricontent:"TYPEOF"; nocase; pcre:"/&TYPEOF\:.+system\s*\(/Ui"; reference:cve,CVE-2006-3819; reference:bugtraq,19188; classtype: web-application-attack; sid:2003085; rev:3;)
+
+#By Blake Hartstein
+#Detects uri evasions too
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB-MISC Poison Null Byte"; flow:established,to_server; uricontent:"|00|"; depth:400; reference:cve,2006-4542; reference:cve,2006-4458; reference:cve,2006-3602; reference:url,www.security-assessment.com/Whitepapers/0x00_vs_ASP_File_Uploads.pdf; classtype:web-application-activity; sid:2003099; rev:3;)
+
+#By David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB Versatile Bulletin Board SQL Injection Attack"; flow:to_server,established; uricontent:"/index.php?"; nocase; pcre:"/select=.+UNION\s+SELECT/Ui"; reference:bugtraq,15068; classtype: web-application-attack; sid:2002494; rev:4;)
+
+#by David Maciejak
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB WPS wps_shop.cgi Remote Command Execution Attempt"; flow: to_server,established; uricontent:"/wps_shop.cgi?"; nocase; pcre:"/(art=\|.+\|)/"; reference:bugtraq,14245; classtype: web-application-attack; sid:2002100; rev:3;)
+
+#by Blake Hartstein of Demarc
+alert tcp $EXTERNAL_NET any -> $HOME_NET 1000 (msg:"ET WEB WebAdmin User Overflow"; flow:established,to_server; content:"/WebAdmin.dll?"; nocase; content:"User="; nocase; content:!"|0a|"; distance:0; within:200; reference:cve,2003-471; classtype:attempted-user; sid:2002847; rev:2;) 
+
+#by Reg Quinton
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"ET EXPLOIT webCalendar Remote File include"; flow: to_server,established,from_client; uricontent:"includedir="; pcre:"/\/ws\/(login|get_reminders|get_events)\.php/"; classtype: web-application-attack; reference:url,www.securityfocus.com/archive/1/462957; sid:2003520; rev:2;)
+
+#by Tom Fischer
+alert tcp any any -> any $HTTP_PORTS (msg:"ET WEB WebAttacker kit (exploit ie0604)"; flow:established,to_server; uricontent:"ie0604.cgi?exploit"; nocase; classtype: web-application-attack; sid:2002870; rev:3;)
+alert tcp any any -> any $HTTP_PORTS (msg:"ET WEB WebAttacker kit (bug ie0604)"; flow:established,to_server; uricontent:"ie0604.cgi?bug="; nocase; classtype: web-application-attack; sid:2002871; rev:3;)
+alert tcp any any -> any $HTTP_PORTS (msg:"ET WEB WebAttacker kit (exploit1 ie0601)"; flow:established,to_server; uricontent:"ie0601.cgi?exploit"; nocase; classtype: web-application-attack; sid:2002869; rev:3;)
+alert tcp any any -> any $HTTP_PORTS (msg:"ET WEB WebAttacker kit (ie0606)"; flow:established,to_server; uricontent:"ie0606.cgi?"; nocase; classtype: web-application-attack;  sid:2002937; rev:2;)
+alert tcp any any -> any $HTTP_PORTS (msg:"ET WEB WebAttacker RootLauncher"; flow:established,to_server; uricontent:"rleadmin.cgi?getexe="; nocase; classtype: web-application-attack; sid:2003063; rev:2;)
+
+#by Blake Hartstein of Demarc
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB WebDAV search overflow"; flow:to_server,established; content:"SEARCH "; depth:8; nocase; isdataat:1000,relative; content:!"|0a|"; within:1000; reference:cve,2003-0109; classtype:web-application-attack; sid:2002844; rev:3;) 
+
+#by tinytwitty
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB WikyBlog XSS Attempt -- sessionRegister.php"; flow:established,to_server; uricontent:"/include/sessionRegister.php?"; nocase; uricontent:"| 3C |"; uricontent:"SCRIPT"; nocase; uricontent:"| 3E |"; classtype:web-application-attack; reference:cve,CVE-2007-2781; reference:url,www.secunia.com/advisories/25308; sid:2004574; rev:2;)
+
+#by Akash Mahajan
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB WinIPDS Directory Traversal Vulnerabilities GET"; flow:to_server,established; content:"GET "; depth:4; pcre:"/(\.\.[\\/]){1,}.+\.(com|exe|bat|dll|cab|ini)/"; classtype:web-application-attack; reference:url,aluigi.altervista.org/adv/winipds-adv.txt; reference:bugtraq,27757; sid:2007872; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB WinIPDS Directory Traversal Vulnerabilities POST"; flow:to_server,established; content:"POST "; depth:5; pcre:"/(\.\.[\\/]){1,}.+\.(com|exe|bat|dll|cab|ini)/"; classtype:web-application-attack; reference:url,aluigi.altervista.org/adv/winipds-adv.txt; reference:bugtraq,27757; sid:2007873; rev:2;)
+
+#Submitted by Chris Norton
+alert tcp $EXTERNAL_NET any -> $HOME_NET 4274 (msg:"ET WEB Possible Xedus Webserver Directory Traversal Attempt"; flow: to_server,established; content:"/../data/log.txt"; content:"/../WINNT/"; nocase; reference:url,www.gulftech.org/?node=research&article_id=00047-08302004; classtype: web-application-activity; sid: 2001238; rev:6;)
+
+# Submitted 2005-10-10 by Mark Tombaugh
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB phpMyAdmin Suspicious Activity"; flow:to_server,established; content:"POST"; depth:4; nocase; uricontent:"/grab_globals.lib.php"; flowbits:set,post.phpmyadmin.grab_globals; flowbits:noalert; classtype: web-application-activity; sid:2002408; rev:5;)
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB phpMyAdmin Local File Inclusion (2.6.4-pl1)"; flow:to_server,established; flowbits:isset,post.phpmyadmin.grab_globals; content:"[redirect]"; nocase; reference:url,securityreason.com/securityalert/69; reference:url,www.frsirt.com/english/advisories/2005/2024; classtype: web-application-activity; sid:2002409; rev:4;)
+# By Frank Knobbe, 2005-11-02
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB sumthin scan"; flow:established,to_server; content:"GET /sumthin HTTP/1."; depth:20; nocase; classtype:attempted-recon; reference:url,www.webmasterworld.com/forum11/2100.htm; sid:2002667; rev:2;)
+
+# Submitted 2006-11-01 by Victor Julien as sighted on Bugtraq
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"ET WEB tikiwiki featured link XSS attempt"; flow:to_server,established; uricontent:"/tiki-featured_link.php?type="; nocase; uricontent:"/iframe>"; nocase; reference:url,www.securityfocus.com/archive/1/450268/30/0; classtype:web-application-attack; sid:2003167; rev:3;)
+

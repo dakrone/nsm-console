@@ -1,0 +1,6 @@
+This module maps all of the IPs in a pcap file to ASN numbers using team Cymru's whois server.
+
+http://www.team-cymru.org/?sec=8&opt=26
+
+Variables:
+OUTPUT_FILE - The filename to save output into, default: ${PCAP_BASE}.asn

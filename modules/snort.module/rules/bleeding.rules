@@ -1,0 +1,82 @@
+#
+# $Id: bleeding.rules,v 1.124 2008/03/03 17:12:56 jonkman Exp $
+# Emerging Threats rules. 
+#
+# SID's are 2000000+ to avoid conflicts
+#
+# More information available at www.emergingthreats.net
+#
+# Please submit any custom rules or ideas to threats@emergingthreats.net or the emerging-sigs mailing list
+#
+#*************************************************************
+#  Copyright (c) 2003-2008, Emerging Threats
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+#  following conditions are met:
+#  
+#  * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+#    disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+#    following disclaimer in the documentation and/or other materials provided with the distribution.
+#  * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+#
+#
+#by Matt Jonkman
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Vulnerable Aurigma ImageUploader5 ActiveX CLSID in Use"; flow:from_server,established; content:"CLSID"; nocase; content:"BA162249-F2C5-4851-8ADC-FC58CB424243"; nocase; pcre:"/(%u6950%u74C9|0x40000)/i"; pcre:"/(ExtractIptc|ExtractExif)/i"; reference:url,www.milw0rm.com/exploits/5049; reference:url,isc.sans.org/diary.html?storyid=3929; classtype:web-application-attack; sid:2007816; rev:3;)
+
+#by Akash Mahajan of Stillsecure
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Aurigma Image Uploader ImageUploader4.ocx ActiveX Control Buffer Overflow Attempt"; flow:to_client,established; content:"0x40000"; content:"Action"; nocase; content:"clsid"; nocase; content:"6E5E167B-1566-4316-B27F-0DDAB3484CF7"; nocase; classtype:web-application-attack; reference:bugtraq,27539; reference:url,isc.sans.org/diary.html?storyid=3929; sid:2007815; rev:2;)
+
+#by Chandan S of StillSecure
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Chilkat FTP ActiveX 2.0 ChilkatCert.dll Insecure Method Vulnerability"; flow:to_client,established; content:"CLSID"; nocase; content:"A934AEE3-8896-485F-8A55-ACF2A87BD010"; nocase; pcre:"/.*\.(ini|exe|dll|bat|com|cab|txt)/i"; content:"SavePkcs8File"; nocase; distance:0; within:40; classtype:web-application-attack; reference:bugtraq,27540; reference:url,www.milw0rm.com/exploits/5028; sid:2007818; rev:1;)
+
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Chilkat Mail ActiveX 7.8 ChilkatCert.dll Insecure Method Vulnerability"; flow:to_client,established; content:"CLSID"; nocase; content:"2A9A3D40-2F32-45BF-9A89-AC9ED6C2FEDF"; nocase; pcre:"/.*\.(ini|exe|dll|bat|com|cab|txt)/i"; content:"SaveLastError"; nocase; distance:0; within:40; classtype:web-application-attack; reference:bugtraq,27493; reference:url,www.milw0rm.com/exploits/5005; sid:2007819; rev:1;)
+
+#by Akash Mahajan of Stillsecure
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Possible Comodo AntiVirus 2.0 ExecuteStr() Remote Command Execution Vulnerability"; flow:to_client,established; content:"clsid"; nocase; content:"309F674D-E4D3-46BD-B9E2-ED7DFD7FD176"; nocase; content:"ExecuteStr"; pcre:"/.*\.(exe|bat|ftp)/i";reference:cve,CVE-2008-0470; reference:bugtraq,27424; reference:url,www.milw0rm.com/exploits/4974; classtype:web-application-attack; sid:2007887; rev:1;)
+
+# re http://isc.sans.org/diary.html?storyid=3929
+#by Akash Majahan at StillSecure
+# FaceBook PhotoUploader Buffer Overflow Exploit
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS FaceBook PhotoUploader Buffer Overflow Exploit"; flow:to_client,established; content:"clsid"; nocase; content:"5C6698D9-7BE4-4122-8EC5-291D84DBD4A0"; nocase; pcre:"/(ExtractIptc|ExtractExif|FileMask)/i"; classtype:web-application-attack; reference:url,www.milw0rm.com/exploits/5049; reference:url,www.milw0rm.com/exploits/5102; reference:bugtraq,27576; reference:url,isc.sans.org/diary.html?storyid=3929; sid:2007817; rev:2;)
+
+#by Akash Mahajan of Stillsecure
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Microsoft DirectSpeechSynthesis Module (XVoice.dll 4.0.4.3303) remote BoF exploit"; flow:to_client,established; content:"clsid"; nocase; content:"EEE78591-FE22-11D0-8BEF-0060081841DE"; nocase; content:"0x40000"; content:"FindEngine"; nocase; reference:url,www.milw0rm.com/exploits/5087; reference:bugtraq,24426; classtype:web-application-attack; sid:2007848; rev:1;)
+
+# by matt jonkman, to be removed/reconsidered on feb 20 08
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET CURRENT EVENTS Likely Storm Binary Requested (postcard.exe)"; flow:established,to_server; uricontent:"/postcard.exe"; nocase; classtype:trojan-activity; sid:2007760; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET CURRENT EVENTS Likely Storm Binary Requested (e-card.exe)"; flow:established,to_server; uricontent:"/e-card.exe"; nocase; classtype:trojan-activity; sid:2007761; rev:3;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET CURRENT EVENTS Likely Storm Binary Requested (ecard.exe)"; flow:established,to_server; uricontent:"/ecard.exe"; nocase; classtype:trojan-activity; sid:2007902; rev:1;)
+
+#keeping this, still getting reports of hits
+alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"ET CURRENT EVENTS Likely Zlob Binary Requested (VideoAccessCodecInstall.exe)"; flow:established,to_server; uricontent:"/VideoAccessCodecInstall.exe"; nocase; sid:2007729; rev:4;)
+
+#by Akash Mahajan of Stillsecure
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Rising Online Scanner Insecure Method Vulnerability"; flow:to_client,established; content:"clsid"; nocase; content:"E4E2F180-CB8B-4DE9-ACBB-DA745D3BA153"; nocase; content:"UpdateEngine"; nocase; content:"0000$0000$0000"; classtype:web-application-attack; reference:bugtraq,27997; reference:url,www.milw0rm.com/exploits/5188; sid:2007888; rev:1;)
+
+#by Adam Pointon at sentinelsecurity.com.au
+alert udp $HOME_NET any -> $DNS_SERVERS 53 (msg:"ET DNS Possible MITM lookup for WPAD.com"; content:"|04|wpad|03|com|02|"; nocase; reference:url,support.microsoft.com/kb/247333; classtype:attempted-user; sid:2007707; rev:2;)
+alert udp $HOME_NET any -> $DNS_SERVERS 53 (msg:"ET DNS Possible MITM lookup for WPAD.co"; content:"|04|wpad|02|co|02|"; nocase; reference:url,support.microsoft.com/kb/247333; classtype:attempted-user; sid:2007708; rev:2;)
+alert udp $HOME_NET any -> $DNS_SERVERS 53 (msg:"ET DNS Possible MITM lookup for WPAD.net"; content:"|04|wpad|03|net|02|"; nocase; reference:url,support.microsoft.com/kb/247333; classtype:attempted-user; sid:2007709; rev:2;)
+alert udp $HOME_NET any -> $DNS_SERVERS 53 (msg:"ET DNS Possible MITM lookup for WPAD.org"; content:"|04|wpad|03|org|02|"; nocase; reference:url,support.microsoft.com/kb/247333; classtype:attempted-user; sid:2007710; rev:2;) 
+
+# re http://isc.sans.org/diary.html?storyid=3929
+# Will remove these sometime after patching looks complete
+#by Akash Mahajan at Stillsecure
+# Yahoo! JukeBox MediaGrid ActiveX Control mediagrid.dll AddBitmap() Buffer O
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Yahoo! JukeBox MediaGrid ActiveX Control mediagrid.dll AddBitmap() BoF"; flow:to_client,established; content:"clsid"; nocase; content:"22FD7C0A-850C-4A53-9821-0B0915C96139"; nocase; content:"0x40000"; content:"AddBitmap"; nocase; classtype:web-application-attack; reference:bugtraq,27578; reference:url,milw0rm.com/exploits/5052; reference:url,isc.sans.org/diary.html?storyid=3929; sid:2007813; rev:1;)
+
+#by Akash Mahajan at Stillsecure
+# Yahoo! Music Jukebox 2.2 AddImage() and AddButton() ActiveX BOF
+alert tcp $EXTERNAL_NET $HTTP_PORTS -> $HOME_NET any (msg:"ET CURRENT_EVENTS Yahoo! Music Jukebox (DataGrid) 2.2 AddImage() ActiveX BOF"; flow:to_client,established; content:"clsid"; nocase; content:"5F810AFC-BB5F-4416-BE63-E01DD117BD6C"; nocase; content:"0x40000"; pcre:"/(AddImage|AddButton)/i"; reference:bugtraq,27590; reference:url,www.milw0rm.com/exploits/5048; reference:url,www.milw0rm.com/exploits/5046; reference:url,www.milw0rm.com/exploits/5051; classtype:web-application-attack; sid:2007812; rev:1;)
+

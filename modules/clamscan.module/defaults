@@ -1,0 +1,2 @@
+OUTPUT_FILE=${PCAP_BASE}.clamscan
+EXTRACT_MODULE=tcpxtract

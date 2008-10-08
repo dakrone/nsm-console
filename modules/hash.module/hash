@@ -1,0 +1,2 @@
+md5 ${PCAP_FILE} > ${OUTPUT_DIR}/${PCAP_BASE}.md5
+sha256 ${PCAP_FILE} > ${OUTPUT_DIR}/${PCAP_BASE}.sha256

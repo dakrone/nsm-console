@@ -1,0 +1,3 @@
+cd ${OUTPUT_DIR} && tcpick ${TCPICK_OPTS} -r ${PCAP_FILE} "${FILTER}" >> ${OUTPUT_FILE}
+mkdir -p ${STREAM_DIR}
+mv ${OUTPUT_DIR}/*.dat ${STREAM_DIR}

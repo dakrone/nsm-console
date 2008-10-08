@@ -1,0 +1,9 @@
+The dnstop module extracts DNS query information from a pcap file. This includes domains, type of requests and other info.
+
+http://dns.measurement-factory.com/tools/dnstop/
+
+Variables:
+FILTER - The filter to use for the pcap file, default: udp port 53
+FLAGS - Command-line flags for dnstop, default: -4 -6
+LEVEL - The top-down level to print information for, default: 7
+OUTPUT_FILE - The file to save output into, default: ${OUTPUT_DIR}/${PCAP_BASE}.dnstop

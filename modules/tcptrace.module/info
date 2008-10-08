@@ -1,0 +1,15 @@
+The tcptrace performs trace analysis on the packet capture file, generating graphs and saving stream contents. The graph files can be viewed using 'xplot <xplfile>'
+
+Homepage: http://jarok.cs.ohiou.edu/software/tcptrace/tcptrace.html
+
+Variables:
+TCPTRACE_OPTS - The options to pass tcptrace, default: -T -C -e -l -n --xplot_title_prefix=${PCAP_BASE}
+Here's what they mean:
+-T  Generate throughput graphs
+-C  Generate graphs in color
+-e  Same stream files
+-l  Long/verbose output
+--xplot_title_prefix  Prefix for xplot graphs
+OUTPUT_FILE - The output filename for trace statistics, default: ${PCAP_BASE}.tcptrace
+GRAPH_DIR - Directory to place graph files, default: ${OUTPUT_DIR}/graph
+STREAM_DIR - Directory to place streams, default: ${OUTPUT_DIR}/streams

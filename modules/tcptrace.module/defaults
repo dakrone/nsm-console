@@ -1,0 +1,4 @@
+TCPTRACE_OPTS=-T -C -e -l -n --xplot_title_prefix=${PCAP_BASE}.
+OUTPUT_FILE=${PCAP_BASE}.tcptrace
+GRAPH_DIR=${OUTPUT_DIR}/graph
+STREAM_DIR=${OUTPUT_DIR}/streams

@@ -1,0 +1,96 @@
+- More modules (always)
+- Fix bugs (always :)
+- Different logging levels
+- morse code -.--...-.-  .-- .-..-.. ---..-- encode/decode
+- leet? Whoops, I mean "l337" encode
+- NTLM v1 & v2 encode
+- LANMAN? encode
+- CHAP? encode
+- Piglatin :P encode/decode
+- Rainbow tables encode/decode (Enhanced is working on this)
+- Ruby module for generating traffic graphs? (gruff)
+- Blog post/tutorial: putting a module in a category for nsm-console
+- Screencast: creating a command for nsm-console
+- Context-sensative tab completion
+- Create coherent code. Comment things (big project)
+- Some kind of unified output structure (?)
+N/A - Guti - run -h addition to help run (not doing this because 'help' command is enable in my opinion)
+- make clamscan module do the tcpxtract itself, or write some way to include dependencies
+- perhaps implement scruby integration? (or scapy, if nothing else)
+- Add a class to handle option variables, like "NSM_Option", instead of using global variables
+- Extend pcapparser to support ARP
+- Extend pcapparser to support ICMP
+- From Scholar: readline tab-completion for filenames
+- Extend 'iplist' command to handle directories of files
+- Perhaps add an additional option for what to do with the list? (ip2asn, harimau)
+- Add 'stats' command for some generic pcap stats
+- Piping something into 'less' gives a broken pipe when you exit
+- Transition Argus modules to be 3, or 2, or both, 3 is preferred.
+- SiLKtools integration (see below)
+- Improve the prompt (show basename of the pcap being worked on)
+DONE - pcapparser supports NULL ethernet types (thanks bsdjunkie)
+DONE - Fix very serious p -x bug where hex output was truncated.
+- make 'update' work correctly
+DONE - Add '-f' flag to print command to display full packet, not just payload
+DONE - Fix p -x formatting on truncated strings
+- Make EVERYTHING work on directories of files
+- Ability to print arbitrary fields of packets (or a range thereof)
+DONE - 'list' command can filter things out, like "list all" and "list enabled" and "list disabled" ('list en' and 'list dis' shorthand)
+DONE - Add dnstop module
+- Add unicode encoding support
+DONE - Fix weird alias problem ("ll en" w/my ./nsmcrc)
+- Ability to "install" NSM-Console, and run it from a different directory
+DONE - Add ability to use -q to start nsm console quietly
+DONE - Fix 'dump * file' (have to use "dump 1-* file" right now)
+DONE - Abstract alias resolving to the NSM_Alias class
+DONE - Abstract logging methods into Logger class
+DONE - Small amount of code cleanup and reorganization to make code more readable
+- Add "HOME_NET" declaration for modules that would support that sort of value.
+  Modules: 
+- Make nsm-console work with ruby 1.8 and 1.9
+DONE - vim modelines
+DONE - "dump" command supports directories
+- Allow "dump -f" to dump packets regardless of supported protocol or not
+DONE - "iplist" command needs to support directories of pcap files
+- Rewrite pcapparser to use Ruby's builtin BinData so it's easier to extend
+
+
+IDEAS:
+==================
+iplist mode, entered using an "iplist" command, so it would follow:
+
+nsm> iplist
+nsm (iplist)>
+nsm (iplist)> cidr (to get cidr masks)
+nsm (iplist)> list [file] (list them to stdout or a file)
+nsm (iplist)> harimau (check against harimau)
+nsm (iplist)> asn (map IPs to asn)
+nsm (iplist)> stats (show rudimentary statistics)
+nsm (iplist)> end
+nsm>
+
+caching the list of ips generated using pcapparser, so that data could be exported to different
+tools, without regeneration. Give optional filename to save to a file and also show on stdout.
+
+P.S. This was/is Scholar's idea, he gets credit
+
+==================
+For silktools integration, I propose a moded implementation, similar to the
+iplist idea or IOS configure modes:
+
+nsm> file data.pcap
+... loads file ...
+nsm> silk
+Generating silk flow file...done.
+nsm (silk)> stats
+... print overall statistics ...
+nsm (silk)> stats -sport 2
+(rwstats -sport --percentage 2 data.silk)
+... etc, etc, etc ...
+nsm (silk)> end
+nsm> 
+
+Need to implement this in a unified fashion, so it makes conceptual sense. This
+will probably also be difficult to implement. It should be separated so that
+not having silktools installed will still allow all other functionality (other
+than silk)

@@ -1,0 +1,6 @@
+This module will analyze the pcap file with the Bro Intrustion Detection System, generating information/alarms about the protocols
+
+http://www.bro-ids.org/
+
+Variables
+POLICIES - The IDS policies to run the pcap file against, default: tcp alarm weird irc http ftp passwords scan ssh rsh udp worm smtp

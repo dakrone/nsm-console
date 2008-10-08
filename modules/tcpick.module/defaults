@@ -1,0 +1,4 @@
+TCPICK_OPTS=-C -t -wR
+FILTER= 
+OUTPUT_FILE=${PCAP_BASE}.tcpick
+STREAM_DIR=${OUTPUT_DIR}/streams

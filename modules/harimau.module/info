@@ -1,0 +1,7 @@
+This module checks all the source and destination IP addresses against the
+Harimau blacklists provided by Spoonfork and the gang.
+
+http://watchlist.security.org.my/
+
+Variables:
+OUTPUT_FILE - The file to output to, default: ${PCAP_BASE}.harimau

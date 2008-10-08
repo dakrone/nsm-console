@@ -1,0 +1,1 @@
+clamscan -r ${OUTPUT_DIR}/../${EXTRACT_MODULE}/ > ${OUTPUT_DIR}/${OUTPUT_FILE}

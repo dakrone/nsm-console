@@ -1,0 +1,8 @@
+This module reads from a pcap file and traces sessions, grabbing
+available data out of them. Options are below:
+
+http://www.brendangregg.com/chaosreader.html
+
+OPTIONS - Additional command-line options for chaosreader
+
+Default OPTIONS is '-v'

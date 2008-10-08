@@ -1,0 +1,7 @@
+The tcpflow module extracts flow information from a pcap file
+
+http://www.circlemud.org/~jelson/software/tcpflow/
+
+Additional options can be set using the ${OPTIONS} variable, the default is:
+OPTIONS=-v
+See the tcpflow man page for a full list of command line options

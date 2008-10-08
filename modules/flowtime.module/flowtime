@@ -1,0 +1,1 @@
+cd ${OUTPUT_DIR} && flowtime -w ${WIDTH} -h ${HEIGHT} -g ${PCAP_FILE} ${IP_FILTER} ${PCAP_BASE}

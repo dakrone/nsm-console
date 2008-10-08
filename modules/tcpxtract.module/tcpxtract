@@ -1,0 +1,1 @@
+tcpxtract -f ${PCAP_FILE} -c ${CONFIG_FILE} -o ${OUTPUT_DIR} 

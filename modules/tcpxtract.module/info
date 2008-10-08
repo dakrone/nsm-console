@@ -1,0 +1,6 @@
+The tcpxtract module attempts to extract files from a pcap file.
+
+http://tcpxtract.sourceforge.net/
+
+To edit the extraction settings, change the ${MODULE_DIR}/${MODULE_NAME}.module/tcpxtract.conf
+file.

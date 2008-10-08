@@ -1,0 +1,1 @@
+foremost -t ${EXTRACT_TYPE} ${FOREMOST_OPTS} -i ${PCAP_FILE} -o ${OUTPUT_DIR}

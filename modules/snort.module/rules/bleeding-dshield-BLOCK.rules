@@ -1,0 +1,35 @@
+#
+# $Id: bleeding-dshield.rules $
+# Emerging Threats Dshield rules.
+#
+# Rules to block Dshield identified Top Attackers (www.dshield.org)
+#
+# More information available at www.emergingthreats.net
+#
+# Please submit any feedback or ideas to emerging@emergingthreats.net or the emerging-sigs mailing list
+#
+#*************************************************************
+#
+#  Copyright (c) 2003-2008, Emerging Threats
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+#  following conditions are met:
+#  
+#  * Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+#    disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+#    following disclaimer in the documentation and/or other materials provided with the distribution.
+#  * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+#  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+#
+#
+alert ip [222.170.93.0/24,221.208.208.0/24,62.159.131.0/24,198.66.68.0/24,148.208.174.0/24,82.178.21.0/24,139.55.60.0/24,202.97.238.0/24,139.55.82.0/24,218.10.137.0/24,221.209.110.0/24,60.209.127.0/24,139.55.44.0/24,217.175.134.0/24,210.22.13.0/24,219.153.19.0/24,64.57.102.0/24,84.234.22.0/24,189.71.6.0/24,70.255.232.0/24] any -> $HOME_NET any (msg:"ET DROP Dshield Block Listed Source - BLOCKING"; reference:url,feeds.dshield.org/block.txt; threshold: type limit, track by_src, seconds 3600, count 1; sid:2403000; rev:1068; fwsam: src, 72 hours;)

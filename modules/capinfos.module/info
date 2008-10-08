@@ -1,0 +1,7 @@
+The capinfos module prints information about a capture file. This
+tool is provided by the wireshark team.
+
+http://www.wireshark.org/
+
+Options:
+OUTPUT_FILE - The output file for capinfos (default: ${PCAP_BASE}.capinfos)

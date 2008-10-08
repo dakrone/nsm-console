@@ -1,0 +1,5 @@
+tcptrace ${TCPTRACE_OPTS} --output_dir=${OUTPUT_DIR} --output_prefix=${PCAP_BASE} ${PCAP_FILE} >> ${OUTPUT_DIR}/${OUTPUT_FILE}
+mkdir -p ${GRAPH_DIR}
+mkdir -p ${STREAM_DIR}
+mv ${OUTPUT_DIR}/*.xpl ${GRAPH_DIR}
+mv ${OUTPUT_DIR}/*.dat ${STREAM_DIR}

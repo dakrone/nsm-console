@@ -1,0 +1,7 @@
+Trace-summary is a Python script which generates break-downs of network traffic, including lists of the top hosts, protocols, ports, etc. Optionally, it can generate output separately for incoming vs. outgoing traffic, per subnet, and per time-interval.
+
+http://www.icir.org/robin/trace-summary/
+
+Variables:
+OPTS - options for the trace-summary.py script, default: (none)
+OUTPUT_FILE - the file output is directed into, default: ${PCAP_BASE}.trace

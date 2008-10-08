@@ -1,0 +1,9 @@
+The tcpick module generated colorized traffic flow as well as rebuilding and outputting tcp streams from the packet file.
+
+http://tcpick.sourceforge.net/
+
+Options:
+TCPICK_OPTS - Command-line options for tcpick, default: -C -t -wR
+FILTER - BPF filter for the packet file, default is no filter
+OUTPUT_FILE - Output filename for tcpick output, default: ${PCAP_BASE}.tcpick
+STREAM_DIR - Directory to put the stream files in, default: ${OUTPUT_DIR}/streams

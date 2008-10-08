@@ -1,0 +1,4 @@
+This module will analyze the pcap file with the Bro Intrustion Detection System 
+Stream contents will be put in the 'contents' directory
+
+http://www.bro-ids.org/

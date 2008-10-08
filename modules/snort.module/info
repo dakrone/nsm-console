@@ -1,0 +1,8 @@
+The snort module runs snort to generate alerts against a packet capture file.
+
+http://snort.org/
+
+Variables:
+SNORT_CONF - The location of the snort configuration file. Default: ${MODULE_DIR}/${MODULE_NAME}.module/snort.conf
+SNORT_OPTIONS - Command line options to be passed to snort. Default: -A full -b -y
+OUTPUT_FILE - The folder to place output into. Default: ${PCAP_BASE}.snort
