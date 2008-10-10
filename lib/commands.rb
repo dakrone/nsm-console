@@ -507,6 +507,7 @@ command "Display program credits","credits" do |args|
   puts "Matthew Lee Hinman - matthew [dot] hinman [at] gmail [dot] com"
   puts "Scholar - PcapParser library, flowtag module (thanks scholar!)"
   puts "JohnQPublic - Clamscan module"
+  puts "Chmeee - afterglow module"
   
   print "\n"
   puts "Ideas:"
