@@ -1,0 +1,8 @@
+The afterglow module generates a graph of the traffic.
+
+Note that this module requires the perl Text::CSV module installed as well as
+neato, which can be downloaded from http://graphviz.org/ to generate the image.
+
+http://afterglow.sourceforge.net/
+
+AFTERGLOW_HOME - Path for afterglow executables (default: ${MODULE_DIR}/bin)

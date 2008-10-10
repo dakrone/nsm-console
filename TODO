@@ -53,6 +53,7 @@ DONE - "dump" command supports directories
 - Allow "dump -f" to dump packets regardless of supported protocol or not
 DONE - "iplist" command needs to support directories of pcap files
 - Rewrite pcapparser to use Ruby's builtin BinData so it's easier to extend
+- Expand ~ for modload command
 
 
 IDEAS:

@@ -1,0 +1,2 @@
+tcpdump -vttttnnelr ${PCAP_FILE} | ${AFTERGLOW_HOME}/tcpdump2csv.pl "sip dip sport" > ${OUTPUT_DIR}/${PCAP_BASE}.csv
+perl ${AFTERGLOW_HOME}/afterglow.pl -c ${AFTERGLOW_HOME}/tcpdump.properties < ${OUTPUT_DIR}/${PCAP_BASE}.csv | neato -Tgif -o ${OUTPUT_DIR}/${PCAP_BASE}.gif
