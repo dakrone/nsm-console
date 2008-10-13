@@ -312,6 +312,9 @@ the currently loaded modules.",
     return
   end
   
+  # expand directory name (like ~)
+  dir = File.expand_path(dir)
+
   if !File.directory?(dir)
     puts "#{dir} is not a directory."
     return
