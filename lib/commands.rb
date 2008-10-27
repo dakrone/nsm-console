@@ -877,32 +877,23 @@ end
 
 
 ## The update command
-command "Update NSM-Console to the latest version from SVN, use -v for verbose", "update" do |args|
-  puts "Updating NSM-Console from svn..."
+command "Update NSM-Console to the latest version from git, use -v for verbose", "update" do |args|
+  puts "Updating NSM-Console from git..."
   args = args.to_s.chomp
   verbose = args =~ /-v/ ? true : false
   
-  unless system("which svn 2>&1 > /dev/null")
-    STDERR.puts "svn not found, please install subversion and try again."
+  unless system("which git 2>&1 > /dev/null")
+    STDERR.puts "git not found, please install git (http://git.or.cz/) and try again."
   end
 
-#  puts "Generating update files..." if verbose
-#  `mkdir -p /tmp/nsmc-update` unless File.directory?("/tmp/nsmc-update")
-#    
-#  svnconf = File.open("/tmp/nsmc-update/config","w")
-#  svnconf.puts "[auth]"
-#  svnconf.puts "[helpers]"
-#  svnconf.puts "[tunnels]"
-#  svnconf.puts "ssh = ssh -p 1337"
-#  svnconf.puts "[miscellany]"
-#  svnconf.puts "[auto-props]"
-#  svnconf.close
+  puts "Fetching newest revision from git..." if verbose
 
-  puts "Fetching newest revision from svn..." if verbose
-
-  puts "svn co --non-interactive http://svn.security.org.my/trunk/rawpacket-root/usr/home/analyzt/rp-NSM/nsm-console ." if verbose
-
-  system("svn co --non-interactive http://svn.security.org.my/trunk/rawpacket-root/usr/home/analyzt/rp-NSM/nsm-console .")
+  puts "> git fetch" if verbose
+  system("git fetch")
+  puts "> git pull" if verbose
+  system("git pull")
+  puts "> git reset --hard HEAD" if verbose
+  system("git reset --hard HEAD")
 
   puts "Return status: #{$?}" if verbose
 

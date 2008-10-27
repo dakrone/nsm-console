@@ -30,7 +30,7 @@ N/A - Guti - run -h addition to help run (not doing this because 'help' command 
 - Improve the prompt (show basename of the pcap being worked on)
 DONE - pcapparser supports NULL ethernet types (thanks bsdjunkie)
 DONE - Fix very serious p -x bug where hex output was truncated.
-- make 'update' work correctly
+DONE - make 'update' work correctly
 DONE - Add '-f' flag to print command to display full packet, not just payload
 DONE - Fix p -x formatting on truncated strings
 - Make EVERYTHING work on directories of files
