@@ -55,6 +55,7 @@ DONE - "iplist" command needs to support directories of pcap files
 - Rewrite pcapparser to use Ruby's builtin BinData so it's easier to extend
 DONE - Expand ~ for modload command
 - Make nsm-console "installable" to a different directory, rather than running it out of the distribution dir.
+DONE - Fixed error in iplist where the ips were not listed due to uninitialized array.
 
 
 IDEAS:

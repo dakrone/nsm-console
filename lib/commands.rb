@@ -830,8 +830,8 @@ end
 
 
 ## The iplist command
-command "Generate a list of all the IPs in a file. Usage: iplist [file] (if no file is specified, stdout is used)","iplist" do |file|
-  file = file.to_s.chomp
+command "Generate a list of all the IPs in a file. Usage: iplist [file] (if no file is specified, stdout is used)","iplist" do |args|
+  file = args.to_s.chomp
 
   iplist = {}
   

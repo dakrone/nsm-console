@@ -324,6 +324,9 @@ end
 def gen_list_from_pcap
   list = {}
 
+  # initialize empty array of file names
+  fnames = []
+
   # get a list of files, otherwise just do one
   if (File.directory?($datafile))
     fnames = get_filelist($datafile,true)
