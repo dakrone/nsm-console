@@ -12,6 +12,7 @@ class NSM_Alias
 
   ## Set a new alias or update an existing one
   def NSM_Alias.set_alias(name,val)
+    puts "setting alias #{name} -> #{val}"
     @aliases = {} if @aliases.nil?
     @aliases[name.to_s] = val.to_s
   end
@@ -40,7 +41,9 @@ class NSM_Alias
   ## Generate a new command and arguments (resolve alias)
   # returns: cmd, args
   def NSM_Alias.resolve(cmd, args)
+    puts "de-aliasing #{cmd}"
     a = self.get_alias(cmd)
+    puts "got alias: #{a}"
     unless a.nil?
       newcmd = String.new(a)
       newcmd.gsub!(/(\w)\s([\s\S]*)/) { $1 }

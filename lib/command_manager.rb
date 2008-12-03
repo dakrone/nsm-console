@@ -11,6 +11,7 @@ class CommandManager
   end
   
   def CommandManager.execute(exec, *args)
+    puts "exec: #{exec}"
     @@commands[exec].execute args
   end
   
