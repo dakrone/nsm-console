@@ -41,9 +41,7 @@ class NSM_Alias
   ## Generate a new command and arguments (resolve alias)
   # returns: cmd, args
   def NSM_Alias.resolve(cmd, args)
-    puts "de-aliasing #{cmd}"
     a = self.get_alias(cmd)
-    puts "got alias: #{a}"
     unless a.nil?
       newcmd = String.new(a)
       newcmd.gsub!(/(\w)\s([\s\S]*)/) { $1 }

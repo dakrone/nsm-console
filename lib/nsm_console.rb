@@ -1,6 +1,8 @@
 # vim: set ts=2 sw=2 tw=80
 class NSM_Console
+  # Default prompt without color
   $PROMPT = "nsm> "
+  # Default prompt with color
   $CPROMPT = "\033[32mnsm\033[0m> "
 
   # Save our default standard out
@@ -11,12 +13,14 @@ class NSM_Console
     # flag to redirect stdout for startup
     quiet_startup = false
 
+    # Check for quiet startup
     if (args.include?("-q"))
       # Remove -q from the arguments
       args.delete_at(0)
       quiet_startup = true
     end
 
+    # If quiet startup is requests, reopen stdout as /dev/null
     if quiet_startup
       # Save the current STDOUT so we can reopen it
       saved_stdout = STDOUT.dup
@@ -32,7 +36,7 @@ class NSM_Console
     ## Set {$PCAP_FILE} if passed in as an argument
     CommandManager.execute("file",args[0]) if args.length > 0
 
-    ## Load modules
+    ## Load modules from default module and category directories
     load_modules($moduledir)
     load_categories($moduledir)
 
@@ -42,11 +46,8 @@ class NSM_Console
 
     puts $color ? "Default ${#{$MAGENTA}OUTPUT_DIR#{$RESET}} is '#{$outputdir}'" : "Default ${OUTPUT_DIR} is '#{$outputdir}'"
     puts $color ? "Default ${#{$MAGENTA}MODULE_DIR#{$RESET}} is '#{$moduledir}'" : "Default ${MODULE_DIR} is '#{$moduledir}'"
-
-    cmd = ""
-
     print "\n"
-    
+
     ## Read ~/.nsmcrc
     rcfile = ENV['HOME']
     rcfile += "/.nsmcrc"
@@ -124,7 +125,6 @@ class NSM_Console
         
         ## Check our aliases and substitute if any match
         cmd, args = NSM_Alias.resolve(cmd, args)
-        puts "cmd: #{cmd}", "args: #{args}"
 
         begin
           Logger.write("[nsmcmd] #{cmd} #{args}\n")
