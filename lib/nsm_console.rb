@@ -130,17 +130,17 @@ class NSM_Console
           Logger.write("[nsmcmd] #{cmd} #{args}\n")
           History.write("#{cmd} #{args}")
           CommandManager.execute(cmd,args) unless cmd.length < 1
-        #rescue Interrupt
-          #puts "Caught ^C, use 'quit' or 'q' to exit"
-        #rescue LocalJumpError
+        rescue Interrupt
+          puts "Caught ^C, use 'quit' or 'q' to exit"
+        rescue LocalJumpError
           ## Ignore LocalJumpErrors, it just means we returned
           # I need to find a better way to do this, otherwise I'm
           # just catching premature returns and ignoring them, which
           # isn't exactly what I want to be doing.
-        #rescue NoMethodError
+        rescue NoMethodError
           # NoMethodError means CommandManager couldn't find the
           # command block for the cmd string.
-          #puts "Command '#{cmd}' unrecognized. Try 'help' for a list of commands."
+          puts "Command '#{cmd}' unrecognized. Try 'help' for a list of commands."
         rescue
           STDERR.puts "Error encountered: #{$!}"
           STDERR.puts "Backtrace:"

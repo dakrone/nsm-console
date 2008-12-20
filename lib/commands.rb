@@ -16,7 +16,7 @@
 ## Help command
 command "Display commands and command usage. 'help <cmd>' for more detail",
 "help" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   
   if args.length < 1
     puts "\nUse 'help <cmd>' to get more detail about a command"
@@ -53,7 +53,7 @@ end
   
 ## List command
 command "List all modules and their enabled or disabled states", "list" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
 
   puts "\nCategories:"
   $categories.each { |cat|
@@ -84,7 +84,7 @@ end
 command "Toggle a module on or off\n\t\tUsage: toggle <module name>\n\t\tYou can also use \
 'toggle all' and 'toggle none' to enable/disable all modules",
 "toggle" do |name|
-  name = name[0][0].to_s
+  name = name[0].to_s
   
   if name.length < 1
     puts "Need a module or category name"
@@ -118,7 +118,7 @@ that will be run (before substitution) for that module.",
   puts $color ? "${#{$MAGENTA}MODULE_DIR#{$RESET}}: #{$moduledir}" : "${MODULE_DIR}: #{$moduledir}"
   print "\n"
   
-  name = name[0][0].to_s
+  name = name[0].to_s
 
   return if name.length < 1
 
@@ -143,8 +143,8 @@ that will be run (before substitution) for that module.",
 end
 
 ## File command
-command "Set the ${PCAP_FILE} filename (the file to be analyzed).", "file" do |name|
-  name = name[0][0]
+command "Set the ${PCAP_FILE} filename (the file to be analyzed).", "file" do |args|
+  name = args[0]
 
   puts "name: #{name}"
 
@@ -193,7 +193,7 @@ end
 
 ## Output command
 command "Set the ${OUTPUT_DIR} output directory.", "output" do |name|
-  name = name[0][0].to_s
+  name = name[0].to_s
   
   if name.length < 1
     puts "Need a output directory name"
@@ -207,7 +207,7 @@ end
 
 ## Run command
 command "Run enabled analysis files on the data (pcap) file. Use run <modname> to run a single module without toggling it.", "run" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
       
   if $datafile == ""
     puts "Error: no pcap datafile has been specified"
@@ -263,7 +263,7 @@ end
 
 ## Info command
 command "Show detailed module information.", "info" do |name|
-  name = name[0][0].to_s
+  name = name[0].to_s
   
   mod = get_mod_by_name(name)
   if mod.nil?
@@ -278,7 +278,7 @@ end
 command "Usage: set <mod> <opt> <val>\n\t\tSet the <mod> module's option \n\t\t\
 '<opt>' to have the value <val>. (ex: 'set aimsnarf OUTPUT_FILE ${PCAP_BASE}.aim.txt').",
 "set" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
 
   if args.length < 1
     puts "Need a module name."
@@ -305,7 +305,7 @@ end
 command "Load the modules from the given directory. Note that this replaces \n\t\t\
 the currently loaded modules.",
 "modload" do |dir|
-  dir = dir[0][0].to_s
+  dir = dir[0].to_s
   
   if dir.length < 1
     puts "Please specify a module directory."
@@ -329,7 +329,7 @@ end
 
 ## Exec command
 command "Execute an external command", "exec" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   
   if args.length < 1
     puts "Need a program to execute."
@@ -353,7 +353,7 @@ end
 
 ## Logfile command
 command "Set the file to log commands to", "logfile" do |file|
-  file = file[0][0].to_s
+  file = file[0].to_s
   
   if file.length < 1
     puts "Need a new logfile name."
@@ -388,7 +388,7 @@ end
 command "Encode value or file into different form\n\t\tRun without any options to see \
 usage",
 "encode" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
 
   if args.length < 2
     puts "\nUsage:\n\n"
@@ -437,7 +437,7 @@ command "Decode value or file into different ascii\n\t\tRun without any options 
 usage",
 "decode" do |args|
     
-  args = args[0][0].to_s
+  args = args[0].to_s
 
   if args.length < 1
     puts "\nUsage:\n\n"
@@ -486,7 +486,7 @@ end
 
 ## Eval command
 command "Evaluate a single line in Ruby","eval" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   if args.length < 1
     puts "Need a line to eval."
     return
@@ -523,7 +523,7 @@ end
 ## Print command
 command "Display a packet's information and payload.\n\t\tUse with no arguments to see usage.",
 "print" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   
   if args.length < 1
     puts "Usage:"
@@ -614,7 +614,7 @@ end
 
 ## Color command
 command "Toggle the terminal color output on or off","color" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   if args =~ /off/i
     puts "Color is now off."
     $color = false
@@ -633,7 +633,7 @@ end
 ## Alias command
 command "Create an alias for a command, Usage: alias <cmd> = <newcmd(s)>",
 "alias" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   if args.length < 1
     puts "Current aliases:"
     puts "-" * 30
@@ -666,7 +666,7 @@ end
 
 ## Unalias command
 command "Unalias a command, Usage: 'unalias <name>'","unalias" do |name|
-  name = name[0][0].to_s
+  name = name[0].to_s
   
   if name.length < 1
     puts "Please specify an alias to unalias"
@@ -682,7 +682,7 @@ end
 
 ## CheckIP command
 command "Check an IP address against the Harimau watchlist","checkip" do |addr|
-  addr = addr[0][0].to_s
+  addr = addr[0].to_s
   
   if addr.length < 1
     puts "Need an IP address to query"
@@ -723,7 +723,7 @@ end
 ## Dump command
 command "Dump the specified packet contents to a file, run without arguments for usage",
 "dump" do |args|
-  args = args[0][0].to_s
+  args = args[0].to_s
   
   if args.length < 2
     puts "Usage:"
@@ -801,7 +801,7 @@ end
 ## The ip2asn command
 command "Find the ASN for a given IP address","ip2asn" do |addr|
 
-  addr = addr[0][0].to_s.chomp
+  addr = addr[0].to_s.chomp
 
   if addr.length < 1
     puts "Need an IP address to query"
@@ -831,7 +831,7 @@ end
 
 ## The iplist command
 command "Generate a list of all the IPs in a file. Usage: iplist [file] (if no file is specified, stdout is used)","iplist" do |args|
-  file = args[0][0].to_s.chomp
+  file = args[0].to_s.chomp
 
   iplist = {}
   
@@ -879,7 +879,7 @@ end
 ## The update command
 command "Update NSM-Console to the latest version from git, use -v for verbose", "update" do |args|
   puts "Updating NSM-Console from git..."
-  args = args[0][0].to_s.chomp
+  args = args[0].to_s.chomp
   verbose = args =~ /-v/ ? true : false
   
   unless system("which git 2>&1 > /dev/null")

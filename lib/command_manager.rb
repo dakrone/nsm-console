@@ -13,7 +13,11 @@ class CommandManager
   
   # Attempt to execute a command, given the name and arguments
   def CommandManager.execute(exec, *args)
-    @@commands[exec].execute args
+    if args.nil?
+      @@commands[exec].execute args
+    else
+      @@commands[exec].execute args.join(" ")
+    end
   end
   
   # Return all commands
