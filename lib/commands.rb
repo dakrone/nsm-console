@@ -143,8 +143,8 @@ that will be run (before substitution) for that module.",
 end
 
 ## File command
-command "Set the ${PCAP_FILE} filename (the file to be analyzed).", "file" do |name|
-  name = name[0][0]
+command "Set the ${PCAP_FILE} filename (the file to be analyzed).", "file" do |args|
+  name = args[0]
 
   puts "name: #{name}"
 
@@ -207,7 +207,7 @@ end
 
 ## Run command
 command "Run enabled analysis files on the data (pcap) file. Use run <modname> to run a single module without toggling it.", "run" do |args|
-  args = args.to_s
+  args = args[0].to_s
       
   if $datafile == ""
     puts "Error: no pcap datafile has been specified"
@@ -633,7 +633,7 @@ end
 ## Alias command
 command "Create an alias for a command, Usage: alias <cmd> = <newcmd(s)>",
 "alias" do |args|
-  args = args.to_s
+  args = args[0].to_s
   if args.length < 1
     puts "Current aliases:"
     puts "-" * 30
@@ -666,7 +666,7 @@ end
 
 ## Unalias command
 command "Unalias a command, Usage: 'unalias <name>'","unalias" do |name|
-  name = name.to_s
+  name = name[0].to_s
   
   if name.length < 1
     puts "Please specify an alias to unalias"
@@ -682,7 +682,7 @@ end
 
 ## CheckIP command
 command "Check an IP address against the Harimau watchlist","checkip" do |addr|
-  addr = addr.to_s
+  addr = addr[0].to_s
   
   if addr.length < 1
     puts "Need an IP address to query"
@@ -801,7 +801,7 @@ end
 ## The ip2asn command
 command "Find the ASN for a given IP address","ip2asn" do |addr|
 
-  addr = addr.to_s.chomp
+  addr = addr[0].to_s.chomp
 
   if addr.length < 1
     puts "Need an IP address to query"
@@ -831,7 +831,7 @@ end
 
 ## The iplist command
 command "Generate a list of all the IPs in a file. Usage: iplist [file] (if no file is specified, stdout is used)","iplist" do |args|
-  file = args.to_s.chomp
+  file = args[0].to_s.chomp
 
   iplist = {}
   
@@ -879,7 +879,7 @@ end
 ## The update command
 command "Update NSM-Console to the latest version from git, use -v for verbose", "update" do |args|
   puts "Updating NSM-Console from git..."
-  args = args.to_s.chomp
+  args = args[0].to_s.chomp
   verbose = args =~ /-v/ ? true : false
   
   unless system("which git 2>&1 > /dev/null")

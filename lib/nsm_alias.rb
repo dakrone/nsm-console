@@ -12,6 +12,7 @@ class NSM_Alias
 
   ## Set a new alias or update an existing one
   def NSM_Alias.set_alias(name,val)
+    puts "setting alias #{name} -> #{val}"
     @aliases = {} if @aliases.nil?
     @aliases[name.to_s] = val.to_s
   end

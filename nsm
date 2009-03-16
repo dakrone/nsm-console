@@ -22,22 +22,27 @@
 
 $NSM_VERSION = "0.8-DEVEL"
 
-## Require ruby files
+## Require ruby files, required for tab completion and up-down history
 require 'readline'
 include Readline
 
 ## Require commands
+# command_manager is the dispatcher for all NSM-Console commands
+# commands is the main command file, listing available nsmc commands
 require 'lib/command_manager'
 require 'lib/commands'
 
-## Required for tab completion
+## Required for tab completion. tabstrings will be a list of commands used
+## for tab completion
+# grab a list of all available commands
 $tabstrings = CommandManager.get_commands_as_array()
+# Add 3 more completions used often
 $tabstrings.push("PCAP_FILE")
 $tabstrings.push("PCAP_BASE")
 $tabstrings.push("OUTPUT_DIR")
 
 ## NOTE: THIS DOESN'T WORK YET :X
-# ## We're taking out space so it treats the whole line as 1 string
+## We're taking out space so it treats the whole line as 1 string
 #Readline.basic_word_break_characters = Readline.basic_word_break_characters.gsub(/ /,"")
 Readline.completion_proc = lambda{ |s|
 #  result = []
@@ -67,6 +72,8 @@ Readline.completion_proc = lambda{ |s|
 #    $tabstrings.find_all{|elm| elm =~ /^#{s}/}
 #  end
 #$tabstrings.find_all{|elm| elm =~ /^#{s}/}
+
+# Basic tab completion on all commands and aliases
 comp_array = Array.new($tabstrings + NSM_Alias.get_alias_names)
 comp_array.find_all{|elm| elm =~ /^#{s}/}
 }
@@ -90,7 +97,7 @@ require 'lib/nsm_console'
 require 'lib/encodelib'
 # Library for print and dump
 require 'lib/pcaplib'
-# Scholar's pcap library so libpcap isn't supported
+# Scholar's pcap library so libpcap isn't required
 require 'lib/pcapparser'
 # Terminal color definitions
 require 'lib/colors'
@@ -113,7 +120,7 @@ $basefile = ""
 ## Color setting (default true)
 $color = true
 
-## Catch our sigterms from being killed
+## Catch our sigterms from being killed (Ctrl+C)
 trap "SIGTERM", proc {
   puts "SIGTERM Caught, exiting..."
   exit(0)

@@ -1,23 +1,31 @@
 # vim: set ts=2 sw=2 tw=80
-# Command Manager handles all the 'registered' commands in the commands.rb file
-# This makes for a much cleaner way to add methods without having to 'eval'
-# everything
+## Command Manager handles all the 'registered' commands in the commands.rb file
+## This makes for a much cleaner way to add methods without having to 'eval'
+## everything
 class CommandManager
   ## The list of our commands
   @@commands = {}
   
+  # Add a command to the command array
   def CommandManager.add(command)
     @@commands[command.exec] = command
   end
   
+  # Attempt to execute a command, given the name and arguments
   def CommandManager.execute(exec, *args)
-    @@commands[exec].execute args
+    if args.nil?
+      @@commands[exec].execute args
+    else
+      @@commands[exec].execute args.join(" ")
+    end
   end
   
+  # Return all commands
   def CommandManager.get_commands
     return @@commands
   end
   
+  # Return all commands available as an array
   def CommandManager.get_commands_as_array
     cmds = []
     i = 0
