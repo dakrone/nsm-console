@@ -132,7 +132,15 @@ class NSM_Module
       ## Actually execute the command, logging the command and exit status
       puts "--> #{new_cmd.to_s}"
       begin
-        res = system("#{new_cmd.to_s}")
+        #res = system("#{new_cmd.to_s}")
+        # TODO: IO.popen() instead of system
+        IO.popen("#{new_cmd.to_s}") { |o|
+          o.each { |line|
+            #STDERR.puts "[--] #{line}"
+            Logger.write("[#{mod_name}]: #{line}")
+          }
+        }
+        #Logger.write(o.readlines)
         Logger.write("[exit: #{$?}] #{new_cmd.to_s}\n")
       rescue
         STDERR.puts "Error executing: #{$!}"

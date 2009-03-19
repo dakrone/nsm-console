@@ -26,6 +26,7 @@ def print_pkt_range(filename,start_pkt,end_pkt,opts,fullpacket)
     return
   rescue
     STDERR.puts "Exception: #{$!}"
+    STDERR.puts $!.backtrace
   end
 end
 
