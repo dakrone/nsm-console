@@ -133,5 +133,5 @@ declist = Encoder.get_decode_list()
 list = enclist.concat(declist)
 list.uniq!
 list.each { |l|
-  $tabstrings.push(l.to_s)
+  $tabstrings << l.to_s
 }

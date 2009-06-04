@@ -52,7 +52,8 @@ class Logger
   end
 
   def Logger.get_def_log_file
-    logfilename = "logs/nsm-log."
+    # This will default to the <nsm-root-dir>/logs/nsm-log.<time>
+    logfilename = File.dirname(__FILE__) + "/../logs/nsm-log."
     logfilename.concat(Time.now.year.to_s)
     logfilename.concat(Time.now.month.to_s)
     logfilename.concat(Time.now.day.to_s)

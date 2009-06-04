@@ -22,6 +22,9 @@
 
 $NSM_VERSION = "0.8-DEVEL"
 
+# Add the directory nsm is in to the include path
+$:.push(File.dirname(__FILE__))
+
 ## Require ruby files, required for tab completion and up-down history
 require 'readline'
 include Readline
@@ -37,9 +40,7 @@ require 'lib/commands'
 # grab a list of all available commands
 $tabstrings = CommandManager.get_commands_as_array()
 # Add 3 more completions used often
-$tabstrings.push("PCAP_FILE")
-$tabstrings.push("PCAP_BASE")
-$tabstrings.push("OUTPUT_DIR")
+$tabstrings << "PCAP_FILE" << "PCAP_BASE" << "OUTPUT_DIR"
 
 ## NOTE: THIS DOESN'T WORK YET :X
 ## We're taking out space so it treats the whole line as 1 string
@@ -105,7 +106,7 @@ require 'lib/colors'
 
 ## Defaults for variables
 ## Default module directory
-$moduledir = "modules"
+$moduledir = File.dirname(__FILE__) + "/modules"
 ## Default output directory
 $outputdir = "${PCAP_BASE}-output"
 
