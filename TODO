@@ -39,7 +39,6 @@ DONE - 'list' command can filter things out, like "list all" and "list enabled" 
 DONE - Add dnstop module
 - Add unicode encoding support
 DONE - Fix weird alias problem ("ll en" w/my ./nsmcrc)
-- Ability to "install" NSM-Console, and run it from a different directory
 DONE - Add ability to use -q to start nsm console quietly
 DONE - Fix 'dump * file' (have to use "dump 1-* file" right now)
 DONE - Abstract alias resolving to the NSM_Alias class
