@@ -507,7 +507,7 @@ command "Display program credits","credits" do |args|
   
   puts "Original design and development:"
   puts "-" * 40
-  puts "Matthew Lee Hinman - matthew [dot] hinman [at] gmail [dot] com"
+  puts "Matthew Lee Hinman - lee [at] writequit [dot] org"
   puts "Scholar - PcapParser library, flowtag module (thanks scholar!)"
   puts "JohnQPublic - Clamscan module"
   puts "Chmeee - afterglow module"

@@ -30,25 +30,25 @@ class Encoder
   end
   
   def Encoder.encode_binary(str)
-    return str.unpack('B*').to_s
+    return str.unpack('B*').join
   end
   def Encoder.encode_binary_MSB(str)
-    return str.unpack('B*').to_s
+    return str.unpack('B*').join
   end
   def Encoder.encode_binary_LSB(str)
-    return str.unpack('b*').to_s
+    return str.unpack('b*').join
   end
   
   # Note that the default "hex" encoding is little-endian, if you're using
   # NSM-Console on SPARC or PPC, uhhh...
   def Encoder.encode_hex(str)
-    return str.unpack('H*').to_s
+    return str.unpack('H*').join
   end
   def Encoder.encode_hex_LSB(str)
-    return str.unpack('h*').to_s
+    return str.unpack('h*').join
   end
   def Encoder.encode_hex_MSB(str)
-    return str.unpack('H*').to_s
+    return str.unpack('H*').join
   end
   
   def Encoder.encode_uuencode(str)
