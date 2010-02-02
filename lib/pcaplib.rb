@@ -151,10 +151,10 @@ def rawwrite_pkt_payload(p,file,num,fulldump)
   begin
     if p.ip?
       if fulldump
-        data = p.data.unpack('H*').to_s
+        data = p.data.unpack('H*').join
         strdata = data
       else
-        data = p.payload.unpack('H*').to_s
+        data = p.payload.unpack('H*').join
         strdata = Encoder.decode_hex(data)
       end
       #strdata = Encoder.decode_hex(data)
