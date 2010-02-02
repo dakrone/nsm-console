@@ -20,7 +20,7 @@
 ## ${MODULE_NAME} - The base name (without the .module) of the module
 ## ${OUTPUT_DIR} - The base output directory
 
-$NSM_VERSION = "0.8-DEVEL"
+$NSM_VERSION = "0.8.1-DEVEL"
 
 # Add the directory nsm is in to the include path
 $:.push(File.dirname(__FILE__))

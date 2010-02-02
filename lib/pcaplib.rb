@@ -49,9 +49,9 @@ def print_pkt_payload(p,opts,fullpacket)
       # If the full packet is requested, print all the data, not just
       # the payload
       if fullpacket
-        data = p.data.unpack('H*').to_s
+        data = p.data.unpack('H*').join
       else
-        data = p.payload.unpack('H*').to_s
+        data = p.payload.unpack('H*').join
       end
       
       if opts == "full"

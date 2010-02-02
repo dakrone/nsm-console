@@ -71,13 +71,13 @@ class Encoder
   end
   
   def Encoder.decode_binary(str)
-    return str.to_a.pack('B*')
+    return [str].pack('B*')
   end
   def Encoder.decode_binary_MSB(str)
-    return str.to_a.pack('B*')
+    return [str].pack('B*')
   end
   def Encoder.decode_binary_LSB(str)
-    return str.to_a.pack('b*')
+    return [str].pack('b*')
   end
   
   def Encoder.decode_hex(str)

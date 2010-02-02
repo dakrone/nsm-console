@@ -1,5 +1,4 @@
-# vim: set ts=2 sw=2 tw=80
-# FLOWTAG - parses and visualizes pcap data
+# DESCRIPTION: is part of the flowtag toolkit and simply parses a pcap file.
 # Copyright (C) 2007 Christopher Lee
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,9 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class PcapParser
-  LINKTYPE_ETH = 0x0001
+  LINKTYPE_ETH  = 0x0001
   LINKTYPE_NULL = 0x0000
-  LINKTYPE_SLL = 0x0071
+  LINKTYPE_SLL  = 0x0071
   
   def initialize(pcapfh)
     @offset = 0
@@ -31,7 +30,7 @@ class PcapParser
     @version_major, @version_minor, @zone, @significant_figures, @snaplength, @linktype = @fh.read(20).unpack(endian)
     @offset += 24
     if (@linktype != LINKTYPE_ETH) && (@linktype != LINKTYPE_NULL)
-      puts "Only ethernet or null are supported, sorry."
+      puts "Only ethernet is supported, sorry."
       exit
     end
   end
@@ -76,8 +75,8 @@ class Packet
       offset = 4
     end
     if @ip
-      @ip_hlen = (data[offset] & 0x0f) << 2
-      @ip_proto = data[offset+9]
+      @ip_hlen = (data[offset].ord & 0x0f) << 2
+      @ip_proto = data[offset+9].ord
       @ip_src, @ip_dst = data[offset+12,8].unpack("NN")
       offset += @ip_hlen
       @tcp = true if @ip_proto == 0x06
@@ -91,10 +90,10 @@ class Packet
         @ack_num = data[offset+8,4].unpack("nn").to_s.to_i
 
         ## Determine TCP flags
-        @flags = data[offset+13].to_s
+        @flags = data[offset+13].ord.to_s
         @urg, @ack, @psh, @rst, @syn, @fin = parse_flags(@flags)
 
-        @tcp_hlen = (data[offset+12]>>4)<<2
+        @tcp_hlen = (data[offset+12].ord>>4)<<2
         offset += @tcp_hlen
       elsif @udp
         @sport, @dport = data[offset,4].unpack("nn")
